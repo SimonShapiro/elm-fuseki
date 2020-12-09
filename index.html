@@ -6169,7 +6169,7 @@ var $elm$http$Http$header = $elm$http$Http$Header;
 var $author$project$Main$submitQuery = function (query) {
 	return $elm$http$Http$request(
 		{
-			body: A2($elm$http$Http$stringBody, 'text', ''),
+			body: A2($elm$http$Http$stringBody, 'text', query),
 			expect: $elm$http$Http$expectString($author$project$Main$GotSparqlResponse),
 			headers: _List_fromArray(
 				[
@@ -6234,7 +6234,9 @@ var $author$project$Main$update = F2(
 					return A2(
 						$elm$core$Debug$log,
 						'Response ERROR',
-						_Utils_Tuple2($author$project$Main$Initialising, $elm$core$Platform$Cmd$none));
+						_Utils_Tuple2(
+							$author$project$Main$Querying(''),
+							$elm$core$Platform$Cmd$none));
 				}
 		}
 	});

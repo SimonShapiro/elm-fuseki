@@ -64,7 +64,7 @@ update msg model =
                     (Querying "", Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
-                    (Initialising, Cmd.none)
+                    (Querying "", Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -91,7 +91,7 @@ submitQuery query =
                     { method = "POST"
                     , headers = [Http.header "Content-Type" "application/sparql-request"]
                     , url = server++"/sparql"
-                    , body = Http.stringBody "text" ""
+                    , body = Http.stringBody "text" query
                     , expect = Http.expectString GotSparqlResponse
                     , timeout = Nothing
                     , tracker = Nothing

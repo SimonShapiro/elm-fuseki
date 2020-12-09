@@ -1,5 +1,6 @@
-from flask import Flask 
+from flask import Flask, Response, request
 from flask_cors import CORS
+import requests
 
 app = Flask(__name__)
 app.config['API_TITLE'] = 'My API'
@@ -16,7 +17,26 @@ def hello():
 
 @app.route("/sparql", methods=['POST'])
 def sparql():
-    return 500
+    queryString = request.data.decode()
+    print(queryString)
+    res = requests.request("POST", SERVER+"/sparql",
+            data = queryString, 
+            headers = {
+                'Content-Type': 'application/sparql-query',
+                'Accept': 'application/json'
+                })
+    print(res.status_code)
+    status = res.status_code
+    if res.status_code == 200:
+        result = res.json()
+        error = res.reason
+    else:
+        result = {}
+        error = res.reason
+    print(status, error, result)
+    return Response(
+        status = 500
+    )
 
 if __name__ == "__main__":
     app.run()

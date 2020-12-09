@@ -1,0 +1,5 @@
+POST http://localhost:3030/latest/sparql
+Content-Type: application/sparql-query
+Accept: application/json
+
+select * { ?s ?p ?o .}
