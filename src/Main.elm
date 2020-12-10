@@ -8,12 +8,14 @@ import Browser.Events exposing (onKeyDown)
 import Http
 import Html exposing (textarea)
 import Html.Events exposing (on)
--- import Json.Decode exposing (Decoder, field, string, map3, list)
+import Json.Decode exposing (Decoder, Error, field, string, map, map3, map4, map5, list, int, decodeString, at, andThen)
 
 type Model 
     = Initialising
     | Pinging
     | Querying Sparql
+    | DisplayingSelectResult String
+    | ApiError Http.Error
 
 type Msg 
     = NoOp
@@ -21,13 +23,20 @@ type Msg
     | Pinged (Result Http.Error ())
     | ChangeQuery Sparql
     | SubmitQuery Sparql
-    | GotSparqlResponse (Result Http.Error SparqlResult)
+    | GotSparqlResponse (Result Http.Error KGResponse)
 
 type alias Server = String
 
 type alias Sparql = String
 
 type alias SparqlResult = String
+
+type alias KGResponse =  -- a copy of the query is available in the api
+    { status: Int
+    , message: String
+    , queryType: String
+    , result: String
+    }
 
 server: Server
 server = "http://localhost:5000"
@@ -59,12 +68,12 @@ update msg model =
             (Querying query, submitQuery query)
         GotSparqlResponse response -> 
             case response of
-                Ok _ -> 
-                    Debug.log "Response OK"
-                    (Querying "", Cmd.none)
+                Ok okData -> 
+                    Debug.log ("Response OK"++okData.result)
+                    (DisplayingSelectResult okData.result, Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
-                    (Querying "", Cmd.none)
+                    (ApiError e, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -92,7 +101,7 @@ submitQuery query =
                     , headers = [Http.header "Content-Type" "application/sparql-request"]
                     , url = server++"/sparql"
                     , body = Http.stringBody "text" query
-                    , expect = Http.expectString GotSparqlResponse
+                    , expect = Http.expectJson GotSparqlResponse mainDecoder
                     , timeout = Nothing
                     , tracker = Nothing
                     }
@@ -120,6 +129,53 @@ view model =
                     ][]
                 , button [onClick (SubmitQuery query)][text "Submit"]
                 ]
+        ApiError error -> 
+            case error of
+                Http.BadBody err ->
+                    div []
+                        [ h1 [][text "I can't interpret the response"]
+                        , div [][text err]
+                        ]
+                _ ->
+                    h1 [][text "Oops - something went wrong! :-("]
+        DisplayingSelectResult result ->
+            varsView result
+
+varsView: String -> Html Msg
+varsView inString =
+    let
+        decoder =
+            --list (decodeString (at ["head", "vars"] string))
+            at [ "head", "vars" ] (list string)
+    in 
+        case (decodeString decoder inString)  of
+            Ok vars ->
+                div []
+                    (List.map (\v ->
+                        div [] [text v]) vars)
+            Err e ->
+                h1 [] [text "decoder error"]
+-- Decoders
+
+mainDecoder: Decoder KGResponse
+mainDecoder =
+     map4 KGResponse
+        (field "status" int)
+        (field "reason" string)
+        (field "queryType" string)
+        (field "result" string)
+    
+getVars: String -> Result Json.Decode.Error String
+getVars inString =
+    let 
+        varsString =
+            inString 
+            |> (decodeString (at ["head", "vars"] string))
+    in
+        case varsString of
+            Ok vars ->
+                Ok vars 
+            Err e -> Err e
 -- Main
 
 main: Program () Model Msg

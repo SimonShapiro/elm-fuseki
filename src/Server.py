@@ -1,6 +1,7 @@
 from flask import Flask, Response, request
 from flask_cors import CORS
 import requests
+import json
 
 app = Flask(__name__)
 app.config['API_TITLE'] = 'My API'
@@ -26,16 +27,23 @@ def sparql():
                 'Accept': 'application/json'
                 })
     print(res.status_code)
+    print(res.text)
     status = res.status_code
+    error = res.reason
     if res.status_code == 200:
-        result = res.json()
-        error = res.reason
+        result = res.json()  # only works for `ask` and `select`
     else:
         result = {}
-        error = res.reason
     print(status, error, result)
     return Response(
-        status = 500
+        status = 200,
+        response = json.dumps({
+            "status": status,
+            "reason": error,
+            "queryType": "select",
+            "query": queryString,
+            "result": json.dumps(result)
+        })
     )
 
 if __name__ == "__main__":
