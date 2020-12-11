@@ -5347,14 +5347,33 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
 };
-var $author$project$Main$DisplayingSelectResult = function (a) {
-	return {$: 'DisplayingSelectResult', a: a};
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
 };
 var $author$project$Main$Pinging = {$: 'Pinging'};
 var $author$project$Main$Querying = function (a) {
 	return {$: 'Querying', a: a};
 };
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $author$project$Main$DisplayingSelectResult = function (a) {
+	return {$: 'DisplayingSelectResult', a: a};
+};
 var $elm$core$Debug$log = _Debug_log;
+var $author$project$Main$decodeBindings = F2(
+	function (result, vars) {
+		return A2(
+			$elm$core$Debug$log,
+			'Response OK' + result,
+			_Utils_Tuple2(
+				$author$project$Main$DisplayingSelectResult(vars),
+				$elm$core$Platform$Cmd$none));
+	});
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Main$Pinged = function (a) {
 	return {$: 'Pinged', a: a};
 };
@@ -5913,9 +5932,6 @@ var $elm$http$Http$expectBytesResponse = F2(
 			_Http_toDataView,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
 	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
 var $elm$http$Http$BadStatus = function (a) {
 	return {$: 'BadStatus', a: a};
 };
@@ -6150,10 +6166,10 @@ var $author$project$Main$pingServer = A3(
 		tracker: $elm$core$Maybe$Nothing,
 		url: $author$project$Main$server + '/hello'
 	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$GotSparqlResponse = function (a) {
 	return {$: 'GotSparqlResponse', a: a};
 };
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$expectStringResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
@@ -6184,10 +6200,8 @@ var $author$project$Main$KGResponse = F4(
 	function (status, message, queryType, result) {
 		return {message: message, queryType: queryType, result: result, status: status};
 	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$map4 = _Json_map4;
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$mainDecoder = A5(
 	$elm$json$Json$Decode$map4,
 	$author$project$Main$KGResponse,
@@ -6253,12 +6267,26 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					return A2(
-						$elm$core$Debug$log,
-						'Response OK' + okData.result,
-						_Utils_Tuple2(
-							$author$project$Main$DisplayingSelectResult(okData.result),
-							$elm$core$Platform$Cmd$none));
+					var decoder = A2(
+						$elm$json$Json$Decode$at,
+						_List_fromArray(
+							['head', 'vars']),
+						$elm$json$Json$Decode$list($elm$json$Json$Decode$string));
+					var data = okData.result;
+					var varsDecoded = A2($elm$json$Json$Decode$decodeString, decoder, data);
+					if (varsDecoded.$ === 'Ok') {
+						var vars = varsDecoded.a;
+						return A2($author$project$Main$decodeBindings, data, vars);
+					} else {
+						var e = varsDecoded.a;
+						return A2(
+							$elm$core$Debug$log,
+							'Vars ERROR',
+							_Utils_Tuple2(
+								$author$project$Main$ApiError(
+									$elm$http$Http$BadBody('Failed to decode vars')),
+								$elm$core$Platform$Cmd$none));
+					}
 				} else {
 					var e = response.a;
 					return A2(
@@ -6316,10 +6344,6 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
 	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
 var $elm$html$Html$Events$targetValue = A2(
 	$elm$json$Json$Decode$at,
 	_List_fromArray(
@@ -6352,41 +6376,22 @@ var $elm$html$Html$Attributes$rows = function (n) {
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$varsView = function (inString) {
-	var decoder = A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['head', 'vars']),
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$string));
-	var _v0 = A2($elm$json$Json$Decode$decodeString, decoder, inString);
-	if (_v0.$ === 'Ok') {
-		var vars = _v0.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			A2(
-				$elm$core$List$map,
-				function (v) {
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text(v)
-							]));
-				},
-				vars));
-	} else {
-		var e = _v0.a;
-		return A2(
-			$elm$html$Html$h1,
-			_List_Nil,
-			_List_fromArray(
-				[
-					$elm$html$Html$text('decoder error')
-				]));
-	}
+var $author$project$Main$varsView = function (vars) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2(
+			$elm$core$List$map,
+			function (v) {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(v)
+						]));
+			},
+			vars));
 };
 var $elm$html$Html$Attributes$wrap = $elm$html$Html$Attributes$stringProperty('wrap');
 var $author$project$Main$view = function (model) {

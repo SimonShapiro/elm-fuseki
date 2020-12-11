@@ -14,7 +14,7 @@ type Model
     = Initialising
     | Pinging
     | Querying Sparql
-    | DisplayingSelectResult String
+    | DisplayingSelectResult (List String)
     | ApiError Http.Error
 
 type Msg 
@@ -69,11 +69,25 @@ update msg model =
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
-                    Debug.log ("Response OK"++okData.result)
-                    (DisplayingSelectResult okData.result, Cmd.none)
+                    let
+                        data = okData.result
+                        decoder = at [ "head", "vars" ] (list string)
+                        varsDecoded = decodeString decoder data
+                    in
+                        case varsDecoded of
+                            Ok vars -> decodeBindings data vars
+                            Err e -> 
+                                Debug.log "Vars ERROR"
+                                (ApiError (Http.BadBody "Failed to decode vars"), Cmd.none)
+
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
+
+decodeBindings: String -> (List String) -> (Model, (Cmd Msg))
+decodeBindings result vars =
+                       Debug.log ("Response OK"++result)
+                       (DisplayingSelectResult vars, Cmd.none)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -141,20 +155,11 @@ view model =
         DisplayingSelectResult result ->
             varsView result
 
-varsView: String -> Html Msg
-varsView inString =
-    let
-        decoder =
-            --list (decodeString (at ["head", "vars"] string))
-            at [ "head", "vars" ] (list string)
-    in 
-        case (decodeString decoder inString)  of
-            Ok vars ->
-                div []
-                    (List.map (\v ->
-                        div [] [text v]) vars)
-            Err e ->
-                h1 [] [text "decoder error"]
+varsView: (List String) -> Html Msg
+varsView vars =
+    div []
+        (List.map (\v ->
+            div [] [text v]) vars)
 -- Decoders
 
 mainDecoder: Decoder KGResponse
