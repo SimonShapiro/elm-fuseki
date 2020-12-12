@@ -32,9 +32,17 @@ def sparql():
     error = res.reason
     if res.status_code == 200:
         result = res.json()  # only works for `ask` and `select`
+        vars = result["head"]["vars"]
+        bindings = result["results"]["bindings"]
+        rows = []
+        for bound in bindings:
+            atoms = [{"key": v, "value": bound[v]["value"]} for v in vars]
+            rows.append(atoms)
     else:
         result = {}
-    print(status, error, result)
+        vars = []
+        rows = []
+    print(status, error, vars, rows)
     return Response(
         status = 200,
         response = json.dumps({
@@ -42,7 +50,8 @@ def sparql():
             "reason": error,
             "queryType": "select",
             "query": queryString,
-            "result": json.dumps(result)
+            "vars": vars,
+            "result": rows
         })
     )
 

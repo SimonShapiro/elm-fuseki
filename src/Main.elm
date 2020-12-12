@@ -1,20 +1,20 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, span, ul, li)
+import Html exposing(Html, div, text, input, button, h1, span, ul, li, b, p)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
 import Http
 import Html exposing (textarea)
 import Html.Events exposing (on)
-import Json.Decode exposing (Decoder, Error, field, string, map, map3, map4, map5, list, int, decodeString, at, andThen)
+import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, list, int, decodeString, at, andThen)
 
 type Model 
     = Initialising
     | Pinging
     | Querying Sparql
-    | DisplayingSelectResult (List String)
+    | DisplayingSelectResult (List (List SelectAtom))
     | ApiError Http.Error
 
 type Msg 
@@ -29,14 +29,32 @@ type alias Server = String
 
 type alias Sparql = String
 
-type alias SparqlResult = String
-
 type alias KGResponse =  -- a copy of the query is available in the api
     { status: Int
     , message: String
     , queryType: String
-    , result: String
+    , vars: (List String)
+    , result: (List (List SelectAtom))
     }
+
+type DecodedSelectQuery a 
+    = DecodeOk SelectResult
+    | Failed SelectFailure
+
+type alias SelectResult = String
+
+type alias SelectFailure = String
+
+type alias SelectAtom =
+    { key: String
+    , value: String
+    }
+
+selectAtomDecoder: Decoder SelectAtom
+selectAtomDecoder = 
+    map2 SelectAtom
+        (field "key" string)
+        (field "value" string )
 
 server: Server
 server = "http://localhost:5000"
@@ -69,26 +87,14 @@ update msg model =
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
-                    let
-                        data = okData.result
-                        decoder = at [ "head", "vars" ] (list string)
-                        varsDecoded = decodeString decoder data
-                    in
-                        case varsDecoded of
-                            Ok vars -> decodeBindings data vars
-                            Err e -> 
-                                Debug.log "Vars ERROR"
-                                (ApiError (Http.BadBody "Failed to decode vars"), Cmd.none)
-
+                    (DisplayingSelectResult okData.result, Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
 
-decodeBindings: String -> (List String) -> (Model, (Cmd Msg))
-decodeBindings result vars =
-                       Debug.log ("Response OK"++result)
-                       (DisplayingSelectResult vars, Cmd.none)
-
+prepareDecoder: String -> Decoder String
+prepareDecoder var = at [ "results", "bindings", var ] string
+       
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
@@ -153,7 +159,19 @@ view model =
                 _ ->
                     h1 [][text "Oops - something went wrong! :-("]
         DisplayingSelectResult result ->
-            varsView result
+            div []
+                (List.map (
+                    \row ->
+                        div []
+                        (List.map (
+                            \var -> 
+                                div []
+                                    [ b [][text var.key]
+                                    , text ": "
+                                    , text var.value
+                                    ]
+                        ) row)
+                ) result)
 
 varsView: (List String) -> Html Msg
 varsView vars =
@@ -164,23 +182,12 @@ varsView vars =
 
 mainDecoder: Decoder KGResponse
 mainDecoder =
-     map4 KGResponse
+     map5 KGResponse
         (field "status" int)
         (field "reason" string)
         (field "queryType" string)
-        (field "result" string)
-    
-getVars: String -> Result Json.Decode.Error String
-getVars inString =
-    let 
-        varsString =
-            inString 
-            |> (decodeString (at ["head", "vars"] string))
-    in
-        case varsString of
-            Ok vars ->
-                Ok vars 
-            Err e -> Err e
+        (field "vars" (list string))
+        (field "result" (list (list selectAtomDecoder)))    
 -- Main
 
 main: Program () Model Msg
