@@ -1,7 +1,7 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, span, ul, li, b, p)
+import Html exposing(Html, div, text, input, button, h1, span, ul, li, b, p, hr)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
@@ -37,10 +37,6 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , result: (List (List SelectAtom))
     }
 
-type DecodedSelectQuery a 
-    = DecodeOk SelectResult
-    | Failed SelectFailure
-
 type alias SelectResult = String
 
 type alias SelectFailure = String
@@ -58,9 +54,6 @@ selectAtomDecoder =
 
 server: Server
 server = "http://localhost:5000"
-
-endpoint: Server
-endpoint = server ++ "/sparql"
 
 initialModel: flags -> (Model, (Cmd Msg))
 initialModel _ = (Initialising, Cmd.none)
@@ -91,9 +84,6 @@ update msg model =
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
-
-prepareDecoder: String -> Decoder String
-prepareDecoder var = at [ "results", "bindings", var ] string
        
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -162,6 +152,7 @@ view model =
             div []
                 (List.map (
                     \row ->
+                      div [][
                         div []
                         (List.map (
                             \var -> 
@@ -171,13 +162,9 @@ view model =
                                     , text var.value
                                     ]
                         ) row)
+                        , hr [][]]
                 ) result)
 
-varsView: (List String) -> Html Msg
-varsView vars =
-    div []
-        (List.map (\v ->
-            div [] [text v]) vars)
 -- Decoders
 
 mainDecoder: Decoder KGResponse

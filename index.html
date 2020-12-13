@@ -6302,6 +6302,7 @@ var $elm$html$Html$Attributes$cols = function (n) {
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6483,26 +6484,33 @@ var $author$project$Main$view = function (model) {
 						return A2(
 							$elm$html$Html$div,
 							_List_Nil,
-							A2(
-								$elm$core$List$map,
-								function (_var) {
-									return A2(
-										$elm$html$Html$div,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2(
-												$elm$html$Html$b,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									A2(
+										$elm$core$List$map,
+										function (_var) {
+											return A2(
+												$elm$html$Html$div,
 												_List_Nil,
 												_List_fromArray(
 													[
-														$elm$html$Html$text(_var.key)
-													])),
-												$elm$html$Html$text(': '),
-												$elm$html$Html$text(_var.value)
-											]));
-								},
-								row));
+														A2(
+														$elm$html$Html$b,
+														_List_Nil,
+														_List_fromArray(
+															[
+																$elm$html$Html$text(_var.key)
+															])),
+														$elm$html$Html$text(': '),
+														$elm$html$Html$text(_var.value)
+													]));
+										},
+										row)),
+									A2($elm$html$Html$hr, _List_Nil, _List_Nil)
+								]));
 					},
 					result));
 	}
