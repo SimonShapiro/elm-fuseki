@@ -20,6 +20,7 @@ SERVER = "http://localhost:3030/latest"
 
 @app.route('/hello', methods=['GET'])
 def hello():
+    print(request.url_root[:-1])
     return "Hello"
 
 @app.route("/sparql", methods=['POST'])
@@ -53,6 +54,7 @@ def sparql():
     return Response(
         status = 200,
         response = json.dumps({
+            "server": request.url_root[:-1],
             "status": status,
             "reason": error,
             "queryType": "select",

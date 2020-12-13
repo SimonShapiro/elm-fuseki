@@ -5333,11 +5333,16 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $author$project$Main$Initialising = {$: 'Initialising'};
+var $author$project$Main$Initialising = function (a) {
+	return {$: 'Initialising', a: a};
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$server = 'http://localhost:port';
 var $author$project$Main$initialModel = function (_v0) {
-	return _Utils_Tuple2($author$project$Main$Initialising, $elm$core$Platform$Cmd$none);
+	return _Utils_Tuple2(
+		$author$project$Main$Initialising($author$project$Main$server),
+		$elm$core$Platform$Cmd$none);
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
@@ -5347,22 +5352,26 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
 };
-var $author$project$Main$DisplayingSelectError = F2(
-	function (a, b) {
-		return {$: 'DisplayingSelectError', a: a, b: b};
+var $author$project$Main$DisplayingSelectError = F3(
+	function (a, b, c) {
+		return {$: 'DisplayingSelectError', a: a, b: b, c: c};
 	});
-var $author$project$Main$DisplayingSelectResult = F2(
-	function (a, b) {
-		return {$: 'DisplayingSelectResult', a: a, b: b};
+var $author$project$Main$DisplayingSelectResult = F3(
+	function (a, b, c) {
+		return {$: 'DisplayingSelectResult', a: a, b: b, c: c};
 	});
-var $author$project$Main$Pinging = {$: 'Pinging'};
-var $author$project$Main$Querying = function (a) {
-	return {$: 'Querying', a: a};
+var $author$project$Main$Pinging = function (a) {
+	return {$: 'Pinging', a: a};
 };
+var $author$project$Main$Querying = F2(
+	function (a, b) {
+		return {$: 'Querying', a: a, b: b};
+	});
 var $elm$core$Debug$log = _Debug_log;
-var $author$project$Main$Pinged = function (a) {
-	return {$: 'Pinged', a: a};
-};
+var $author$project$Main$Pinged = F2(
+	function (a, b) {
+		return {$: 'Pinged', a: a, b: b};
+	});
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -6140,21 +6149,23 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $author$project$Main$server = 'http://localhost:5000';
 var $elm$http$Http$stringBody = _Http_pair;
-var $author$project$Main$pingServer = A3(
-	$elm$core$Debug$log,
-	'Pinging' + $author$project$Main$server,
-	$elm$http$Http$request,
-	{
-		body: A2($elm$http$Http$stringBody, 'text', ''),
-		expect: $elm$http$Http$expectWhatever($author$project$Main$Pinged),
-		headers: _List_Nil,
-		method: 'HEAD',
-		timeout: $elm$core$Maybe$Nothing,
-		tracker: $elm$core$Maybe$Nothing,
-		url: $author$project$Main$server + '/hello'
-	});
+var $author$project$Main$pingServer = function (newServer) {
+	return A3(
+		$elm$core$Debug$log,
+		'Pinging' + newServer,
+		$elm$http$Http$request,
+		{
+			body: A2($elm$http$Http$stringBody, 'text', ''),
+			expect: $elm$http$Http$expectWhatever(
+				$author$project$Main$Pinged(newServer)),
+			headers: _List_Nil,
+			method: 'HEAD',
+			timeout: $elm$core$Maybe$Nothing,
+			tracker: $elm$core$Maybe$Nothing,
+			url: newServer + '/hello'
+		});
+};
 var $author$project$Main$GotSparqlResponse = function (a) {
 	return {$: 'GotSparqlResponse', a: a};
 };
@@ -6185,14 +6196,14 @@ var $elm$http$Http$Header = F2(
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $author$project$Main$KGResponse = F6(
-	function (status, message, queryType, query, vars, result) {
-		return {message: message, query: query, queryType: queryType, result: result, status: status, vars: vars};
+var $author$project$Main$KGResponse = F7(
+	function (server, status, message, queryType, query, vars, result) {
+		return {message: message, query: query, queryType: queryType, result: result, server: server, status: status, vars: vars};
 	});
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $elm$json$Json$Decode$map6 = _Json_map6;
+var $elm$json$Json$Decode$map7 = _Json_map7;
 var $author$project$Main$SelectAtom = F2(
 	function (key, value) {
 		return {key: key, value: value};
@@ -6203,9 +6214,10 @@ var $author$project$Main$selectAtomDecoder = A3(
 	$author$project$Main$SelectAtom,
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string));
-var $author$project$Main$mainDecoder = A7(
-	$elm$json$Json$Decode$map6,
+var $author$project$Main$mainDecoder = A8(
+	$elm$json$Json$Decode$map7,
 	$author$project$Main$KGResponse,
+	A2($elm$json$Json$Decode$field, 'server', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'status', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'reason', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'queryType', $elm$json$Json$Decode$string),
@@ -6219,60 +6231,76 @@ var $author$project$Main$mainDecoder = A7(
 		'result',
 		$elm$json$Json$Decode$list(
 			$elm$json$Json$Decode$list($author$project$Main$selectAtomDecoder))));
-var $author$project$Main$submitQuery = function (query) {
-	return $elm$http$Http$request(
-		{
-			body: A2($elm$http$Http$stringBody, 'text', query),
-			expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder),
-			headers: _List_fromArray(
-				[
-					A2($elm$http$Http$header, 'Content-Type', 'application/sparql-request')
-				]),
-			method: 'POST',
-			timeout: $elm$core$Maybe$Nothing,
-			tracker: $elm$core$Maybe$Nothing,
-			url: $author$project$Main$server + '/sparql'
-		});
-};
+var $author$project$Main$submitQuery = F2(
+	function (newServer, query) {
+		return $elm$http$Http$request(
+			{
+				body: A2($elm$http$Http$stringBody, 'text', query),
+				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Content-Type', 'application/sparql-request')
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: newServer + '/sparql'
+			});
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'NoOp':
-				return _Utils_Tuple2($author$project$Main$Initialising, $elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					$author$project$Main$Initialising(''),
+					$elm$core$Platform$Cmd$none);
+			case 'ChangeServer':
+				var newServer = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Initialising(newServer),
+					$elm$core$Platform$Cmd$none);
 			case 'PingServer':
-				return _Utils_Tuple2($author$project$Main$Pinging, $author$project$Main$pingServer);
+				var newServer = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Pinging(newServer),
+					$author$project$Main$pingServer(newServer));
 			case 'Pinged':
-				var result = msg.a;
+				var newServer = msg.a;
+				var result = msg.b;
 				if (result.$ === 'Ok') {
 					return A2(
 						$elm$core$Debug$log,
 						'Pinged OK',
 						_Utils_Tuple2(
-							$author$project$Main$Querying(''),
+							A2($author$project$Main$Querying, newServer, ''),
 							$elm$core$Platform$Cmd$none));
 				} else {
 					var e = result.a;
 					return A2(
 						$elm$core$Debug$log,
 						'Pinged ERROR',
-						_Utils_Tuple2($author$project$Main$Initialising, $elm$core$Platform$Cmd$none));
+						_Utils_Tuple2(
+							$author$project$Main$Initialising(''),
+							$elm$core$Platform$Cmd$none));
 				}
 			case 'ChangeQuery':
-				var newQuery = msg.a;
+				var newServer = msg.a;
+				var newQuery = msg.b;
 				return A2(
 					$elm$core$Debug$log,
 					'Query ' + newQuery,
 					_Utils_Tuple2(
-						$author$project$Main$Querying(newQuery),
+						A2($author$project$Main$Querying, newServer, newQuery),
 						$elm$core$Platform$Cmd$none));
 			case 'SubmitQuery':
-				var query = msg.a;
+				var newServer = msg.a;
+				var query = msg.b;
 				return A2(
 					$elm$core$Debug$log,
 					'Submitting Query ' + query,
 					_Utils_Tuple2(
-						$author$project$Main$Querying(query),
-						$author$project$Main$submitQuery(query)));
+						A2($author$project$Main$Querying, newServer, query),
+						A2($author$project$Main$submitQuery, newServer, query)));
 			default:
 				var response = msg.a;
 				if (response.$ === 'Ok') {
@@ -6280,11 +6308,11 @@ var $author$project$Main$update = F2(
 					var _v3 = okData.status;
 					if (_v3 === 200) {
 						return _Utils_Tuple2(
-							A2($author$project$Main$DisplayingSelectResult, okData.query, okData.result),
+							A3($author$project$Main$DisplayingSelectResult, okData.server, okData.query, okData.result),
 							$elm$core$Platform$Cmd$none);
 					} else {
 						return _Utils_Tuple2(
-							A2($author$project$Main$DisplayingSelectError, okData.query, okData.message),
+							A3($author$project$Main$DisplayingSelectError, okData.server, okData.query, okData.message),
 							$elm$core$Platform$Cmd$none);
 					}
 				} else {
@@ -6298,15 +6326,18 @@ var $author$project$Main$update = F2(
 				}
 		}
 	});
-var $author$project$Main$ChangeQuery = function (a) {
-	return {$: 'ChangeQuery', a: a};
+var $author$project$Main$ChangeServer = function (a) {
+	return {$: 'ChangeServer', a: a};
 };
-var $author$project$Main$PingServer = {$: 'PingServer'};
+var $author$project$Main$PingServer = function (a) {
+	return {$: 'PingServer', a: a};
+};
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$hr = _VirtualDom_node('hr');
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6323,15 +6354,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Main$SubmitQuery = function (a) {
-	return {$: 'SubmitQuery', a: a};
-};
-var $elm$html$Html$Attributes$cols = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'cols',
-		$elm$core$String$fromInt(n));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -6373,6 +6395,20 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $author$project$Main$ChangeQuery = F2(
+	function (a, b) {
+		return {$: 'ChangeQuery', a: a, b: b};
+	});
+var $author$project$Main$SubmitQuery = F2(
+	function (a, b) {
+		return {$: 'SubmitQuery', a: a, b: b};
+	});
+var $elm$html$Html$Attributes$cols = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'cols',
+		$elm$core$String$fromInt(n));
+};
 var $elm$html$Html$Attributes$rows = function (n) {
 	return A2(
 		_VirtualDom_attribute,
@@ -6384,40 +6420,43 @@ var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$Attributes$wrap = $elm$html$Html$Attributes$stringProperty('wrap');
-var $author$project$Main$queryInput = function (query) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$textarea,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$cols(120),
-						$elm$html$Html$Attributes$rows(15),
-						$elm$html$Html$Attributes$wrap('soft'),
-						$elm$html$Html$Attributes$placeholder('Sparql Query'),
-						$elm$html$Html$Events$onInput($author$project$Main$ChangeQuery),
-						$elm$html$Html$Attributes$value(query)
-					]),
-				_List_Nil),
-				A2(
-				$elm$html$Html$button,
-				_List_fromArray(
-					[
-						$elm$html$Html$Events$onClick(
-						$author$project$Main$SubmitQuery(query))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Submit')
-					]))
-			]));
-};
+var $author$project$Main$queryInput = F2(
+	function (newServer, query) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$textarea,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$cols(120),
+							$elm$html$Html$Attributes$rows(15),
+							$elm$html$Html$Attributes$wrap('soft'),
+							$elm$html$Html$Attributes$placeholder('Sparql Query'),
+							$elm$html$Html$Events$onInput(
+							$author$project$Main$ChangeQuery(newServer)),
+							$elm$html$Html$Attributes$value(query)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							A2($author$project$Main$SubmitQuery, newServer, query))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Submit')
+						]))
+				]));
+	});
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Initialising':
+			var newServer = model.a;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
@@ -6436,10 +6475,20 @@ var $author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$placeholder('Server'),
+										$elm$html$Html$Events$onInput($author$project$Main$ChangeServer),
+										$elm$html$Html$Attributes$value(newServer)
+									]),
+								_List_Nil),
+								A2(
 								$elm$html$Html$button,
 								_List_fromArray(
 									[
-										$elm$html$Html$Events$onClick($author$project$Main$PingServer)
+										$elm$html$Html$Events$onClick(
+										$author$project$Main$PingServer(newServer))
 									]),
 								_List_fromArray(
 									[
@@ -6448,16 +6497,18 @@ var $author$project$Main$view = function (model) {
 							]))
 					]));
 		case 'Pinging':
+			var newServer = model.a;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Pinging' + $author$project$Main$server)
+						$elm$html$Html$text('Pinging' + newServer)
 					]));
 		case 'Querying':
-			var query = model.a;
-			return $author$project$Main$queryInput(query);
+			var newServer = model.a;
+			var query = model.b;
+			return A2($author$project$Main$queryInput, newServer, query);
 		case 'ApiError':
 			var error = model.a;
 			if (error.$ === 'BadBody') {
@@ -6480,17 +6531,6 @@ var $author$project$Main$view = function (model) {
 							_List_fromArray(
 								[
 									$elm$html$Html$text(err)
-								])),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									$author$project$Main$ChangeQuery(''))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('<-Query')
 								]))
 						]));
 			} else {
@@ -6509,14 +6549,15 @@ var $author$project$Main$view = function (model) {
 						]));
 			}
 		case 'DisplayingSelectError':
-			var query = model.a;
-			var message = model.b;
+			var newServer = model.a;
+			var query = model.b;
+			var message = model.c;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Main$queryInput(query),
+						A2($author$project$Main$queryInput, newServer, query),
 						A2(
 						$elm$html$Html$div,
 						_List_Nil,
@@ -6526,14 +6567,15 @@ var $author$project$Main$view = function (model) {
 							]))
 					]));
 		default:
-			var query = model.a;
-			var result = model.b;
+			var newServer = model.a;
+			var query = model.b;
+			var result = model.c;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Main$queryInput(query),
+						A2($author$project$Main$queryInput, newServer, query),
 						A2(
 						$elm$html$Html$div,
 						_List_Nil,

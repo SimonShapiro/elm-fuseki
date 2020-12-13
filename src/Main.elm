@@ -8,22 +8,23 @@ import Browser.Events exposing (onKeyDown)
 import Http
 import Html exposing (textarea)
 import Html.Events exposing (on)
-import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, list, int, decodeString, at, andThen)
+import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, map7, list, int, decodeString, at, andThen)
 
 type Model 
-    = Initialising
-    | Pinging
-    | Querying Sparql
-    | DisplayingSelectResult Sparql (List (List SelectAtom))
-    | DisplayingSelectError Sparql String
+    = Initialising Server
+    | Pinging Server
+    | Querying Server Sparql
+    | DisplayingSelectResult Server Sparql (List (List SelectAtom))
+    | DisplayingSelectError Server Sparql String
     | ApiError Http.Error
 
 type Msg 
     = NoOp
-    | PingServer
-    | Pinged (Result Http.Error ())
-    | ChangeQuery Sparql
-    | SubmitQuery Sparql
+    | ChangeServer Server
+    | PingServer Server
+    | Pinged Server (Result Http.Error ())
+    | ChangeQuery Server Sparql
+    | SubmitQuery Server Sparql
     | GotSparqlResponse (Result Http.Error KGResponse)
 
 type alias Server = String
@@ -31,7 +32,8 @@ type alias Server = String
 type alias Sparql = String
 
 type alias KGResponse =  -- a copy of the query is available in the api
-    { status: Int
+    { server: Server
+    , status: Int
     , message: String
     , queryType: String
     , query: Sparql
@@ -55,38 +57,39 @@ selectAtomDecoder =
         (field "value" string )
 
 server: Server
-server = "http://localhost:5000"
+server = "http://localhost:port"
 
 initialModel: flags -> (Model, (Cmd Msg))
-initialModel _ = (Initialising, Cmd.none)
+initialModel _ = (Initialising server, Cmd.none)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        NoOp -> (Initialising, Cmd.none)
-        PingServer -> (Pinging, pingServer)
-        Pinged result ->
+        NoOp -> (Initialising "", Cmd.none)
+        ChangeServer newServer -> (Initialising newServer, Cmd.none)
+        PingServer newServer -> (Pinging newServer, pingServer newServer)
+        Pinged newServer result ->
             case result of
                 Ok _ -> 
                     Debug.log "Pinged OK"
-                    (Querying "", Cmd.none)
+                    (Querying newServer "", Cmd.none)
                 Err e -> 
                     Debug.log "Pinged ERROR"
-                    (Initialising, Cmd.none)
-        ChangeQuery newQuery -> 
+                    (Initialising "", Cmd.none)
+        ChangeQuery newServer newQuery -> 
             Debug.log ("Query "++newQuery)
-            (Querying newQuery, Cmd.none)
-        SubmitQuery query -> 
+            (Querying newServer newQuery, Cmd.none)
+        SubmitQuery newServer query -> 
             Debug.log ("Submitting Query "++query)
-            (Querying query, submitQuery query)
+            (Querying newServer query, submitQuery newServer query)
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
                     case okData.status of
                         200 ->
-                            (DisplayingSelectResult okData.query okData.result, Cmd.none)
+                            (DisplayingSelectResult okData.server okData.query okData.result, Cmd.none)
                         _ ->
-                            (DisplayingSelectError okData.query okData.message, Cmd.none)
+                            (DisplayingSelectError okData.server okData.query okData.message, Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
@@ -95,27 +98,27 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
 
-pingServer = 
+pingServer newServer = 
   --  let
-        Debug.log ("Pinging"++server)
+        Debug.log ("Pinging"++newServer)
 
   --  in
         Http.request
                     { method = "HEAD"
                     , headers = []
-                    , url = server++"/hello"
+                    , url = newServer++"/hello"
                     , body = Http.stringBody "text" ""
-                    , expect = Http.expectWhatever Pinged
+                    , expect = Http.expectWhatever (Pinged newServer)
                     , timeout = Nothing
                     , tracker = Nothing
                     }
 
-submitQuery: Sparql -> (Cmd  Msg)
-submitQuery query = 
+submitQuery: Server -> Sparql -> (Cmd  Msg)
+submitQuery newServer query = 
         Http.request
                     { method = "POST"
                     , headers = [Http.header "Content-Type" "application/sparql-request"]
-                    , url = server++"/sparql"
+                    , url = newServer++"/sparql"
                     , body = Http.stringBody "text" query
                     , expect = Http.expectJson GotSparqlResponse mainDecoder
                     , timeout = Nothing
@@ -124,54 +127,55 @@ submitQuery query =
 
 -- View
 
-queryInput: Sparql -> Html Msg
-queryInput query =
+queryInput: Server -> Sparql -> Html Msg
+queryInput newServer query =
             div [] 
                 [ textarea 
                     [ cols 120
                     , rows 15
                     , wrap "soft"
                     , placeholder "Sparql Query"
-                    , onInput ChangeQuery
+                    , onInput (ChangeQuery newServer)
                     , value query
                     ][]
-                , button [onClick (SubmitQuery query)][text "Submit"]
+                , button [onClick (SubmitQuery newServer query)][text "Submit"]
                 ]
 
 view: Model -> Html Msg
 view model = 
     case model of
-        Initialising ->
+        Initialising newServer ->
             div [] 
                 [ h1 [][text "hello world"]
                 , div [] 
-                    [ button [onClick PingServer][text "Connect"]
+                    [ input [placeholder "Server", onInput ChangeServer, value newServer][]
+                    , button [onClick (PingServer newServer)][text "Connect"]
                     ]
                 ]
-        Pinging -> 
-            div [][text <| "Pinging"++server]
-        Querying query ->
-            queryInput query
+        Pinging newServer-> 
+            div [][text <| "Pinging"++newServer]
+        Querying newServer query ->
+            queryInput newServer query
         ApiError error -> 
             case error of
                 Http.BadBody err ->
                     div []
                         [ h1 [][text "I can't interpret the response"]
                         , div [][text err]
-                        , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
+--                        , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
                         ]
                 _ ->
                     div [][
                         h1 [][text "Oops - something went wrong! :-("]
                     ]
-        DisplayingSelectError query message ->
+        DisplayingSelectError newServer query message ->
             div [][
-                queryInput query
+                queryInput newServer query
                 , div [][text message]
             ]
-        DisplayingSelectResult query result ->
+        DisplayingSelectResult newServer query result ->
             div [][
-                queryInput query
+                queryInput newServer query
                 , div []
                     (List.map (
                         \row ->
@@ -193,7 +197,8 @@ view model =
 
 mainDecoder: Decoder KGResponse
 mainDecoder =
-     map6 KGResponse
+     map7 KGResponse
+        (field "server" string)
         (field "status" int)
         (field "reason" string)
         (field "queryType" string)

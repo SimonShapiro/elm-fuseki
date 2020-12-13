@@ -34,3 +34,6 @@ get http://localhost:3030/latest
 ####
 
 get http://localhost:3030/latest/?default-graph-uri=http://exmaple.com/default
+
+#####
+get http://localhost:5000/hello
