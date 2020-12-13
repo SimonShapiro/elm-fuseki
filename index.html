@@ -5347,9 +5347,13 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
 };
-var $author$project$Main$DisplayingSelectResult = function (a) {
-	return {$: 'DisplayingSelectResult', a: a};
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
 };
+var $author$project$Main$DisplayingSelectResult = F2(
+	function (a, b) {
+		return {$: 'DisplayingSelectResult', a: a, b: b};
+	});
 var $author$project$Main$Pinging = {$: 'Pinging'};
 var $author$project$Main$Querying = function (a) {
 	return {$: 'Querying', a: a};
@@ -5913,9 +5917,6 @@ var $elm$http$Http$expectBytesResponse = F2(
 			_Http_toDataView,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
 	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
 var $elm$http$Http$BadStatus = function (a) {
 	return {$: 'BadStatus', a: a};
 };
@@ -6180,14 +6181,14 @@ var $elm$http$Http$Header = F2(
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $author$project$Main$KGResponse = F5(
-	function (status, message, queryType, vars, result) {
-		return {message: message, queryType: queryType, result: result, status: status, vars: vars};
+var $author$project$Main$KGResponse = F6(
+	function (status, message, queryType, query, vars, result) {
+		return {message: message, query: query, queryType: queryType, result: result, status: status, vars: vars};
 	});
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$json$Json$Decode$map6 = _Json_map6;
 var $author$project$Main$SelectAtom = F2(
 	function (key, value) {
 		return {key: key, value: value};
@@ -6198,12 +6199,13 @@ var $author$project$Main$selectAtomDecoder = A3(
 	$author$project$Main$SelectAtom,
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string));
-var $author$project$Main$mainDecoder = A6(
-	$elm$json$Json$Decode$map5,
+var $author$project$Main$mainDecoder = A7(
+	$elm$json$Json$Decode$map6,
 	$author$project$Main$KGResponse,
 	A2($elm$json$Json$Decode$field, 'status', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'reason', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'queryType', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'query', $elm$json$Json$Decode$string),
 	A2(
 		$elm$json$Json$Decode$field,
 		'vars',
@@ -6271,9 +6273,17 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					return _Utils_Tuple2(
-						$author$project$Main$DisplayingSelectResult(okData.result),
-						$elm$core$Platform$Cmd$none);
+					var _v3 = okData.status;
+					if (_v3 === 200) {
+						return _Utils_Tuple2(
+							A2($author$project$Main$DisplayingSelectResult, okData.query, okData.result),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						return _Utils_Tuple2(
+							$author$project$Main$ApiError(
+								$elm$http$Http$BadBody(okData.message)),
+							$elm$core$Platform$Cmd$none);
+					}
 				} else {
 					var e = response.a;
 					return A2(
@@ -6285,21 +6295,9 @@ var $author$project$Main$update = F2(
 				}
 		}
 	});
-var $author$project$Main$ChangeQuery = function (a) {
-	return {$: 'ChangeQuery', a: a};
-};
 var $author$project$Main$PingServer = {$: 'PingServer'};
-var $author$project$Main$SubmitQuery = function (a) {
-	return {$: 'SubmitQuery', a: a};
-};
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$Attributes$cols = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'cols',
-		$elm$core$String$fromInt(n));
-};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$hr = _VirtualDom_node('hr');
@@ -6319,6 +6317,18 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
+};
+var $author$project$Main$ChangeQuery = function (a) {
+	return {$: 'ChangeQuery', a: a};
+};
+var $author$project$Main$SubmitQuery = function (a) {
+	return {$: 'SubmitQuery', a: a};
+};
+var $elm$html$Html$Attributes$cols = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'cols',
+		$elm$core$String$fromInt(n));
 };
 var $elm$html$Html$Events$alwaysStop = function (x) {
 	return _Utils_Tuple2(x, true);
@@ -6369,7 +6379,39 @@ var $elm$html$Html$Attributes$rows = function (n) {
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$Attributes$wrap = $elm$html$Html$Attributes$stringProperty('wrap');
+var $author$project$Main$queryInput = function (query) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$textarea,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$cols(120),
+						$elm$html$Html$Attributes$rows(15),
+						$elm$html$Html$Attributes$wrap('soft'),
+						$elm$html$Html$Attributes$placeholder('Sparql Query'),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangeQuery),
+						$elm$html$Html$Attributes$value(query)
+					]),
+				_List_Nil),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Main$SubmitQuery(query))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Submit')
+					]))
+			]));
+};
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Initialising':
@@ -6412,34 +6454,7 @@ var $author$project$Main$view = function (model) {
 					]));
 		case 'Querying':
 			var query = model.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$textarea,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$cols(120),
-								$elm$html$Html$Attributes$rows(30),
-								$elm$html$Html$Attributes$wrap('soft'),
-								$elm$html$Html$Attributes$placeholder('Sparql Query'),
-								$elm$html$Html$Events$onInput($author$project$Main$ChangeQuery)
-							]),
-						_List_Nil),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$SubmitQuery(query))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Submit')
-							]))
-					]));
+			return $author$project$Main$queryInput(query);
 		case 'ApiError':
 			var error = model.a;
 			if (error.$ === 'BadBody') {
@@ -6474,45 +6489,53 @@ var $author$project$Main$view = function (model) {
 						]));
 			}
 		default:
-			var result = model.a;
+			var query = model.a;
+			var result = model.b;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
-				A2(
-					$elm$core$List$map,
-					function (row) {
-						return A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
+				_List_fromArray(
+					[
+						$author$project$Main$queryInput(query),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						A2(
+							$elm$core$List$map,
+							function (row) {
+								return A2(
 									$elm$html$Html$div,
 									_List_Nil,
-									A2(
-										$elm$core$List$map,
-										function (_var) {
-											return A2(
-												$elm$html$Html$div,
-												_List_Nil,
-												_List_fromArray(
-													[
-														A2(
-														$elm$html$Html$b,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$div,
+											_List_Nil,
+											A2(
+												$elm$core$List$map,
+												function (_var) {
+													return A2(
+														$elm$html$Html$div,
 														_List_Nil,
 														_List_fromArray(
 															[
-																$elm$html$Html$text(_var.key)
-															])),
-														$elm$html$Html$text(': '),
-														$elm$html$Html$text(_var.value)
-													]));
-										},
-										row)),
-									A2($elm$html$Html$hr, _List_Nil, _List_Nil)
-								]));
-					},
-					result));
+																A2(
+																$elm$html$Html$b,
+																_List_Nil,
+																_List_fromArray(
+																	[
+																		$elm$html$Html$text(_var.key)
+																	])),
+																$elm$html$Html$text(': '),
+																$elm$html$Html$text(_var.value)
+															]));
+												},
+												row)),
+											A2($elm$html$Html$hr, _List_Nil, _List_Nil)
+										]));
+							},
+							result))
+					]));
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

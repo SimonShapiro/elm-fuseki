@@ -3,3 +3,34 @@ Content-Type: application/sparql-query
 Accept: application/json
 
 select * { ?s ?p ?o .}
+
+####
+
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+drop graph <http://example.com/Graph1>
+
+####
+
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+insert data {
+    graph :Graph1 {
+    : a :Dataset .
+    :John :livesAt [
+            a :Address;
+            :postalCode "wd234xa" 
+            ];
+        :firstName "Siomon"^^xsd:string .
+}}
+
+####
+get http://localhost:3030/latest
+
+####
+
+get http://localhost:3030/latest/?default-graph-uri=http://exmaple.com/default

@@ -2,6 +2,12 @@ from flask import Flask, Response, request
 from flask_cors import CORS
 import requests
 import json
+from dataclasses import dataclass
+
+@dataclass
+class Atom:
+    _type: str = ""
+    value: str = ""
 
 app = Flask(__name__)
 app.config['API_TITLE'] = 'My API'
@@ -36,7 +42,8 @@ def sparql():
         bindings = result["results"]["bindings"]
         rows = []
         for bound in bindings:
-            atoms = [{"key": v, "value": bound[v]["value"]} for v in vars]
+            # create atom here
+            atoms = [{"key": v, "value": bound[v]["value"] if bound.get(v) else ""} for v in vars]
             rows.append(atoms)
     else:
         result = {}

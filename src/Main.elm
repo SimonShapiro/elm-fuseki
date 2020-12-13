@@ -8,13 +8,13 @@ import Browser.Events exposing (onKeyDown)
 import Http
 import Html exposing (textarea)
 import Html.Events exposing (on)
-import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, list, int, decodeString, at, andThen)
+import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, list, int, decodeString, at, andThen)
 
 type Model 
     = Initialising
     | Pinging
     | Querying Sparql
-    | DisplayingSelectResult (List (List SelectAtom))
+    | DisplayingSelectResult Sparql (List (List SelectAtom))
     | ApiError Http.Error
 
 type Msg 
@@ -33,6 +33,7 @@ type alias KGResponse =  -- a copy of the query is available in the api
     { status: Int
     , message: String
     , queryType: String
+    , query: Sparql
     , vars: (List String)
     , result: (List (List SelectAtom))
     }
@@ -80,7 +81,11 @@ update msg model =
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
-                    (DisplayingSelectResult okData.result, Cmd.none)
+                    case okData.status of
+                        200 ->
+                            (DisplayingSelectResult okData.query okData.result, Cmd.none)
+                        _ ->
+                            (ApiError <| Http.BadBody okData.message, Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
@@ -116,6 +121,22 @@ submitQuery query =
                     , tracker = Nothing
                     }
 
+-- View
+
+queryInput: Sparql -> Html Msg
+queryInput query =
+            div [] 
+                [ textarea 
+                    [ cols 120
+                    , rows 15
+                    , wrap "soft"
+                    , placeholder "Sparql Query"
+                    , onInput ChangeQuery
+                    , value query
+                    ][]
+                , button [onClick (SubmitQuery query)][text "Submit"]
+                ]
+
 view: Model -> Html Msg
 view model = 
     case model of
@@ -129,16 +150,7 @@ view model =
         Pinging -> 
             div [][text <| "Pinging"++server]
         Querying query ->
-            div [] 
-                [ textarea 
-                    [ cols 120
-                    , rows 30
-                    , wrap "soft"
-                    , placeholder "Sparql Query"
-                    , onInput ChangeQuery
-                    ][]
-                , button [onClick (SubmitQuery query)][text "Submit"]
-                ]
+            queryInput query
         ApiError error -> 
             case error of
                 Http.BadBody err ->
@@ -148,31 +160,35 @@ view model =
                         ]
                 _ ->
                     h1 [][text "Oops - something went wrong! :-("]
-        DisplayingSelectResult result ->
-            div []
-                (List.map (
-                    \row ->
-                      div [][
-                        div []
-                        (List.map (
-                            \var -> 
-                                div []
-                                    [ b [][text var.key]
-                                    , text ": "
-                                    , text var.value
-                                    ]
-                        ) row)
-                        , hr [][]]
-                ) result)
-
+        DisplayingSelectResult query result ->
+            div [][
+                queryInput query
+                , div []
+                    (List.map (
+                        \row ->
+                        div [][
+                            div []
+                            (List.map (
+                                \var -> 
+                                    div []
+                                        [ b [][text var.key]
+                                        , text ": "
+                                        , text var.value
+                                        ]
+                            ) row)
+                            , hr [][]]
+                    ) result)
+--                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
+            ]
 -- Decoders
 
 mainDecoder: Decoder KGResponse
 mainDecoder =
-     map5 KGResponse
+     map6 KGResponse
         (field "status" int)
         (field "reason" string)
         (field "queryType" string)
+        (field "query" string)
         (field "vars" (list string))
         (field "result" (list (list selectAtomDecoder)))    
 -- Main
