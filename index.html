@@ -5347,9 +5347,10 @@ var $author$project$Main$subscriptions = function (model) {
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
 };
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
+var $author$project$Main$DisplayingSelectError = F2(
+	function (a, b) {
+		return {$: 'DisplayingSelectError', a: a, b: b};
+	});
 var $author$project$Main$DisplayingSelectResult = F2(
 	function (a, b) {
 		return {$: 'DisplayingSelectResult', a: a, b: b};
@@ -5917,6 +5918,9 @@ var $elm$http$Http$expectBytesResponse = F2(
 			_Http_toDataView,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
 	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
 var $elm$http$Http$BadStatus = function (a) {
 	return {$: 'BadStatus', a: a};
 };
@@ -6280,8 +6284,7 @@ var $author$project$Main$update = F2(
 							$elm$core$Platform$Cmd$none);
 					} else {
 						return _Utils_Tuple2(
-							$author$project$Main$ApiError(
-								$elm$http$Http$BadBody(okData.message)),
+							A2($author$project$Main$DisplayingSelectError, okData.query, okData.message),
 							$elm$core$Platform$Cmd$none);
 					}
 				} else {
@@ -6295,6 +6298,9 @@ var $author$project$Main$update = F2(
 				}
 		}
 	});
+var $author$project$Main$ChangeQuery = function (a) {
+	return {$: 'ChangeQuery', a: a};
+};
 var $author$project$Main$PingServer = {$: 'PingServer'};
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
@@ -6317,9 +6323,6 @@ var $elm$html$Html$Events$onClick = function (msg) {
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Main$ChangeQuery = function (a) {
-	return {$: 'ChangeQuery', a: a};
 };
 var $author$project$Main$SubmitQuery = function (a) {
 	return {$: 'SubmitQuery', a: a};
@@ -6477,17 +6480,51 @@ var $author$project$Main$view = function (model) {
 							_List_fromArray(
 								[
 									$elm$html$Html$text(err)
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$Main$ChangeQuery(''))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('<-Query')
 								]))
 						]));
 			} else {
 				return A2(
-					$elm$html$Html$h1,
+					$elm$html$Html$div,
 					_List_Nil,
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Oops - something went wrong! :-(')
+							A2(
+							$elm$html$Html$h1,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Oops - something went wrong! :-(')
+								]))
 						]));
 			}
+		case 'DisplayingSelectError':
+			var query = model.a;
+			var message = model.b;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Main$queryInput(query),
+						A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(message)
+							]))
+					]));
 		default:
 			var query = model.a;
 			var result = model.b;

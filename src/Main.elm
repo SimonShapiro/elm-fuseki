@@ -15,6 +15,7 @@ type Model
     | Pinging
     | Querying Sparql
     | DisplayingSelectResult Sparql (List (List SelectAtom))
+    | DisplayingSelectError Sparql String
     | ApiError Http.Error
 
 type Msg 
@@ -85,7 +86,7 @@ update msg model =
                         200 ->
                             (DisplayingSelectResult okData.query okData.result, Cmd.none)
                         _ ->
-                            (ApiError <| Http.BadBody okData.message, Cmd.none)
+                            (DisplayingSelectError okData.query okData.message, Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
@@ -157,9 +158,17 @@ view model =
                     div []
                         [ h1 [][text "I can't interpret the response"]
                         , div [][text err]
+                        , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
                         ]
                 _ ->
-                    h1 [][text "Oops - something went wrong! :-("]
+                    div [][
+                        h1 [][text "Oops - something went wrong! :-("]
+                    ]
+        DisplayingSelectError query message ->
+            div [][
+                queryInput query
+                , div [][text message]
+            ]
         DisplayingSelectResult query result ->
             div [][
                 queryInput query
