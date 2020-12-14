@@ -12,27 +12,35 @@ import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, 
 
 import File exposing (File)
 import File.Select as Select
+import File.Download as Download
 import Task
 
-type Model 
-    = Initialising Server
-    | Pinging Server
-    | Querying Server Sparql
-    | DisplayingSelectResult Server Sparql (List (List SelectAtom))
-    | DisplayingSelectError Server Sparql String
+type UIState 
+    = Initialising 
+    | Pinging 
+    | Querying 
+    | DisplayingSelectResult  (List (List SelectAtom))
+    | DisplayingSelectError String
     | ApiError Http.Error
+
+type alias Model = 
+    { state: UIState
+    , server: Server
+    , query: Sparql 
+    }
 
 type Msg 
     = NoOp
     | ChangeServer Server
-    | PingServer Server
-    | Pinged Server (Result Http.Error ())
-    | ChangeQuery Server Sparql
-    | SubmitQuery Server Sparql
+    | PingServer 
+    | Pinged (Result Http.Error ())
+    | ChangeQuery Sparql
+    | SubmitQuery 
     | GotSparqlResponse (Result Http.Error KGResponse)
     | FileRequested 
     | FileSelected File
     | FileLoaded Sparql
+    | DownloadFile
 
 type alias Server = String
 
@@ -66,40 +74,43 @@ selectAtomDecoder =
 server: Server
 server = "http://localhost:port"
 
+startWith: Model
+startWith = Model Initialising server ""
+
 initialModel: flags -> (Model, (Cmd Msg))
-initialModel _ = (Initialising server, Cmd.none)
+initialModel _ = (startWith, Cmd.none)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
-        NoOp -> (Initialising "", Cmd.none)
-        ChangeServer newServer -> (Initialising newServer, Cmd.none)
-        PingServer newServer -> (Pinging newServer, pingServer newServer)
-        Pinged newServer result ->
+        NoOp -> (model, Cmd.none)
+        ChangeServer newServer -> ({model | server = newServer}, Cmd.none)
+        PingServer -> ({model | state = Pinging}, pingServer model.server)
+        Pinged result ->
             case result of
                 Ok _ -> 
                     Debug.log "Pinged OK"
-                    (Querying newServer "", Cmd.none)
+                    ({model | state = Querying}, Cmd.none)
                 Err e -> 
                     Debug.log "Pinged ERROR"
-                    (Initialising "", Cmd.none)
-        ChangeQuery newServer newQuery -> 
+                    ({model | state = Initialising}, Cmd.none)
+        ChangeQuery newQuery -> 
             Debug.log ("Query "++newQuery)
-            (Querying newServer newQuery, Cmd.none)
-        SubmitQuery newServer query -> 
-            Debug.log ("Submitting Query "++query)
-            (Querying newServer query, submitQuery newServer query)
+            ({model | query = newQuery, state = Querying}, Cmd.none)
+        SubmitQuery -> 
+            Debug.log ("Submitting Query "++model.query)
+            ({model | state = Querying}, submitQuery model.server model.query)
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
                     case okData.status of
                         200 ->
-                            (DisplayingSelectResult okData.server okData.query okData.result, Cmd.none)
+                            ({model | state = DisplayingSelectResult okData.result}, Cmd.none)
                         _ ->
-                            (DisplayingSelectError okData.server okData.query okData.message, Cmd.none)
+                            ({model | state = DisplayingSelectError okData.message}, Cmd.none)
                 Err e -> 
                     Debug.log "Response ERROR"
-                    (ApiError e, Cmd.none)
+                    ({model | state = ApiError e}, Cmd.none)
         FileRequested  ->
                 ( model
                 , Select.file ["text"] FileSelected
@@ -109,15 +120,9 @@ update msg model =
                 , Task.perform FileLoaded (File.toString file)
                 )
         FileLoaded content ->
-            case model of
-                Querying newServer _ ->
-                    ( Querying newServer content, Cmd.none)
-                DisplayingSelectResult newServer _ oldResults ->
-                    ( DisplayingSelectResult newServer content oldResults, Cmd.none )
-                DisplayingSelectError newServer _ oldError ->
-                    ( DisplayingSelectError newServer content oldError, Cmd.none)
-                _ ->
-                    ( model, Cmd.none)
+            ({model | query = content}, Cmd.none)
+        DownloadFile -> 
+            (model, downloadFile model.query)
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -133,7 +138,7 @@ pingServer newServer =
                     , headers = []
                     , url = newServer++"/hello"
                     , body = Http.stringBody "text" ""
-                    , expect = Http.expectWhatever (Pinged newServer)
+                    , expect = Http.expectWhatever Pinged
                     , timeout = Nothing
                     , tracker = Nothing
                     }
@@ -160,33 +165,38 @@ queryInput newServer query =
                     , rows 15
                     , wrap "soft"
                     , placeholder "Sparql Query"
-                    , onInput (ChangeQuery newServer)
+                    , onInput ChangeQuery
                     , value query
                     ][]
-                , button [onClick (SubmitQuery newServer query)][text "Submit"]
+                , button [onClick SubmitQuery][text "Submit"]
                 ]
 
 uploadQueryFromFile:  Html Msg
 uploadQueryFromFile = 
     div []
-    [ button [onClick FileRequested][text "Load"]]
+    [ button [onClick FileRequested][text "Load query"]
+    , button [onClick DownloadFile][text "Download query"]]
+
+downloadFile: String -> Cmd msg
+downloadFile query =
+  Download.string "query.txt" "text" query
 
 view: Model -> Html Msg
 view model = 
-    case model of
-        Initialising newServer ->
+    case model.state of
+        Initialising ->
             div [] 
                 [ h1 [][text "hello world"]
                 , div [] 
-                    [ input [placeholder "Server", onInput ChangeServer, value newServer][]
-                    , button [onClick (PingServer newServer)][text "Connect"]
+                    [ input [placeholder "Server", onInput ChangeServer, value model.server][]
+                    , button [onClick PingServer][text "Connect"]
                     ]
                 ]
-        Pinging newServer-> 
-            div [][text <| "Pinging"++newServer]
-        Querying newServer query -> div []
+        Pinging -> 
+            div [][text <| "Pinging"++model.server]
+        Querying -> div []
                 [ uploadQueryFromFile
-                , queryInput newServer query
+                , queryInput model.server model.query
                 ]
         ApiError error -> 
             case error of
@@ -200,16 +210,16 @@ view model =
                     div [][
                         h1 [][text "Oops - something went wrong! :-("]
                     ]
-        DisplayingSelectError newServer query message ->
+        DisplayingSelectError message ->
             div []                
                 [ uploadQueryFromFile
-                , queryInput newServer query
+                , queryInput model.server model.query
                 , div [][text message]
                 ]
-        DisplayingSelectResult newServer query result ->
+        DisplayingSelectResult result ->
             div []                
                 [ uploadQueryFromFile
-                , queryInput newServer query
+                , queryInput model.server model.query
                 , div []
                     (List.map (
                         \row ->

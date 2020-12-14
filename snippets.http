@@ -53,3 +53,13 @@ insert data {
         :description "Add graph, predicate lookup to sparlq text area";
         :status "Pending" .
 }}
+#####
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+delete  where {
+    graph :ElmAndApi {:1 :status "Pending" .}};
+insert data {graph :ElmAndApi {
+    :1 :status "Done" .
+}}
