@@ -10,6 +10,10 @@ import Html exposing (textarea)
 import Html.Events exposing (on)
 import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, map7, list, int, decodeString, at, andThen)
 
+import File exposing (File)
+import File.Select as Select
+import Task
+
 type Model 
     = Initialising Server
     | Pinging Server
@@ -26,6 +30,9 @@ type Msg
     | ChangeQuery Server Sparql
     | SubmitQuery Server Sparql
     | GotSparqlResponse (Result Http.Error KGResponse)
+    | FileRequested 
+    | FileSelected File
+    | FileLoaded Sparql
 
 type alias Server = String
 
@@ -93,7 +100,18 @@ update msg model =
                 Err e -> 
                     Debug.log "Response ERROR"
                     (ApiError e, Cmd.none)
-       
+        FileRequested  ->
+                ( model
+                , Select.file ["text"] FileSelected
+                )  --          (Querying newServer "", Cmd.none)
+        FileSelected file ->        
+                ( model
+                , Task.perform FileLoaded (File.toString file)
+                )
+        FileLoaded content ->
+                Debug.log content
+                ( model, Cmd.none)
+                
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
@@ -141,6 +159,11 @@ queryInput newServer query =
                 , button [onClick (SubmitQuery newServer query)][text "Submit"]
                 ]
 
+uploadQueryFromFile:  Html Msg
+uploadQueryFromFile = 
+    div []
+    [ button [onClick FileRequested][text "Load"]]
+
 view: Model -> Html Msg
 view model = 
     case model of
@@ -154,8 +177,10 @@ view model =
                 ]
         Pinging newServer-> 
             div [][text <| "Pinging"++newServer]
-        Querying newServer query ->
-            queryInput newServer query
+        Querying newServer query -> div []
+                [ uploadQueryFromFile
+                , queryInput newServer query
+                ]
         ApiError error -> 
             case error of
                 Http.BadBody err ->
@@ -169,13 +194,15 @@ view model =
                         h1 [][text "Oops - something went wrong! :-("]
                     ]
         DisplayingSelectError newServer query message ->
-            div [][
-                queryInput newServer query
+            div []                
+                [ uploadQueryFromFile
+                , queryInput newServer query
                 , div [][text message]
-            ]
+                ]
         DisplayingSelectResult newServer query result ->
-            div [][
-                queryInput newServer query
+            div []                
+                [ uploadQueryFromFile
+                , queryInput newServer query
                 , div []
                     (List.map (
                         \row ->

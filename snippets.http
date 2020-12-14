@@ -37,3 +37,19 @@ get http://localhost:3030/latest/?default-graph-uri=http://exmaple.com/default
 
 #####
 get http://localhost:5000/hello
+
+#####  Use this snippet to add todos to the kg ######
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+insert data {
+    graph :ElmAndApi {
+    : a :ToDoList .
+    :1 a :ToDo;
+        :description "Add sparql snippet loader/saver";
+        :status "Pending" .
+    :2 a :ToDo;
+        :description "Add graph, predicate lookup to sparlq text area";
+        :status "Pending" .
+}}

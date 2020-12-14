@@ -4372,6 +4372,184 @@ function _Browser_load(url)
 
 
 
+// DECODER
+
+var _File_decoder = _Json_decodePrim(function(value) {
+	// NOTE: checks if `File` exists in case this is run on node
+	return (typeof File !== 'undefined' && value instanceof File)
+		? $elm$core$Result$Ok(value)
+		: _Json_expecting('a FILE', value);
+});
+
+
+// METADATA
+
+function _File_name(file) { return file.name; }
+function _File_mime(file) { return file.type; }
+function _File_size(file) { return file.size; }
+
+function _File_lastModified(file)
+{
+	return $elm$time$Time$millisToPosix(file.lastModified);
+}
+
+
+// DOWNLOAD
+
+var _File_downloadNode;
+
+function _File_getDownloadNode()
+{
+	return _File_downloadNode || (_File_downloadNode = document.createElement('a'));
+}
+
+var _File_download = F3(function(name, mime, content)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var blob = new Blob([content], {type: mime});
+
+		// for IE10+
+		if (navigator.msSaveOrOpenBlob)
+		{
+			navigator.msSaveOrOpenBlob(blob, name);
+			return;
+		}
+
+		// for HTML5
+		var node = _File_getDownloadNode();
+		var objectUrl = URL.createObjectURL(blob);
+		node.href = objectUrl;
+		node.download = name;
+		_File_click(node);
+		URL.revokeObjectURL(objectUrl);
+	});
+});
+
+function _File_downloadUrl(href)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = _File_getDownloadNode();
+		node.href = href;
+		node.download = '';
+		node.origin === location.origin || (node.target = '_blank');
+		_File_click(node);
+	});
+}
+
+
+// IE COMPATIBILITY
+
+function _File_makeBytesSafeForInternetExplorer(bytes)
+{
+	// only needed by IE10 and IE11 to fix https://github.com/elm/file/issues/10
+	// all other browsers can just run `new Blob([bytes])` directly with no problem
+	//
+	return new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+
+function _File_click(node)
+{
+	// only needed by IE10 and IE11 to fix https://github.com/elm/file/issues/11
+	// all other browsers have MouseEvent and do not need this conditional stuff
+	//
+	if (typeof MouseEvent === 'function')
+	{
+		node.dispatchEvent(new MouseEvent('click'));
+	}
+	else
+	{
+		var event = document.createEvent('MouseEvents');
+		event.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+		document.body.appendChild(node);
+		node.dispatchEvent(event);
+		document.body.removeChild(node);
+	}
+}
+
+
+// UPLOAD
+
+var _File_node;
+
+function _File_uploadOne(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_File_node = document.createElement('input');
+		_File_node.type = 'file';
+		_File_node.accept = A2($elm$core$String$join, ',', mimes);
+		_File_node.addEventListener('change', function(event)
+		{
+			callback(_Scheduler_succeed(event.target.files[0]));
+		});
+		_File_click(_File_node);
+	});
+}
+
+function _File_uploadOneOrMore(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_File_node = document.createElement('input');
+		_File_node.type = 'file';
+		_File_node.multiple = true;
+		_File_node.accept = A2($elm$core$String$join, ',', mimes);
+		_File_node.addEventListener('change', function(event)
+		{
+			var elmFiles = _List_fromArray(event.target.files);
+			callback(_Scheduler_succeed(_Utils_Tuple2(elmFiles.a, elmFiles.b)));
+		});
+		_File_click(_File_node);
+	});
+}
+
+
+// CONTENT
+
+function _File_toString(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsText(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toBytes(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(new DataView(reader.result)));
+		});
+		reader.readAsArrayBuffer(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toUrl(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsDataURL(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+
+
+
 // SEND REQUEST
 
 var _Http_toTask = F3(function(router, toTask, request)
@@ -5360,12 +5538,29 @@ var $author$project$Main$DisplayingSelectResult = F3(
 	function (a, b, c) {
 		return {$: 'DisplayingSelectResult', a: a, b: b, c: c};
 	});
+var $author$project$Main$FileLoaded = function (a) {
+	return {$: 'FileLoaded', a: a};
+};
+var $author$project$Main$FileSelected = function (a) {
+	return {$: 'FileSelected', a: a};
+};
 var $author$project$Main$Pinging = function (a) {
 	return {$: 'Pinging', a: a};
 };
 var $author$project$Main$Querying = F2(
 	function (a, b) {
 		return {$: 'Querying', a: a, b: b};
+	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$file$File$Select$file = F2(
+	function (mimes, toMsg) {
+		return A2(
+			$elm$core$Task$perform,
+			toMsg,
+			_File_uploadOne(mimes));
 	});
 var $elm$core$Debug$log = _Debug_log;
 var $author$project$Main$Pinged = F2(
@@ -6247,6 +6442,7 @@ var $author$project$Main$submitQuery = F2(
 				url: newServer + '/sparql'
 			});
 	});
+var $elm$file$File$toString = _File_toString;
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6301,7 +6497,7 @@ var $author$project$Main$update = F2(
 					_Utils_Tuple2(
 						A2($author$project$Main$Querying, newServer, query),
 						A2($author$project$Main$submitQuery, newServer, query)));
-			default:
+			case 'GotSparqlResponse':
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
@@ -6324,6 +6520,28 @@ var $author$project$Main$update = F2(
 							$author$project$Main$ApiError(e),
 							$elm$core$Platform$Cmd$none));
 				}
+			case 'FileRequested':
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$file$File$Select$file,
+						_List_fromArray(
+							['text']),
+						$author$project$Main$FileSelected));
+			case 'FileSelected':
+				var file = msg.a;
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$core$Task$perform,
+						$author$project$Main$FileLoaded,
+						$elm$file$File$toString(file)));
+			default:
+				var content = msg.a;
+				return A2(
+					$elm$core$Debug$log,
+					content,
+					_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
 		}
 	});
 var $author$project$Main$ChangeServer = function (a) {
@@ -6453,6 +6671,23 @@ var $author$project$Main$queryInput = F2(
 						]))
 				]));
 	});
+var $author$project$Main$FileRequested = {$: 'FileRequested'};
+var $author$project$Main$uploadQueryFromFile = A2(
+	$elm$html$Html$div,
+	_List_Nil,
+	_List_fromArray(
+		[
+			A2(
+			$elm$html$Html$button,
+			_List_fromArray(
+				[
+					$elm$html$Html$Events$onClick($author$project$Main$FileRequested)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text('Load')
+				]))
+		]));
 var $author$project$Main$view = function (model) {
 	switch (model.$) {
 		case 'Initialising':
@@ -6508,7 +6743,14 @@ var $author$project$Main$view = function (model) {
 		case 'Querying':
 			var newServer = model.a;
 			var query = model.b;
-			return A2($author$project$Main$queryInput, newServer, query);
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Main$uploadQueryFromFile,
+						A2($author$project$Main$queryInput, newServer, query)
+					]));
 		case 'ApiError':
 			var error = model.a;
 			if (error.$ === 'BadBody') {
@@ -6557,6 +6799,7 @@ var $author$project$Main$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
+						$author$project$Main$uploadQueryFromFile,
 						A2($author$project$Main$queryInput, newServer, query),
 						A2(
 						$elm$html$Html$div,
@@ -6575,6 +6818,7 @@ var $author$project$Main$view = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
+						$author$project$Main$uploadQueryFromFile,
 						A2($author$project$Main$queryInput, newServer, query),
 						A2(
 						$elm$html$Html$div,
