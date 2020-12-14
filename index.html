@@ -6538,10 +6538,27 @@ var $author$project$Main$update = F2(
 						$elm$file$File$toString(file)));
 			default:
 				var content = msg.a;
-				return A2(
-					$elm$core$Debug$log,
-					content,
-					_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+				switch (model.$) {
+					case 'Querying':
+						var newServer = model.a;
+						return _Utils_Tuple2(
+							A2($author$project$Main$Querying, newServer, content),
+							$elm$core$Platform$Cmd$none);
+					case 'DisplayingSelectResult':
+						var newServer = model.a;
+						var oldResults = model.c;
+						return _Utils_Tuple2(
+							A3($author$project$Main$DisplayingSelectResult, newServer, content, oldResults),
+							$elm$core$Platform$Cmd$none);
+					case 'DisplayingSelectError':
+						var newServer = model.a;
+						var oldError = model.c;
+						return _Utils_Tuple2(
+							A3($author$project$Main$DisplayingSelectError, newServer, content, oldError),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$ChangeServer = function (a) {

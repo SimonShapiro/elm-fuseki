@@ -109,9 +109,16 @@ update msg model =
                 , Task.perform FileLoaded (File.toString file)
                 )
         FileLoaded content ->
-                Debug.log content
-                ( model, Cmd.none)
-                
+            case model of
+                Querying newServer _ ->
+                    ( Querying newServer content, Cmd.none)
+                DisplayingSelectResult newServer _ oldResults ->
+                    ( DisplayingSelectResult newServer content oldResults, Cmd.none )
+                DisplayingSelectError newServer _ oldError ->
+                    ( DisplayingSelectError newServer content oldError, Cmd.none)
+                _ ->
+                    ( model, Cmd.none)
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
