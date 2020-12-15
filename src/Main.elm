@@ -27,10 +27,17 @@ type alias Model =
     { state: UIState
     , server: Server
     , query: Sparql 
+    , keyboard: KeyboardMode
     }
+
+type KeyboardMode
+    = Normal
+    | Ctrl
+    | ReadyToAcceptControl
 
 type Msg 
     = NoOp
+    | PressedKey String
     | ChangeServer Server
     | PingServer 
     | Pinged (Result Http.Error ())
@@ -75,7 +82,7 @@ server: Server
 server = "http://localhost:port"
 
 startWith: Model
-startWith = Model Initialising server ""
+startWith = Model Initialising server "" Normal
 
 initialModel: flags -> (Model, (Cmd Msg))
 initialModel _ = (startWith, Cmd.none)
@@ -84,19 +91,45 @@ update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         NoOp -> (model, Cmd.none)
+        PressedKey s -> 
+            case model.keyboard of
+                ReadyToAcceptControl -> 
+--                    Debug.log ("Key = "++s)
+--                    (model, Cmd.none)
+                     case s of
+                        "Control" ->
+                            Debug.log "Entering Ctrl mode" 
+                            ({model | keyboard = Ctrl}, Cmd.none)
+                        _ -> (model, Cmd.none)
+                Ctrl ->
+                    case s of 
+                        "F2" -> 
+                            Debug.log ("In Ctrl+F2 mode "++s)
+                            ({model | keyboard = ReadyToAcceptControl}
+                            , submitParametrisedQuery model.server "select distinct ?p {?s ?p ?o.}" (Http.expectJson GotSparqlResponse mainDecoder))
+                        _ ->
+                            Debug.log ("Leaving Ctrl mode "++s)
+                            ({model | keyboard = ReadyToAcceptControl}, Cmd.none)
+                Normal -> 
+                    ({model | keyboard = Normal}, Cmd.none)
+--            ({model | query = model.query++s}, Cmd.none )
         ChangeServer newServer -> ({model | server = newServer}, Cmd.none)
         PingServer -> ({model | state = Pinging}, pingServer model.server)
         Pinged result ->
             case result of
                 Ok _ -> 
                     Debug.log "Pinged OK"
-                    ({model | state = Querying}, Cmd.none)
+                    ({model | state = Querying, keyboard = ReadyToAcceptControl}, Cmd.none)
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
         ChangeQuery newQuery -> 
-            Debug.log ("Query "++newQuery)
-            ({model | query = newQuery, state = Querying}, Cmd.none)
+            case model.keyboard of
+                ReadyToAcceptControl ->
+                    Debug.log ("Query "++newQuery)
+                    ({model | query = newQuery, state = Querying}, Cmd.none)
+                _ ->
+                    (model, Cmd.none) 
         SubmitQuery -> 
             Debug.log ("Submitting Query "++model.query)
             ({model | state = Querying}, submitQuery model.server model.query)
@@ -123,11 +156,14 @@ update msg model =
             ({model | query = content}, Cmd.none)
         DownloadFile -> 
             (model, downloadFile model.query)
+msgDecoder : Decoder Msg
+msgDecoder =
+    field "key" string
+        |> map PressedKey
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
+subscriptions _ =
+    Browser.Events.onKeyDown msgDecoder
 pingServer newServer = 
   --  let
         Debug.log ("Pinging"++newServer)
@@ -154,6 +190,19 @@ submitQuery newServer query =
                     , timeout = Nothing
                     , tracker = Nothing
                     }
+
+submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd msg)
+submitParametrisedQuery newServer query returnTo = 
+        Http.request
+                    { method = "POST"
+                    , headers = [Http.header "Content-Type" "application/sparql-request"]
+                    , url = newServer++"/sparql"
+                    , body = Http.stringBody "text" query
+                    , expect = returnTo
+                    , timeout = Nothing
+                    , tracker = Nothing
+                    }
+
 
 -- View
 
