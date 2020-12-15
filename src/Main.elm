@@ -106,7 +106,12 @@ update msg model =
                         "F2" -> 
                             Debug.log ("In Ctrl+F2 mode "++s)
                             ({model | keyboard = ReadyToAcceptControl}
-                            , submitParametrisedQuery model.server "select distinct ?p {?s ?p ?o.}" (Http.expectJson GotSparqlResponse mainDecoder))
+                            , submitParametrisedQuery model.server 
+                               """select distinct ?domain ?predicate {
+                                    ?s ?predicate ?o.
+                                    ?s a ?domain .
+                                    } order by ?domain ?predicate
+                                """ (Http.expectJson GotSparqlResponse mainDecoder))
                         _ ->
                             Debug.log ("Leaving Ctrl mode "++s)
                             ({model | keyboard = ReadyToAcceptControl}, Cmd.none)

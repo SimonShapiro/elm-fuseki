@@ -6773,7 +6773,7 @@ var $author$project$Main$update = F2(
 									A3(
 										$author$project$Main$submitParametrisedQuery,
 										model.server,
-										'select distinct ?p {?s ?p ?o.}',
+										'select distinct ?domain ?predicate {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } order by ?domain ?predicate\n                                ',
 										A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder))));
 						} else {
 							return A2(
