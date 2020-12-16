@@ -14,6 +14,8 @@ import File exposing (File)
 import File.Select as Select
 import File.Download as Download
 import Task
+import List.Extra exposing (uncons, groupWhile)
+import Maybe.Extra exposing (combine)
 
 type UIState 
     = Initialising 
@@ -208,6 +210,80 @@ submitParametrisedQuery newServer query returnTo =
                     , tracker = Nothing
                     }
 
+makeTriple: List SelectAtom -> Maybe (SelectAtom, SelectAtom, SelectAtom)
+makeTriple spo =
+    case (List.length spo) of
+       3 -> Maybe.map3 (\a b c -> (a, b, c)) (List.head spo) (List.head (List.drop 1 spo)) (List.head (List.drop 2 spo))
+       _ -> Nothing
+
+extractTriples:  List (List SelectAtom) -> Maybe (List (SelectAtom, SelectAtom, SelectAtom))
+extractTriples results = 
+    List.map (\result -> makeTriple result) results
+    |> combine
+
+pivotToSubject: Maybe (List (SelectAtom, SelectAtom, SelectAtom)) -> Maybe (List (SelectAtom, List((SelectAtom, SelectAtom))))
+pivotToSubject maybeList =
+            case maybeList of
+                Nothing -> Nothing
+                Just l -> l
+                    |> List.map (\triple -> rearrangeTriple triple)
+                    |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
+                    |> separateIntoSubject_PredicateObjects
+                    |> Just
+
+rearrangeTriple: (a, b, c) -> (a, (b, c))
+rearrangeTriple (a, b, c) = 
+    (a, (b, c))
+
+separateIntoSubject_PredicateObjects: List (( SelectAtom, (SelectAtom, SelectAtom) )
+                                            , List ( SelectAtom, (SelectAtom, SelectAtom) )) 
+                                            -> List (SelectAtom, List(SelectAtom, SelectAtom))
+separateIntoSubject_PredicateObjects l = 
+    l |> List.map (\subject ->
+                        let
+                            subj = Tuple.first (Tuple.first subject)
+                            predobj = Tuple.second (Tuple.first subject)
+                            predicateObjects = predobj :: Tuple.second (List.unzip (Tuple.second subject))
+
+                        in
+                            (subj, predicateObjects)
+                    )
+
+-- pivotToSubject: (List (List SelectAtom)) -> List (List (SelectAtom, (List SelectAtom)))   --   (subject, [pred, obj])
+-- pivotToSubject results =
+--     let
+--         subjects = List.filterMap (\triple -> uncons triple) results -- List (SelectAtom, List SelectAtom) ie ?s of [?s ?p ?o])
+--             |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
+-- --            |> List.map (\group -> (Tuple.first group)::(Tuple.second group))
+-- --            |> List.map (\subject -> List.map (\group -> makeTriple group) subject) 
+--     in
+--         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
+--         subjects
+    
+viewSubjects: Maybe (List (SelectAtom, List(SelectAtom, SelectAtom))) -> Html Msg      -- subjects
+viewSubjects subjectPredObjs =
+    case subjectPredObjs of 
+        Nothing -> div[][]
+        Just subjs ->
+            div []
+            (List.map (\spo -> 
+                let
+                    subject = Tuple.first spo
+                    predObjs = Tuple.second spo
+                in
+                    div []
+                        [ text subject.value
+                        , div [] (List.map (\details ->
+                                    div[]
+                                        [ text (Tuple.first details).value
+                                        , text ": "
+                                        , text (Tuple.second details).value
+                                        ]
+                            ) predObjs)
+                        , hr [][]
+                        ]
+            ) subjs)
+--            |> List.concat
 
 -- View
 
@@ -289,6 +365,7 @@ view model =
                             ) row)
                             , hr [][]]
                     ) result)
+                , viewSubjects (pivotToSubject <| extractTriples result)
 --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
             ]
 -- Decoders

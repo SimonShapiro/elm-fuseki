@@ -6922,6 +6922,102 @@ var $author$project$Main$PingServer = {$: 'PingServer'};
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$combine = A2(
+	$elm$core$List$foldr,
+	$elm$core$Maybe$map2($elm$core$List$cons),
+	$elm$core$Maybe$Just(_List_Nil));
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Maybe$map3 = F4(
+	function (func, ma, mb, mc) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					return $elm$core$Maybe$Just(
+						A3(func, a, b, c));
+				}
+			}
+		}
+	});
+var $author$project$Main$makeTriple = function (spo) {
+	var _v0 = $elm$core$List$length(spo);
+	if (_v0 === 3) {
+		return A4(
+			$elm$core$Maybe$map3,
+			F3(
+				function (a, b, c) {
+					return _Utils_Tuple3(a, b, c);
+				}),
+			$elm$core$List$head(spo),
+			$elm$core$List$head(
+				A2($elm$core$List$drop, 1, spo)),
+			$elm$core$List$head(
+				A2($elm$core$List$drop, 2, spo)));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$extractTriples = function (results) {
+	return $elm_community$maybe_extra$Maybe$Extra$combine(
+		A2(
+			$elm$core$List$map,
+			function (result) {
+				return $author$project$Main$makeTriple(result);
+			},
+			results));
+};
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$input = _VirtualDom_node('input');
@@ -6972,6 +7068,100 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$json$Json$Decode$map,
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm_community$list_extra$List$Extra$groupWhile = F2(
+	function (isSameGroup, items) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					if (!acc.b) {
+						return _List_fromArray(
+							[
+								_Utils_Tuple2(x, _List_Nil)
+							]);
+					} else {
+						var _v1 = acc.a;
+						var y = _v1.a;
+						var restOfGroup = _v1.b;
+						var groups = acc.b;
+						return A2(isSameGroup, x, y) ? A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(
+								x,
+								A2($elm$core$List$cons, y, restOfGroup)),
+							groups) : A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(x, _List_Nil),
+							acc);
+					}
+				}),
+			_List_Nil,
+			items);
+	});
+var $author$project$Main$rearrangeTriple = function (_v0) {
+	var a = _v0.a;
+	var b = _v0.b;
+	var c = _v0.c;
+	return _Utils_Tuple2(
+		a,
+		_Utils_Tuple2(b, c));
+};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_v0, _v1) {
+			var x = _v0.a;
+			var y = _v0.b;
+			var xs = _v1.a;
+			var ys = _v1.b;
+			return _Utils_Tuple2(
+				A2($elm$core$List$cons, x, xs),
+				A2($elm$core$List$cons, y, ys));
+		});
+	return A3(
+		$elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
+	return A2(
+		$elm$core$List$map,
+		function (subject) {
+			var subj = subject.a.a;
+			var predobj = subject.a.b;
+			var predicateObjects = A2(
+				$elm$core$List$cons,
+				predobj,
+				$elm$core$List$unzip(subject.b).b);
+			return _Utils_Tuple2(subj, predicateObjects);
+		},
+		l);
+};
+var $author$project$Main$pivotToSubject = function (maybeList) {
+	if (maybeList.$ === 'Nothing') {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var l = maybeList.a;
+		return $elm$core$Maybe$Just(
+			$author$project$Main$separateIntoSubject_PredicateObjects(
+				A2(
+					$elm_community$list_extra$List$Extra$groupWhile,
+					F2(
+						function (a, b) {
+							return _Utils_eq(a.a.value, b.a.value);
+						}),
+					A2(
+						$elm$core$List$map,
+						function (triple) {
+							return $author$project$Main$rearrangeTriple(triple);
+						},
+						l))));
+	}
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -7062,6 +7252,48 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
+var $author$project$Main$viewSubjects = function (subjectPredObjs) {
+	if (subjectPredObjs.$ === 'Nothing') {
+		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+	} else {
+		var subjs = subjectPredObjs.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (spo) {
+					var subject = spo.a;
+					var predObjs = spo.b;
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(subject.value),
+								A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								A2(
+									$elm$core$List$map,
+									function (details) {
+										return A2(
+											$elm$html$Html$div,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text(details.a.value),
+													$elm$html$Html$text(': '),
+													$elm$html$Html$text(details.b.value)
+												]));
+									},
+									predObjs)),
+								A2($elm$html$Html$hr, _List_Nil, _List_Nil)
+							]));
+				},
+				subjs));
+	}
+};
 var $author$project$Main$view = function (model) {
 	var _v0 = model.state;
 	switch (_v0.$) {
@@ -7223,7 +7455,10 @@ var $author$project$Main$view = function (model) {
 											A2($elm$html$Html$hr, _List_Nil, _List_Nil)
 										]));
 							},
-							result))
+							result)),
+						$author$project$Main$viewSubjects(
+						$author$project$Main$pivotToSubject(
+							$author$project$Main$extractTriples(result)))
 					]));
 	}
 };
