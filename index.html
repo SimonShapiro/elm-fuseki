@@ -7019,6 +7019,7 @@ var $author$project$Main$extractTriples = function (results) {
 			results));
 };
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
+var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
@@ -7270,7 +7271,13 @@ var $author$project$Main$viewSubjects = function (subjectPredObjs) {
 						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$text(subject.value),
+								A2(
+								$elm$html$Html$b,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(subject.value)
+									])),
 								A2(
 								$elm$html$Html$div,
 								_List_Nil,
@@ -7456,6 +7463,13 @@ var $author$project$Main$view = function (model) {
 										]));
 							},
 							result)),
+						A2(
+						$elm$html$Html$h2,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Subject orientation (when available)')
+							])),
 						$author$project$Main$viewSubjects(
 						$author$project$Main$pivotToSubject(
 							$author$project$Main$extractTriples(result)))

@@ -1,7 +1,7 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, span, ul, li, b, p, hr)
+import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
@@ -16,6 +16,12 @@ import File.Download as Download
 import Task
 import List.Extra exposing (uncons, groupWhile)
 import Maybe.Extra exposing (combine)
+
+type Cardinality 
+    = OneToOne 
+    | ZeroOrOne 
+    | ZeroToMany 
+    | OneToMany 
 
 type UIState 
     = Initialising 
@@ -65,16 +71,45 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , result: (List (List SelectAtom))
     }
 
-type alias SelectResult = String
-
-type alias SelectFailure = String
-
 type alias SelectAtom =
     { key: String
     , value: String
     }
 
-selectAtomDecoder: Decoder SelectAtom
+type alias ToDo =
+    { id: String
+    , description: String
+    , status: String
+    }
+
+recordFrom3: (a->b->c->result) -> (a, b, c) -> result
+recordFrom3 record (a, b, c) =
+    record a b c 
+
+extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
+extractPredicate spec preds =    -- will return [] if spec not present
+    List.filter (\a -> (Tuple.first a).value == spec) preds
+    |> List.unzip
+    |> Tuple.second
+    |> List.map (\obj -> obj.value)
+
+makeToDo: (SelectAtom, List((SelectAtom, SelectAtom))) -> ToDo
+makeToDo raw = 
+    let
+        id = Tuple.first raw
+        predsObjects = Tuple.second raw
+        description = extractPredicate "http://example/com/descrption" predsObjects
+                    |> List.head  -- only if cardinality of 1.
+        status = extractPredicate "http://example.com/status" predsObjects
+                |> List.head
+    in
+        ( id.value
+        , (Maybe.withDefault "" description)
+        , (Maybe.withDefault "" status)
+        )
+        |> recordFrom3 ToDo    
+
+ selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 
     map2 SelectAtom
         (field "key" string)
@@ -260,7 +295,7 @@ separateIntoSubject_PredicateObjects l =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: Maybe (List (SelectAtom, List(SelectAtom, SelectAtom))) -> Html Msg      -- subjects
+viewSubjects: Maybe (List (SelectAtom, List(SelectAtom, SelectAtom))) -> Html Msg      
 viewSubjects subjectPredObjs =
     case subjectPredObjs of 
         Nothing -> div[][]
@@ -272,7 +307,7 @@ viewSubjects subjectPredObjs =
                     predObjs = Tuple.second spo
                 in
                     div []
-                        [ text subject.value
+                        [ b [] [text subject.value]
                         , div [] (List.map (\details ->
                                     div[]
                                         [ text (Tuple.first details).value
@@ -365,6 +400,7 @@ view model =
                             ) row)
                             , hr [][]]
                     ) result)
+                , h2 [][text "Subject orientation (when available)"]
                 , viewSubjects (pivotToSubject <| extractTriples result)
 --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
             ]
