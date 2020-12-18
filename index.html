@@ -7022,6 +7022,79 @@ var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $author$project$Main$ToDo = F3(
+	function (id, description, status) {
+		return {description: description, id: id, status: status};
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_v0, _v1) {
+			var x = _v0.a;
+			var y = _v0.b;
+			var xs = _v1.a;
+			var ys = _v1.b;
+			return _Utils_Tuple2(
+				A2($elm$core$List$cons, x, xs),
+				A2($elm$core$List$cons, y, ys));
+		});
+	return A3(
+		$elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var $author$project$Main$extractPredicate = F2(
+	function (spec, preds) {
+		return A2(
+			$elm$core$List$map,
+			function (obj) {
+				return obj.value;
+			},
+			$elm$core$List$unzip(
+				A2(
+					$elm$core$List$filter,
+					function (a) {
+						return _Utils_eq(a.a.value, spec);
+					},
+					preds)).b);
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Main$makeToDo = function (_v0) {
+	var id = _v0.a;
+	var predsObjects = _v0.b;
+	var status = $elm$core$List$head(
+		A2($author$project$Main$extractPredicate, 'http://example.com/status', predsObjects));
+	var description = $elm$core$List$head(
+		A2($author$project$Main$extractPredicate, 'http://example/com/descrption', predsObjects));
+	return A3(
+		$author$project$Main$ToDo,
+		id.value,
+		A2($elm$core$Maybe$withDefault, '', description),
+		A2($elm$core$Maybe$withDefault, '', status));
+};
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7107,27 +7180,6 @@ var $author$project$Main$rearrangeTriple = function (_v0) {
 	return _Utils_Tuple2(
 		a,
 		_Utils_Tuple2(b, c));
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$core$List$unzip = function (pairs) {
-	var step = F2(
-		function (_v0, _v1) {
-			var x = _v0.a;
-			var y = _v0.b;
-			var xs = _v1.a;
-			var ys = _v1.b;
-			return _Utils_Tuple2(
-				A2($elm$core$List$cons, x, xs),
-				A2($elm$core$List$cons, y, ys));
-		});
-	return A3(
-		$elm$core$List$foldr,
-		step,
-		_Utils_Tuple2(_List_Nil, _List_Nil),
-		pairs);
 };
 var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
 	return A2(
@@ -7301,6 +7353,46 @@ var $author$project$Main$viewSubjects = function (subjectPredObjs) {
 				subjs));
 	}
 };
+var $author$project$Main$viewToDos = function (toDos) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		A2(
+			$elm$core$List$map,
+			function (toDo) {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$b,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(toDo.id)
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('details:'),
+									$elm$html$Html$text(toDo.description)
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('status:'),
+									$elm$html$Html$text(toDo.status)
+								])),
+							A2($elm$html$Html$hr, _List_Nil, _List_Nil)
+						]));
+			},
+			toDos));
+};
 var $author$project$Main$view = function (model) {
 	var _v0 = model.state;
 	switch (_v0.$) {
@@ -7472,7 +7564,30 @@ var $author$project$Main$view = function (model) {
 							])),
 						$author$project$Main$viewSubjects(
 						$author$project$Main$pivotToSubject(
-							$author$project$Main$extractTriples(result)))
+							$author$project$Main$extractTriples(result))),
+						A2(
+						$elm$html$Html$h2,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('ToDos example')
+							])),
+						function () {
+						var _v2 = $author$project$Main$pivotToSubject(
+							$author$project$Main$extractTriples(result));
+						if (_v2.$ === 'Nothing') {
+							return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+						} else {
+							var l = _v2.a;
+							return $author$project$Main$viewToDos(
+								A2(
+									$elm$core$List$map,
+									function (subject) {
+										return $author$project$Main$makeToDo(subject);
+									},
+									l));
+						}
+					}()
 					]));
 	}
 };

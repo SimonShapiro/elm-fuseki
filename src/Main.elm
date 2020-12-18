@@ -1,7 +1,7 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr)
+import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr, br)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
@@ -16,6 +16,7 @@ import File.Download as Download
 import Task
 import List.Extra exposing (uncons, groupWhile)
 import Maybe.Extra exposing (combine)
+import Html exposing (a)
 
 type Cardinality 
     = OneToOne 
@@ -82,9 +83,6 @@ type alias ToDo =
     , status: String
     }
 
-recordFrom3: (a->b->c->result) -> (a, b, c) -> result
-recordFrom3 record (a, b, c) =
-    record a b c 
 
 extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
 extractPredicate spec preds =    -- will return [] if spec not present
@@ -94,22 +92,16 @@ extractPredicate spec preds =    -- will return [] if spec not present
     |> List.map (\obj -> obj.value)
 
 makeToDo: (SelectAtom, List((SelectAtom, SelectAtom))) -> ToDo
-makeToDo raw = 
+makeToDo (id, predsObjects) = 
     let
-        id = Tuple.first raw
-        predsObjects = Tuple.second raw
         description = extractPredicate "http://example/com/descrption" predsObjects
                     |> List.head  -- only if cardinality of 1.
         status = extractPredicate "http://example.com/status" predsObjects
                 |> List.head
     in
-        ( id.value
-        , (Maybe.withDefault "" description)
-        , (Maybe.withDefault "" status)
-        )
-        |> recordFrom3 ToDo    
+        ToDo id.value (Maybe.withDefault "" description) (Maybe.withDefault "" status)
 
- selectAtomDecoder: Decoder SelectAtom
+selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 
     map2 SelectAtom
         (field "key" string)
@@ -256,7 +248,7 @@ extractTriples results =
     List.map (\result -> makeTriple result) results
     |> combine
 
-pivotToSubject: Maybe (List (SelectAtom, SelectAtom, SelectAtom)) -> Maybe (List (SelectAtom, List((SelectAtom, SelectAtom))))
+pivotToSubject: Maybe (List (SelectAtom, SelectAtom, SelectAtom)) -> Maybe (List ( SelectAtom, List ( SelectAtom, SelectAtom )))
 pivotToSubject maybeList =
             case maybeList of
                 Nothing -> Nothing
@@ -264,6 +256,7 @@ pivotToSubject maybeList =
                     |> List.map (\triple -> rearrangeTriple triple)
                     |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
                     |> separateIntoSubject_PredicateObjects
+--                    |> List.map (\subject -> makeToDo subject)  -- mkaeToDo can be gereralised ???
                     |> Just
 
 rearrangeTriple: (a, b, c) -> (a, (b, c))
@@ -319,6 +312,22 @@ viewSubjects subjectPredObjs =
                         ]
             ) subjs)
 --            |> List.concat
+
+viewToDos: List ToDo -> Html Msg      
+viewToDos toDos =
+    div []
+    (List.map (\toDo -> 
+        div []
+            [ b [] [text toDo.id]
+            , div []
+                [ text "details:"
+                , text toDo.description]
+            , div []
+                [ text "status:"
+                , text toDo.status]
+            , hr [][]
+            ]
+    ) toDos)
 
 -- View
 
@@ -402,6 +411,11 @@ view model =
                     ) result)
                 , h2 [][text "Subject orientation (when available)"]
                 , viewSubjects (pivotToSubject <| extractTriples result)
+                , h2 [][text "ToDos example"]
+                , case extractTriples result
+                    |> pivotToSubject of
+                       Nothing -> div[][] -- mkaeToDo can be gereralised ???
+                       Just l ->  l |> List.map (\subject -> makeToDo subject) |> viewToDos
 --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
             ]
 -- Decoders
