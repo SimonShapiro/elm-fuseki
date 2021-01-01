@@ -77,19 +77,26 @@ type alias SelectAtom =
     , value: String
     }
 
+type RdfNode 
+    = Uri String
+    | BlankNode String
+    | LiteralOnlyValue {value: String}
+    | LiteralValueAndDataType {value: String, dataType: String}
+    | LiteralLanguageString {value: String, language: String}
+
+type alias RdfKey = (String, String)  -- (simple, full)
+
+type RdfDict = Dict RdfKey (List RdfNode)
+
+type alias Nodes = List RdfDict
+
+type alias Edges = List (RdfKey, RdfKey)
+
 type alias ToDo =
     { id: String
     , description: String
     , status: String
     }
-
-
-extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
-extractPredicate spec preds =    -- will return [] if spec not present
-    List.filter (\a -> (Tuple.first a).value == spec) preds
-    |> List.unzip
-    |> Tuple.second
-    |> List.map (\obj -> obj.value)
 
 makeToDo: (SelectAtom, List((SelectAtom, SelectAtom))) -> ToDo
 makeToDo (id, predsObjects) = 
@@ -100,6 +107,13 @@ makeToDo (id, predsObjects) =
                 |> List.head
     in
         ToDo id.value (Maybe.withDefault "" description) (Maybe.withDefault "" status)
+
+extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
+extractPredicate spec preds =    -- will return [] if spec not present
+    List.filter (\a -> (Tuple.first a).value == spec) preds
+    |> List.unzip
+    |> Tuple.second
+    |> List.map (\obj -> obj.value)
 
 selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 
@@ -132,7 +146,7 @@ update msg model =
                         _ -> (model, Cmd.none)
                 Ctrl ->
                     case s of 
-                        "F2" -> 
+                        "Shift" -> 
                             Debug.log ("In Ctrl+F2 mode "++s)
                             ({model | keyboard = ReadyToAcceptControl}
                             , submitParametrisedQuery model.server 
@@ -198,6 +212,7 @@ msgDecoder =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Browser.Events.onKeyDown msgDecoder
+
 pingServer newServer = 
   --  let
         Debug.log ("Pinging"++newServer)

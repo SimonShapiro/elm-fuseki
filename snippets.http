@@ -43,15 +43,17 @@ post http://localhost:3030/latest/update
 Content-Type: application/sparql-update
 
 prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 insert data {
     graph :ElmAndApi {
     : a :ToDoList .
     :1 a :ToDo;
-        :description "Add sparql snippet loader/saver";
+        :description "Add sparql snippet loader/saver"^^xsd:string;
         :status "Pending" .
     :2 a :ToDo;
-        :description "Add graph, predicate lookup to sparlq text area";
-        :status "Pending" .
+        :description "Add graph, predicate lookup to sparlq text area"@en;
+        :status "Pending";
+        :related :1 .
 }}
 #####
 post http://localhost:3030/latest/update
@@ -63,3 +65,38 @@ delete  where {
 insert data {graph :ElmAndApi {
     :1 :status "Done" .
 }}
+
+#######
+
+post http://localhost:5000/sparql
+
+construct {?s ?p ?o.}
+where {
+    graph <http://example.com/ElmAndApi>
+        {?s ?p ?o.}
+}
+
+#####
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+insert data {
+    graph :ElmAndApi {
+        :Simon a :Person;
+            :livesIn [
+                a :Country;
+                :countryName "England"
+            ] .
+}}
+
+####  returns turtle :-( #####
+post http://localhost:3030/latest
+Content-Type: application/sparql-query
+
+construct {?s ?p ?o.}
+where {
+    graph <http://example.com/ElmAndApi>
+        {?s ?p ?o.}
+}
