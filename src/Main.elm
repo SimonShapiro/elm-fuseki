@@ -1,7 +1,7 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr, br)
+import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr, br, table, tr, th, td)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
@@ -28,7 +28,7 @@ type UIState
     = Initialising 
     | Pinging 
     | Querying 
-    | DisplayingSelectResult  (List (List SelectAtom))
+    | DisplayingSelectResult  (List String) (List (List SelectAtom))
     | DisplayingSelectError String
     | ApiError Http.Error
 
@@ -186,7 +186,7 @@ update msg model =
                 Ok okData -> 
                     case okData.status of
                         200 ->
-                            ({model | state = DisplayingSelectResult okData.result}, Cmd.none)
+                            ({model | state = DisplayingSelectResult okData.vars okData.result}, Cmd.none)
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
                 Err e -> 
@@ -346,6 +346,21 @@ viewToDos toDos =
 
 -- View
 
+tableView: (List String) -> (List (List SelectAtom)) -> Html Msg
+tableView vars result =
+        div [] 
+            [ table []
+                ((tr [] (List.map (\v -> th[][text v]) vars))
+                ::(List.map (
+                        \row ->
+                        tr []
+                            (List.map (
+                                \var -> 
+                                    td [][ text var.value]
+                            ) row)
+                    ) result ))
+            ]
+
 queryInput: Server -> Sparql -> Html Msg
 queryInput newServer query =
             div [] 
@@ -405,25 +420,11 @@ view model =
                 , queryInput model.server model.query
                 , div [][text message]
                 ]
-        DisplayingSelectResult result ->
+        DisplayingSelectResult vars result ->
             div []                
                 [ uploadQueryFromFile
                 , queryInput model.server model.query
-                , div []
-                    (List.map (
-                        \row ->
-                        div [][
-                            div []
-                            (List.map (
-                                \var -> 
-                                    div []
-                                        [ b [][text var.key]
-                                        , text ": "
-                                        , text var.value
-                                        ]
-                            ) row)
-                            , hr [][]]
-                    ) result)
+                , tableView vars result
                 , h2 [][text "Subject orientation (when available)"]
                 , viewSubjects (pivotToSubject <| extractTriples result)
                 , h2 [][text "ToDos example"]

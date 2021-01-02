@@ -5944,9 +5944,10 @@ var $author$project$Main$Ctrl = {$: 'Ctrl'};
 var $author$project$Main$DisplayingSelectError = function (a) {
 	return {$: 'DisplayingSelectError', a: a};
 };
-var $author$project$Main$DisplayingSelectResult = function (a) {
-	return {$: 'DisplayingSelectResult', a: a};
-};
+var $author$project$Main$DisplayingSelectResult = F2(
+	function (a, b) {
+		return {$: 'DisplayingSelectResult', a: a, b: b};
+	});
 var $author$project$Main$FileLoaded = function (a) {
 	return {$: 'FileLoaded', a: a};
 };
@@ -6861,7 +6862,7 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									state: $author$project$Main$DisplayingSelectResult(okData.result)
+									state: A2($author$project$Main$DisplayingSelectResult, okData.vars, okData.result)
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
@@ -6919,7 +6920,6 @@ var $author$project$Main$ChangeServer = function (a) {
 	return {$: 'ChangeServer', a: a};
 };
 var $author$project$Main$PingServer = {$: 'PingServer'};
-var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$Maybe$map2 = F3(
@@ -7020,7 +7020,6 @@ var $author$project$Main$extractTriples = function (results) {
 };
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
-var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$Main$ToDo = F3(
 	function (id, description, status) {
@@ -7277,6 +7276,59 @@ var $author$project$Main$queryInput = F2(
 						]))
 				]));
 	});
+var $elm$html$Html$table = _VirtualDom_node('table');
+var $elm$html$Html$td = _VirtualDom_node('td');
+var $elm$html$Html$th = _VirtualDom_node('th');
+var $elm$html$Html$tr = _VirtualDom_node('tr');
+var $author$project$Main$tableView = F2(
+	function (vars, result) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$table,
+					_List_Nil,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$elm$html$Html$tr,
+							_List_Nil,
+							A2(
+								$elm$core$List$map,
+								function (v) {
+									return A2(
+										$elm$html$Html$th,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text(v)
+											]));
+								},
+								vars)),
+						A2(
+							$elm$core$List$map,
+							function (row) {
+								return A2(
+									$elm$html$Html$tr,
+									_List_Nil,
+									A2(
+										$elm$core$List$map,
+										function (_var) {
+											return A2(
+												$elm$html$Html$td,
+												_List_Nil,
+												_List_fromArray(
+													[
+														$elm$html$Html$text(_var.value)
+													]));
+										},
+										row));
+							},
+							result)))
+				]));
+	});
 var $author$project$Main$DownloadFile = {$: 'DownloadFile'};
 var $author$project$Main$FileRequested = {$: 'FileRequested'};
 var $author$project$Main$uploadQueryFromFile = A2(
@@ -7305,6 +7357,8 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
+var $elm$html$Html$b = _VirtualDom_node('b');
+var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $author$project$Main$viewSubjects = function (subjectPredObjs) {
 	if (subjectPredObjs.$ === 'Nothing') {
 		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
@@ -7509,7 +7563,8 @@ var $author$project$Main$view = function (model) {
 							]))
 					]));
 		default:
-			var result = _v0.a;
+			var vars = _v0.a;
+			var result = _v0.b;
 			return A2(
 				$elm$html$Html$div,
 				_List_Nil,
@@ -7517,44 +7572,7 @@ var $author$project$Main$view = function (model) {
 					[
 						$author$project$Main$uploadQueryFromFile,
 						A2($author$project$Main$queryInput, model.server, model.query),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						A2(
-							$elm$core$List$map,
-							function (row) {
-								return A2(
-									$elm$html$Html$div,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$div,
-											_List_Nil,
-											A2(
-												$elm$core$List$map,
-												function (_var) {
-													return A2(
-														$elm$html$Html$div,
-														_List_Nil,
-														_List_fromArray(
-															[
-																A2(
-																$elm$html$Html$b,
-																_List_Nil,
-																_List_fromArray(
-																	[
-																		$elm$html$Html$text(_var.key)
-																	])),
-																$elm$html$Html$text(': '),
-																$elm$html$Html$text(_var.value)
-															]));
-												},
-												row)),
-											A2($elm$html$Html$hr, _List_Nil, _List_Nil)
-										]));
-							},
-							result)),
+						A2($author$project$Main$tableView, vars, result),
 						A2(
 						$elm$html$Html$h2,
 						_List_Nil,

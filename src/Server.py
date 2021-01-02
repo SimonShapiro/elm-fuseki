@@ -140,7 +140,7 @@ def processConstructQuery(queryString):
             "reason": error,
             "queryType": "select",
             "query": queryString,
-            "vars": [],
+            "vars": ['s', 'p', 'o'],
             "result": resultArray
         })}
 
@@ -160,7 +160,7 @@ def sparql():
             status = result["status"],
             response = result["response"]
         )
-    elif "construct" in queryString.lower():
+    elif ("construct" in queryString.lower()) or ("describe" in queryString.lower()):
         result = processConstructQuery(queryString)
         return Response(
             status = result["status"],
