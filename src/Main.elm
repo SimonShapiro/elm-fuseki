@@ -2,7 +2,7 @@ module Main exposing(..)
 
 import Browser exposing (..)
 import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr, br, table, tr, th, td)
-import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap)
+import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
 import Http
@@ -31,6 +31,7 @@ type UIState
     | DisplayingSelectResult  (List String) (List (List SelectAtom))
     | DisplayingSelectError String
     | ApiError Http.Error
+    | Waiting
 
 type alias Model = 
     { state: UIState
@@ -148,7 +149,7 @@ update msg model =
                     case s of 
                         "Shift" -> 
                             Debug.log ("In Ctrl+F2 mode "++s)
-                            ({model | keyboard = ReadyToAcceptControl}
+                            ({model | keyboard = ReadyToAcceptControl, state = Waiting}
                             , submitParametrisedQuery model.server 
                                """select distinct ?domain ?predicate {
                                     ?s ?predicate ?o.
@@ -180,7 +181,7 @@ update msg model =
                     (model, Cmd.none) 
         SubmitQuery -> 
             Debug.log ("Submitting Query "++model.query)
-            ({model | state = Querying}, submitQuery model.server model.query)
+            ({model | state = Waiting}, submitQuery model.server model.query)
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
@@ -401,6 +402,11 @@ view model =
         Querying -> div []
                 [ uploadQueryFromFile
                 , queryInput model.server model.query
+                ]
+        Waiting -> div [style "cursor" "waiting"]
+                [ uploadQueryFromFile
+                , queryInput model.server model.query
+                , text "Wating for server response"
                 ]
         ApiError error -> 
             case error of

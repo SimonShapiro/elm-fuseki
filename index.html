@@ -5960,6 +5960,7 @@ var $author$project$Main$GotSparqlResponse = function (a) {
 var $author$project$Main$Pinging = {$: 'Pinging'};
 var $author$project$Main$Querying = {$: 'Querying'};
 var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
+var $author$project$Main$Waiting = {$: 'Waiting'};
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -6770,7 +6771,7 @@ var $author$project$Main$update = F2(
 								_Utils_Tuple2(
 									_Utils_update(
 										model,
-										{keyboard: $author$project$Main$ReadyToAcceptControl}),
+										{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Waiting}),
 									A3(
 										$author$project$Main$submitParametrisedQuery,
 										model.server,
@@ -6850,7 +6851,7 @@ var $author$project$Main$update = F2(
 					_Utils_Tuple2(
 						_Utils_update(
 							model,
-							{state: $author$project$Main$Querying}),
+							{state: $author$project$Main$Waiting}),
 						A2($author$project$Main$submitQuery, model.server, model.query)));
 			case 'GotSparqlResponse':
 				var response = msg.a;
@@ -7276,6 +7277,8 @@ var $author$project$Main$queryInput = F2(
 						]))
 				]));
 	});
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$td = _VirtualDom_node('td');
 var $elm$html$Html$th = _VirtualDom_node('th');
@@ -7505,6 +7508,19 @@ var $author$project$Main$view = function (model) {
 					[
 						$author$project$Main$uploadQueryFromFile,
 						A2($author$project$Main$queryInput, model.server, model.query)
+					]));
+		case 'Waiting':
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'cursor', 'waiting')
+					]),
+				_List_fromArray(
+					[
+						$author$project$Main$uploadQueryFromFile,
+						A2($author$project$Main$queryInput, model.server, model.query),
+						$elm$html$Html$text('Wating for server response')
 					]));
 		case 'ApiError':
 			var error = _v0.a;
