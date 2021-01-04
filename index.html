@@ -6921,6 +6921,7 @@ var $author$project$Main$ChangeServer = function (a) {
 	return {$: 'ChangeServer', a: a};
 };
 var $author$project$Main$PingServer = {$: 'PingServer'};
+var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$Maybe$map2 = F3(
@@ -7360,7 +7361,6 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
-var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $author$project$Main$viewSubjects = function (subjectPredObjs) {
 	if (subjectPredObjs.$ === 'Nothing') {
@@ -7514,13 +7514,19 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'cursor', 'waiting')
+						A2($elm$html$Html$Attributes$style, 'cursor', 'progress')
 					]),
 				_List_fromArray(
 					[
 						$author$project$Main$uploadQueryFromFile,
 						A2($author$project$Main$queryInput, model.server, model.query),
-						$elm$html$Html$text('Wating for server response')
+						A2(
+						$elm$html$Html$b,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Wating for server response...')
+							]))
 					]));
 		case 'ApiError':
 			var error = _v0.a;

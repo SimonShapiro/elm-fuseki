@@ -403,10 +403,10 @@ view model =
                 [ uploadQueryFromFile
                 , queryInput model.server model.query
                 ]
-        Waiting -> div [style "cursor" "waiting"]
+        Waiting -> div [style "cursor" "progress"]
                 [ uploadQueryFromFile
                 , queryInput model.server model.query
-                , text "Wating for server response"
+                , b [] [text "Wating for server response..."]
                 ]
         ApiError error -> 
             case error of
