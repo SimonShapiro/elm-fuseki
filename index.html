@@ -7046,6 +7046,7 @@ var $author$project$Main$extractTriples = function (results) {
 };
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
+var $elm$html$Html$h4 = _VirtualDom_node('h4');
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -7582,25 +7583,46 @@ var $author$project$Main$view = function (model) {
 							A2($author$project$Main$tableView, vars, result)
 						]));
 			} else {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$author$project$Main$uploadQueryFromFile,
-							A2($author$project$Main$queryInput, model.server, model.query),
-							$author$project$Main$resultFormatToggle(model.resultsDisplay),
-							A2(
-							$elm$html$Html$h2,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Subject orientation')
-								])),
-							$author$project$Main$viewSubjects(
-							$author$project$Main$pivotToSubject(
-								$author$project$Main$extractTriples(result)))
-						]));
+				if ((((((vars.b && (vars.a === 's')) && vars.b.b) && (vars.b.a === 'p')) && vars.b.b.b) && (vars.b.b.a === 'o')) && (!vars.b.b.b.b)) {
+					var _v4 = vars.b;
+					var _v5 = _v4.b;
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$Main$uploadQueryFromFile,
+								A2($author$project$Main$queryInput, model.server, model.query),
+								$author$project$Main$resultFormatToggle(model.resultsDisplay),
+								A2(
+								$elm$html$Html$h2,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Subject orientation')
+									])),
+								$author$project$Main$viewSubjects(
+								$author$project$Main$pivotToSubject(
+									$author$project$Main$extractTriples(result)))
+							]));
+				} else {
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$author$project$Main$uploadQueryFromFile,
+								A2($author$project$Main$queryInput, model.server, model.query),
+								$author$project$Main$resultFormatToggle(model.resultsDisplay),
+								A2(
+								$elm$html$Html$h4,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Subject orientation only where results are in the shape of ?s ?p ?o')
+									]))
+							]));
+				}
 			}
 	}
 };

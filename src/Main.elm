@@ -1,7 +1,7 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr, br, table, tr, th, td)
+import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
@@ -466,19 +466,29 @@ view model =
                         , tableView vars result
                         ]
                 SubjectOrientation ->
-                    div []                
-                        [ uploadQueryFromFile
-                        , queryInput model.server model.query
-                        , resultFormatToggle model.resultsDisplay
-                        , h2 [][text "Subject orientation"]
-                        , viewSubjects (pivotToSubject <| extractTriples result)
-                        -- , h2 [][text "ToDos example"]
-                        -- , case extractTriples result
-                        --     |> pivotToSubject of
-                        --     Nothing -> div[][] -- mkaeToDo can be gereralised ???
-                        --     Just l ->  l |> List.map (\subject -> makeToDo subject) |> viewToDos
-        --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
-                    ]
+                    case vars of
+                        ["s", "p", "o"] ->
+                            div []                
+                                [ uploadQueryFromFile
+                                , queryInput model.server model.query
+                                , resultFormatToggle model.resultsDisplay
+                                , h2 [][text "Subject orientation"]
+                                , viewSubjects (pivotToSubject <| extractTriples result)
+                                -- , h2 [][text "ToDos example"]
+                                -- , case extractTriples result
+                                --     |> pivotToSubject of
+                                --     Nothing -> div[][] -- mkaeToDo can be gereralised ???
+                                --     Just l ->  l |> List.map (\subject -> makeToDo subject) |> viewToDos
+                --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
+                                ]
+                        _ ->                             
+                            div []                
+                                [ uploadQueryFromFile
+                                , queryInput model.server model.query
+                                , resultFormatToggle model.resultsDisplay
+                                , h4 [][text "Subject orientation only where results are in the shape of ?s ?p ?o"]
+                                ]
+
 -- Decoders
 
 mainDecoder: Decoder KGResponse
