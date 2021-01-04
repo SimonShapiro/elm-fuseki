@@ -2,7 +2,7 @@ module Main exposing(..)
 
 import Browser exposing (..)
 import Html exposing(Html, div, text, input, button, h1, h2, span, ul, li, b, p, hr, br, table, tr, th, td)
-import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style)
+import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
 import Http
@@ -38,12 +38,17 @@ type alias Model =
     , server: Server
     , query: Sparql 
     , keyboard: KeyboardMode
+    , resultsDisplay: ResultsDisplay
     }
 
 type KeyboardMode
     = Normal
     | Ctrl
     | ReadyToAcceptControl
+
+type ResultsDisplay
+    = Table
+    | SubjectOrientation
 
 type Msg 
     = NoOp
@@ -58,6 +63,7 @@ type Msg
     | FileSelected File
     | FileLoaded Sparql
     | DownloadFile
+    | ChangeOutputFormat String
 
 type alias Server = String
 
@@ -126,7 +132,7 @@ server: Server
 server = "http://localhost:port"
 
 startWith: Model
-startWith = Model Initialising server "" Normal
+startWith = Model Initialising server "" Normal Table
 
 initialModel: flags -> (Model, (Cmd Msg))
 initialModel _ = (startWith, Cmd.none)
@@ -205,6 +211,11 @@ update msg model =
             ({model | query = content}, Cmd.none)
         DownloadFile -> 
             (model, downloadFile model.query)
+        ChangeOutputFormat outputFormat ->
+            case outputFormat of
+                "table" -> ({model | resultsDisplay = Table}, Cmd.none)
+                "subject" -> ({model | resultsDisplay = SubjectOrientation}, Cmd.none)
+                _ -> ({model | resultsDisplay = Table}, Cmd.none)
 msgDecoder : Decoder Msg
 msgDecoder =
     field "key" string
@@ -375,7 +386,25 @@ queryInput newServer query =
                     ][]
                 , button [onClick SubmitQuery][text "Submit"]
                 ]
-
+resultFormatToggle: ResultsDisplay -> Html Msg
+resultFormatToggle selected = 
+    div []
+        [ text "Output format"
+        , input [ type_ "radio"
+                , name "resultFormat"
+                , value "table"
+                , checked (selected == Table)
+                , onInput ChangeOutputFormat
+                ][]
+        , text "Table"
+        , input [ type_ "radio"
+                , name "resultFormat"
+                , value "subject"
+                , checked (selected == SubjectOrientation)
+                , onInput ChangeOutputFormat
+                ][]
+        , text "Subjects"
+        ]
 uploadQueryFromFile:  Html Msg
 uploadQueryFromFile = 
     div []
@@ -402,6 +431,7 @@ view model =
         Querying -> div []
                 [ uploadQueryFromFile
                 , queryInput model.server model.query
+                , resultFormatToggle model.resultsDisplay
                 ]
         Waiting -> div [style "cursor" "progress"]
                 [ uploadQueryFromFile
@@ -427,19 +457,28 @@ view model =
                 , div [][text message]
                 ]
         DisplayingSelectResult vars result ->
-            div []                
-                [ uploadQueryFromFile
-                , queryInput model.server model.query
-                , tableView vars result
-                , h2 [][text "Subject orientation (when available)"]
-                , viewSubjects (pivotToSubject <| extractTriples result)
-                , h2 [][text "ToDos example"]
-                , case extractTriples result
-                    |> pivotToSubject of
-                       Nothing -> div[][] -- mkaeToDo can be gereralised ???
-                       Just l ->  l |> List.map (\subject -> makeToDo subject) |> viewToDos
---                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
-            ]
+            case model.resultsDisplay of
+                Table ->
+                    div []                
+                        [ uploadQueryFromFile
+                        , queryInput model.server model.query
+                        , resultFormatToggle model.resultsDisplay
+                        , tableView vars result
+                        ]
+                SubjectOrientation ->
+                    div []                
+                        [ uploadQueryFromFile
+                        , queryInput model.server model.query
+                        , resultFormatToggle model.resultsDisplay
+                        , h2 [][text "Subject orientation"]
+                        , viewSubjects (pivotToSubject <| extractTriples result)
+                        -- , h2 [][text "ToDos example"]
+                        -- , case extractTriples result
+                        --     |> pivotToSubject of
+                        --     Nothing -> div[][] -- mkaeToDo can be gereralised ???
+                        --     Just l ->  l |> List.map (\subject -> makeToDo subject) |> viewToDos
+        --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
+                    ]
 -- Decoders
 
 mainDecoder: Decoder KGResponse

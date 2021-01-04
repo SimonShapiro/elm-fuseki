@@ -5514,13 +5514,14 @@ var $elm$browser$Browser$element = _Browser_element;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$Initialising = {$: 'Initialising'};
-var $author$project$Main$Model = F4(
-	function (state, server, query, keyboard) {
-		return {keyboard: keyboard, query: query, server: server, state: state};
+var $author$project$Main$Model = F5(
+	function (state, server, query, keyboard, resultsDisplay) {
+		return {keyboard: keyboard, query: query, resultsDisplay: resultsDisplay, server: server, state: state};
 	});
 var $author$project$Main$Normal = {$: 'Normal'};
+var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$server = 'http://localhost:port';
-var $author$project$Main$startWith = A4($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal);
+var $author$project$Main$startWith = A5($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table);
 var $author$project$Main$initialModel = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$startWith, $elm$core$Platform$Cmd$none);
 };
@@ -5960,6 +5961,7 @@ var $author$project$Main$GotSparqlResponse = function (a) {
 var $author$project$Main$Pinging = {$: 'Pinging'};
 var $author$project$Main$Querying = {$: 'Querying'};
 var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
+var $author$project$Main$SubjectOrientation = {$: 'SubjectOrientation'};
 var $author$project$Main$Waiting = {$: 'Waiting'};
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
@@ -6911,10 +6913,32 @@ var $author$project$Main$update = F2(
 						model,
 						{query: content}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'DownloadFile':
 				return _Utils_Tuple2(
 					model,
 					$author$project$Main$downloadFile(model.query));
+			default:
+				var outputFormat = msg.a;
+				switch (outputFormat) {
+					case 'table':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{resultsDisplay: $author$project$Main$Table}),
+							$elm$core$Platform$Cmd$none);
+					case 'subject':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{resultsDisplay: $author$project$Main$SubjectOrientation}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{resultsDisplay: $author$project$Main$Table}),
+							$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$ChangeServer = function (a) {
@@ -7023,79 +7047,6 @@ var $author$project$Main$extractTriples = function (results) {
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$input = _VirtualDom_node('input');
-var $author$project$Main$ToDo = F3(
-	function (id, description, status) {
-		return {description: description, id: id, status: status};
-	});
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$core$List$unzip = function (pairs) {
-	var step = F2(
-		function (_v0, _v1) {
-			var x = _v0.a;
-			var y = _v0.b;
-			var xs = _v1.a;
-			var ys = _v1.b;
-			return _Utils_Tuple2(
-				A2($elm$core$List$cons, x, xs),
-				A2($elm$core$List$cons, y, ys));
-		});
-	return A3(
-		$elm$core$List$foldr,
-		step,
-		_Utils_Tuple2(_List_Nil, _List_Nil),
-		pairs);
-};
-var $author$project$Main$extractPredicate = F2(
-	function (spec, preds) {
-		return A2(
-			$elm$core$List$map,
-			function (obj) {
-				return obj.value;
-			},
-			$elm$core$List$unzip(
-				A2(
-					$elm$core$List$filter,
-					function (a) {
-						return _Utils_eq(a.a.value, spec);
-					},
-					preds)).b);
-	});
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Main$makeToDo = function (_v0) {
-	var id = _v0.a;
-	var predsObjects = _v0.b;
-	var status = $elm$core$List$head(
-		A2($author$project$Main$extractPredicate, 'http://example.com/status', predsObjects));
-	var description = $elm$core$List$head(
-		A2($author$project$Main$extractPredicate, 'http://example/com/descrption', predsObjects));
-	return A3(
-		$author$project$Main$ToDo,
-		id.value,
-		A2($elm$core$Maybe$withDefault, '', description),
-		A2($elm$core$Maybe$withDefault, '', status));
-};
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7181,6 +7132,27 @@ var $author$project$Main$rearrangeTriple = function (_v0) {
 	return _Utils_Tuple2(
 		a,
 		_Utils_Tuple2(b, c));
+};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_v0, _v1) {
+			var x = _v0.a;
+			var y = _v0.b;
+			var xs = _v1.a;
+			var ys = _v1.b;
+			return _Utils_Tuple2(
+				A2($elm$core$List$cons, x, xs),
+				A2($elm$core$List$cons, y, ys));
+		});
+	return A3(
+		$elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
 };
 var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
 	return A2(
@@ -7278,6 +7250,55 @@ var $author$project$Main$queryInput = F2(
 						]))
 				]));
 	});
+var $author$project$Main$ChangeOutputFormat = function (a) {
+	return {$: 'ChangeOutputFormat', a: a};
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$html$Html$Attributes$name = $elm$html$Html$Attributes$stringProperty('name');
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $author$project$Main$resultFormatToggle = function (selected) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Output format'),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('radio'),
+						$elm$html$Html$Attributes$name('resultFormat'),
+						$elm$html$Html$Attributes$value('table'),
+						$elm$html$Html$Attributes$checked(
+						_Utils_eq(selected, $author$project$Main$Table)),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangeOutputFormat)
+					]),
+				_List_Nil),
+				$elm$html$Html$text('Table'),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('radio'),
+						$elm$html$Html$Attributes$name('resultFormat'),
+						$elm$html$Html$Attributes$value('subject'),
+						$elm$html$Html$Attributes$checked(
+						_Utils_eq(selected, $author$project$Main$SubjectOrientation)),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangeOutputFormat)
+					]),
+				_List_Nil),
+				$elm$html$Html$text('Subjects')
+			]));
+};
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$table = _VirtualDom_node('table');
@@ -7410,46 +7431,6 @@ var $author$project$Main$viewSubjects = function (subjectPredObjs) {
 				subjs));
 	}
 };
-var $author$project$Main$viewToDos = function (toDos) {
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		A2(
-			$elm$core$List$map,
-			function (toDo) {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$b,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text(toDo.id)
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('details:'),
-									$elm$html$Html$text(toDo.description)
-								])),
-							A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('status:'),
-									$elm$html$Html$text(toDo.status)
-								])),
-							A2($elm$html$Html$hr, _List_Nil, _List_Nil)
-						]));
-			},
-			toDos));
-};
 var $author$project$Main$view = function (model) {
 	var _v0 = model.state;
 	switch (_v0.$) {
@@ -7507,7 +7488,8 @@ var $author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						$author$project$Main$uploadQueryFromFile,
-						A2($author$project$Main$queryInput, model.server, model.query)
+						A2($author$project$Main$queryInput, model.server, model.query),
+						$author$project$Main$resultFormatToggle(model.resultsDisplay)
 					]));
 		case 'Waiting':
 			return A2(
@@ -7587,48 +7569,39 @@ var $author$project$Main$view = function (model) {
 		default:
 			var vars = _v0.a;
 			var result = _v0.b;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$uploadQueryFromFile,
-						A2($author$project$Main$queryInput, model.server, model.query),
-						A2($author$project$Main$tableView, vars, result),
-						A2(
-						$elm$html$Html$h2,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Subject orientation (when available)')
-							])),
-						$author$project$Main$viewSubjects(
-						$author$project$Main$pivotToSubject(
-							$author$project$Main$extractTriples(result))),
-						A2(
-						$elm$html$Html$h2,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('ToDos example')
-							])),
-						function () {
-						var _v2 = $author$project$Main$pivotToSubject(
-							$author$project$Main$extractTriples(result));
-						if (_v2.$ === 'Nothing') {
-							return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-						} else {
-							var l = _v2.a;
-							return $author$project$Main$viewToDos(
-								A2(
-									$elm$core$List$map,
-									function (subject) {
-										return $author$project$Main$makeToDo(subject);
-									},
-									l));
-						}
-					}()
-					]));
+			var _v2 = model.resultsDisplay;
+			if (_v2.$ === 'Table') {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$author$project$Main$uploadQueryFromFile,
+							A2($author$project$Main$queryInput, model.server, model.query),
+							$author$project$Main$resultFormatToggle(model.resultsDisplay),
+							A2($author$project$Main$tableView, vars, result)
+						]));
+			} else {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$author$project$Main$uploadQueryFromFile,
+							A2($author$project$Main$queryInput, model.server, model.query),
+							$author$project$Main$resultFormatToggle(model.resultsDisplay),
+							A2(
+							$elm$html$Html$h2,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Subject orientation')
+								])),
+							$author$project$Main$viewSubjects(
+							$author$project$Main$pivotToSubject(
+								$author$project$Main$extractTriples(result)))
+						]));
+			}
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
