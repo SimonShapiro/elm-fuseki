@@ -123,7 +123,7 @@ def processConstructQuery(queryString):
                 if predicate != '@id':
                     for obj in subj[predicate]:
                         if predicate == '@type':
-                                objectAtom = {"key": "o", "value": obj}
+                                objectAtom = {"key": "o", "value": obj if obj else ""}
 #                                print(f'>>{objectAtom}')
                         else:
                             objectAtom = {"key": "o", "value": obj.get("@value") or obj.get("@id")}
