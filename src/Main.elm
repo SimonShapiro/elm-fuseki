@@ -39,6 +39,7 @@ type alias Model =
     , query: Sparql 
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
+    , predicateStyle: PredicateStyle
     }
 
 type KeyboardMode
@@ -49,6 +50,10 @@ type KeyboardMode
 type ResultsDisplay
     = Table
     | SubjectOrientation
+
+type PredicateStyle
+    = Terse
+    | Verbose
 
 type Msg 
     = NoOp
@@ -64,6 +69,8 @@ type Msg
     | FileLoaded Sparql
     | DownloadFile
     | ChangeOutputFormat String
+    | ChangePredicateStyle String
+    | BackToQuery
 
 type alias Server = String
 
@@ -132,7 +139,7 @@ server: Server
 server = "http://localhost:port"
 
 startWith: Model
-startWith = Model Initialising server "" Normal Table
+startWith = Model Initialising server "" Normal Table Terse
 
 initialModel: flags -> (Model, (Cmd Msg))
 initialModel _ = (startWith, Cmd.none)
@@ -141,6 +148,7 @@ update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         NoOp -> (model, Cmd.none)
+        BackToQuery -> ({model | state = Querying}, Cmd.none)
         PressedKey s -> 
             case model.keyboard of
                 ReadyToAcceptControl -> 
@@ -216,6 +224,12 @@ update msg model =
                 "table" -> ({model | resultsDisplay = Table}, Cmd.none)
                 "subject" -> ({model | resultsDisplay = SubjectOrientation}, Cmd.none)
                 _ -> ({model | resultsDisplay = Table}, Cmd.none)
+        ChangePredicateStyle predicateStyle ->
+            case predicateStyle of
+               "verbose" -> ({model | predicateStyle = Verbose}, Cmd.none)
+               "terse" -> ({model | predicateStyle = Terse}, Cmd.none)
+               _ -> ({model | predicateStyle = Verbose}, Cmd.none)
+
 msgDecoder : Decoder Msg
 msgDecoder =
     field "key" string
@@ -304,6 +318,15 @@ separateIntoSubject_PredicateObjects l =
                             (subj, predicateObjects)
                     )
 
+aka: PredicateStyle -> String -> String
+aka predicateStyle pred = 
+    case predicateStyle of
+       Verbose -> pred
+       Terse -> String.split "/" pred
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault pred
+
 -- pivotToSubject: (List (List SelectAtom)) -> List (List (SelectAtom, (List SelectAtom)))   --   (subject, [pred, obj])
 -- pivotToSubject results =
 --     let
@@ -315,8 +338,8 @@ separateIntoSubject_PredicateObjects l =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: Maybe (List (SelectAtom, List(SelectAtom, SelectAtom))) -> Html Msg      
-viewSubjects subjectPredObjs =
+viewSubjects: PredicateStyle -> Maybe (List (SelectAtom, List(SelectAtom, SelectAtom))) -> Html Msg      
+viewSubjects predicateStyle subjectPredObjs =
     case subjectPredObjs of 
         Nothing -> div[][]
         Just subjs ->
@@ -330,8 +353,8 @@ viewSubjects subjectPredObjs =
                         [ b [] [text subject.value]
                         , div [] (List.map (\details ->
                                     div[]
-                                        [ text (Tuple.first details).value
-                                        , text ": "
+                                        [ b []  [ text (aka predicateStyle (Tuple.first details).value)
+                                                , text ": "]
                                         , text (Tuple.second details).value
                                         ]
                             ) predObjs)
@@ -405,6 +428,28 @@ resultFormatToggle selected =
                 ][]
         , text "Subjects"
         ]
+
+predicateStyleToggle: PredicateStyle -> Html Msg
+predicateStyleToggle selected =
+    div []
+        [ text "Output format"
+        , input [ type_ "radio"
+                , name "predicateStyle"
+                , value "verbose"
+                , checked (selected == Verbose)
+                , onInput ChangePredicateStyle
+                ][]
+        , text "Verbose"
+        , input [ type_ "radio"
+                , name "predicateStyle"
+                , value "terse"
+                , checked (selected == Terse)
+                , onInput ChangePredicateStyle
+                ][]
+        , text "Terse"
+        ]
+
+
 uploadQueryFromFile:  Html Msg
 uploadQueryFromFile = 
     div []
@@ -442,13 +487,14 @@ view model =
             case error of
                 Http.BadBody err ->
                     div []
-                        [ h1 [][text "I can't interpret the response"]
+                        [ h1 [][text "ApiError: I can't interpret the response"]
                         , div [][text err]
---                        , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
+                        , button [onClick BackToQuery][text "Back"]
                         ]
                 _ ->
                     div [][
-                        h1 [][text "Oops - something went wrong! :-("]
+                        h1 [][text "ApiError: Oops - something went wrong! :-("]
+                        , button [onClick BackToQuery][text "Back"]
                     ]
         DisplayingSelectError message ->
             div []                
@@ -473,7 +519,9 @@ view model =
                                 , queryInput model.server model.query
                                 , resultFormatToggle model.resultsDisplay
                                 , h2 [][text "Subject orientation"]
-                                , viewSubjects (pivotToSubject <| extractTriples result)
+                                , predicateStyleToggle model.predicateStyle
+                                , br [] []
+                                , viewSubjects model.predicateStyle (pivotToSubject <| extractTriples result)
                                 -- , h2 [][text "ToDos example"]
                                 -- , case extractTriples result
                                 --     |> pivotToSubject of

@@ -5514,14 +5514,15 @@ var $elm$browser$Browser$element = _Browser_element;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$Initialising = {$: 'Initialising'};
-var $author$project$Main$Model = F5(
-	function (state, server, query, keyboard, resultsDisplay) {
-		return {keyboard: keyboard, query: query, resultsDisplay: resultsDisplay, server: server, state: state};
+var $author$project$Main$Model = F6(
+	function (state, server, query, keyboard, resultsDisplay, predicateStyle) {
+		return {keyboard: keyboard, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state};
 	});
 var $author$project$Main$Normal = {$: 'Normal'};
 var $author$project$Main$Table = {$: 'Table'};
+var $author$project$Main$Terse = {$: 'Terse'};
 var $author$project$Main$server = 'http://localhost:port';
-var $author$project$Main$startWith = A5($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table);
+var $author$project$Main$startWith = A6($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse);
 var $author$project$Main$initialModel = function (_v0) {
 	return _Utils_Tuple2($author$project$Main$startWith, $elm$core$Platform$Cmd$none);
 };
@@ -5962,6 +5963,7 @@ var $author$project$Main$Pinging = {$: 'Pinging'};
 var $author$project$Main$Querying = {$: 'Querying'};
 var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
 var $author$project$Main$SubjectOrientation = {$: 'SubjectOrientation'};
+var $author$project$Main$Verbose = {$: 'Verbose'};
 var $author$project$Main$Waiting = {$: 'Waiting'};
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
@@ -6748,6 +6750,12 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'NoOp':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'BackToQuery':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{state: $author$project$Main$Querying}),
+					$elm$core$Platform$Cmd$none);
 			case 'PressedKey':
 				var s = msg.a;
 				var _v1 = model.keyboard;
@@ -6917,7 +6925,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					model,
 					$author$project$Main$downloadFile(model.query));
-			default:
+			case 'ChangeOutputFormat':
 				var outputFormat = msg.a;
 				switch (outputFormat) {
 					case 'table':
@@ -6939,13 +6947,37 @@ var $author$project$Main$update = F2(
 								{resultsDisplay: $author$project$Main$Table}),
 							$elm$core$Platform$Cmd$none);
 				}
+			default:
+				var predicateStyle = msg.a;
+				switch (predicateStyle) {
+					case 'verbose':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{predicateStyle: $author$project$Main$Verbose}),
+							$elm$core$Platform$Cmd$none);
+					case 'terse':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{predicateStyle: $author$project$Main$Terse}),
+							$elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{predicateStyle: $author$project$Main$Verbose}),
+							$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
+var $author$project$Main$BackToQuery = {$: 'BackToQuery'};
 var $author$project$Main$ChangeServer = function (a) {
 	return {$: 'ChangeServer', a: a};
 };
 var $author$project$Main$PingServer = {$: 'PingServer'};
 var $elm$html$Html$b = _VirtualDom_node('b');
+var $elm$html$Html$br = _VirtualDom_node('br');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$core$Maybe$map2 = F3(
@@ -7199,6 +7231,58 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $author$project$Main$ChangePredicateStyle = function (a) {
+	return {$: 'ChangePredicateStyle', a: a};
+};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
+var $elm$html$Html$Attributes$name = $elm$html$Html$Attributes$stringProperty('name');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $author$project$Main$predicateStyleToggle = function (selected) {
+	return A2(
+		$elm$html$Html$div,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text('Output format'),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('radio'),
+						$elm$html$Html$Attributes$name('predicateStyle'),
+						$elm$html$Html$Attributes$value('verbose'),
+						$elm$html$Html$Attributes$checked(
+						_Utils_eq(selected, $author$project$Main$Verbose)),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangePredicateStyle)
+					]),
+				_List_Nil),
+				$elm$html$Html$text('Verbose'),
+				A2(
+				$elm$html$Html$input,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$type_('radio'),
+						$elm$html$Html$Attributes$name('predicateStyle'),
+						$elm$html$Html$Attributes$value('terse'),
+						$elm$html$Html$Attributes$checked(
+						_Utils_eq(selected, $author$project$Main$Terse)),
+						$elm$html$Html$Events$onInput($author$project$Main$ChangePredicateStyle)
+					]),
+				_List_Nil),
+				$elm$html$Html$text('Terse')
+			]));
+};
 var $author$project$Main$ChangeQuery = function (a) {
 	return {$: 'ChangeQuery', a: a};
 };
@@ -7215,10 +7299,7 @@ var $elm$html$Html$Attributes$rows = function (n) {
 		'rows',
 		$elm$core$String$fromInt(n));
 };
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$Attributes$wrap = $elm$html$Html$Attributes$stringProperty('wrap');
 var $author$project$Main$queryInput = F2(
 	function (newServer, query) {
@@ -7254,17 +7335,6 @@ var $author$project$Main$queryInput = F2(
 var $author$project$Main$ChangeOutputFormat = function (a) {
 	return {$: 'ChangeOutputFormat', a: a};
 };
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
-var $elm$html$Html$Attributes$name = $elm$html$Html$Attributes$stringProperty('name');
-var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
 var $author$project$Main$resultFormatToggle = function (selected) {
 	return A2(
 		$elm$html$Html$div,
@@ -7383,55 +7453,85 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Main$aka = F2(
+	function (predicateStyle, pred) {
+		if (predicateStyle.$ === 'Verbose') {
+			return pred;
+		} else {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				pred,
+				$elm$core$List$head(
+					$elm$core$List$reverse(
+						A2($elm$core$String$split, '/', pred))));
+		}
+	});
 var $elm$html$Html$hr = _VirtualDom_node('hr');
-var $author$project$Main$viewSubjects = function (subjectPredObjs) {
-	if (subjectPredObjs.$ === 'Nothing') {
-		return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-	} else {
-		var subjs = subjectPredObjs.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			A2(
-				$elm$core$List$map,
-				function (spo) {
-					var subject = spo.a;
-					var predObjs = spo.b;
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$b,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(subject.value)
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								A2(
-									$elm$core$List$map,
-									function (details) {
-										return A2(
-											$elm$html$Html$div,
-											_List_Nil,
-											_List_fromArray(
-												[
-													$elm$html$Html$text(details.a.value),
-													$elm$html$Html$text(': '),
-													$elm$html$Html$text(details.b.value)
-												]));
-									},
-									predObjs)),
-								A2($elm$html$Html$hr, _List_Nil, _List_Nil)
-							]));
-				},
-				subjs));
-	}
-};
+var $author$project$Main$viewSubjects = F2(
+	function (predicateStyle, subjectPredObjs) {
+		if (subjectPredObjs.$ === 'Nothing') {
+			return A2($elm$html$Html$div, _List_Nil, _List_Nil);
+		} else {
+			var subjs = subjectPredObjs.a;
+			return A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				A2(
+					$elm$core$List$map,
+					function (spo) {
+						var subject = spo.a;
+						var predObjs = spo.b;
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$b,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text(subject.value)
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									A2(
+										$elm$core$List$map,
+										function (details) {
+											return A2(
+												$elm$html$Html$div,
+												_List_Nil,
+												_List_fromArray(
+													[
+														A2(
+														$elm$html$Html$b,
+														_List_Nil,
+														_List_fromArray(
+															[
+																$elm$html$Html$text(
+																A2($author$project$Main$aka, predicateStyle, details.a.value)),
+																$elm$html$Html$text(': ')
+															])),
+														$elm$html$Html$text(details.b.value)
+													]));
+										},
+										predObjs)),
+									A2($elm$html$Html$hr, _List_Nil, _List_Nil)
+								]));
+					},
+					subjs));
+		}
+	});
 var $author$project$Main$view = function (model) {
 	var _v0 = model.state;
 	switch (_v0.$) {
@@ -7525,7 +7625,7 @@ var $author$project$Main$view = function (model) {
 							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$text('I can\'t interpret the response')
+									$elm$html$Html$text('ApiError: I can\'t interpret the response')
 								])),
 							A2(
 							$elm$html$Html$div,
@@ -7533,6 +7633,16 @@ var $author$project$Main$view = function (model) {
 							_List_fromArray(
 								[
 									$elm$html$Html$text(err)
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$BackToQuery)
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Back')
 								]))
 						]));
 			} else {
@@ -7546,7 +7656,17 @@ var $author$project$Main$view = function (model) {
 							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Oops - something went wrong! :-(')
+									$elm$html$Html$text('ApiError: Oops - something went wrong! :-(')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$BackToQuery)
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Back')
 								]))
 						]));
 			}
@@ -7601,7 +7721,11 @@ var $author$project$Main$view = function (model) {
 									[
 										$elm$html$Html$text('Subject orientation')
 									])),
-								$author$project$Main$viewSubjects(
+								$author$project$Main$predicateStyleToggle(model.predicateStyle),
+								A2($elm$html$Html$br, _List_Nil, _List_Nil),
+								A2(
+								$author$project$Main$viewSubjects,
+								model.predicateStyle,
 								$author$project$Main$pivotToSubject(
 									$author$project$Main$extractTriples(result)))
 							]));

@@ -2,14 +2,15 @@
 
 - ~~Cursor on wait~~
 - ~~Table/subject view toggle~~
+- Provide for `terse` predicates
 - Bulk up predicates into lists
 - UI to accomodate lists
 - Elaborate on the structure of SelectAtom
-- Add limit and offset semantics
+- Add limit and offset semantics in table and subject oriented list
 - csv download
 - Improve table (a more fully featured table)
 
 # Known Bugs
 
-- Scan jsonld for `null` value
-- Make error pages return to query screen
+- ~~Scan jsonld for `null` value~~
+- ~~Make error pages return to query screen~~ Untested because it relates to APIError
