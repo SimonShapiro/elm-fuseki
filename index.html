@@ -7700,6 +7700,13 @@ var $author$project$Main$view = function (model) {
 							$author$project$Main$uploadQueryFromFile,
 							A2($author$project$Main$queryInput, model.server, model.query),
 							$author$project$Main$resultFormatToggle(model.resultsDisplay),
+							A2(
+							$elm$html$Html$button,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Download csv')
+								])),
 							A2($author$project$Main$tableView, vars, result)
 						]));
 			} else {

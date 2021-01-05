@@ -42,6 +42,10 @@ type alias Model =
     , predicateStyle: PredicateStyle
     }
 
+type alias SubjectOrientedAtoms = (List (SelectAtom, List(SelectAtom, SelectAtom)))  -- s, List (pred, obj)
+
+type alias CollapsedPredicates = (List (SelectAtom, List (SelectAtom, List SelectAtom)))
+
 type KeyboardMode
     = Normal
     | Ctrl
@@ -68,6 +72,7 @@ type Msg
     | FileSelected File
     | FileLoaded Sparql
     | DownloadFile
+    | DownloadResultsAsCSV (List String) (List (List SelectAtom))
     | ChangeOutputFormat String
     | ChangePredicateStyle String
     | BackToQuery
@@ -106,21 +111,6 @@ type alias Nodes = List RdfDict
 
 type alias Edges = List (RdfKey, RdfKey)
 
-type alias ToDo =
-    { id: String
-    , description: String
-    , status: String
-    }
-
-makeToDo: (SelectAtom, List((SelectAtom, SelectAtom))) -> ToDo
-makeToDo (id, predsObjects) = 
-    let
-        description = extractPredicate "http://example/com/descrption" predsObjects
-                    |> List.head  -- only if cardinality of 1.
-        status = extractPredicate "http://example.com/status" predsObjects
-                |> List.head
-    in
-        ToDo id.value (Maybe.withDefault "" description) (Maybe.withDefault "" status)
 
 extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
 extractPredicate spec preds =    -- will return [] if spec not present
@@ -219,6 +209,12 @@ update msg model =
             ({model | query = content}, Cmd.none)
         DownloadFile -> 
             (model, downloadFile model.query)
+        DownloadResultsAsCSV vars results -> 
+            -- let
+            --     headedResults = List.map (\r -> r.value) results 
+            --                 |> List.append vars 
+            -- in
+                (model, Cmd.none)
         ChangeOutputFormat outputFormat ->
             case outputFormat of
                 "table" -> ({model | resultsDisplay = Table}, Cmd.none)
@@ -289,7 +285,7 @@ extractTriples results =
     List.map (\result -> makeTriple result) results
     |> combine
 
-pivotToSubject: Maybe (List (SelectAtom, SelectAtom, SelectAtom)) -> Maybe (List ( SelectAtom, List ( SelectAtom, SelectAtom )))
+pivotToSubject: Maybe (List (SelectAtom, SelectAtom, SelectAtom)) -> Maybe SubjectOrientedAtoms
 pivotToSubject maybeList =
             case maybeList of
                 Nothing -> Nothing
@@ -297,7 +293,6 @@ pivotToSubject maybeList =
                     |> List.map (\triple -> rearrangeTriple triple)
                     |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
                     |> separateIntoSubject_PredicateObjects
---                    |> List.map (\subject -> makeToDo subject)  -- mkaeToDo can be gereralised ???
                     |> Just
 
 rearrangeTriple: (a, b, c) -> (a, (b, c))
@@ -338,7 +333,7 @@ aka predicateStyle pred =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: PredicateStyle -> Maybe (List (SelectAtom, List(SelectAtom, SelectAtom))) -> Html Msg      
+viewSubjects: PredicateStyle -> Maybe SubjectOrientedAtoms -> Html Msg      
 viewSubjects predicateStyle subjectPredObjs =
     case subjectPredObjs of 
         Nothing -> div[][]
@@ -363,24 +358,11 @@ viewSubjects predicateStyle subjectPredObjs =
             ) subjs)
 --            |> List.concat
 
-viewToDos: List ToDo -> Html Msg      
-viewToDos toDos =
-    div []
-    (List.map (\toDo -> 
-        div []
-            [ b [] [text toDo.id]
-            , div []
-                [ text "details:"
-                , text toDo.description]
-            , div []
-                [ text "status:"
-                , text toDo.status]
-            , hr [][]
-            ]
-    ) toDos)
 
 -- View
 
+
+-- could refactor below into two steps - shape and show
 tableView: (List String) -> (List (List SelectAtom)) -> Html Msg
 tableView vars result =
         div [] 
@@ -509,6 +491,7 @@ view model =
                         [ uploadQueryFromFile
                         , queryInput model.server model.query
                         , resultFormatToggle model.resultsDisplay
+                        , button [onClick <| DownloadResultsAsCSV vars result][text "Download csv"]
                         , tableView vars result
                         ]
                 SubjectOrientation ->
@@ -522,12 +505,6 @@ view model =
                                 , predicateStyleToggle model.predicateStyle
                                 , br [] []
                                 , viewSubjects model.predicateStyle (pivotToSubject <| extractTriples result)
-                                -- , h2 [][text "ToDos example"]
-                                -- , case extractTriples result
-                                --     |> pivotToSubject of
-                                --     Nothing -> div[][] -- mkaeToDo can be gereralised ???
-                                --     Just l ->  l |> List.map (\subject -> makeToDo subject) |> viewToDos
-                --                , button [onClick <| ChangeQuery ""][text "<-Query"]  -- need onldQuery instead of ""
                                 ]
                         _ ->                             
                             div []                
