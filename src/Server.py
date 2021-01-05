@@ -126,7 +126,7 @@ def processConstructQuery(queryString):
                                 objectAtom = {"key": "o", "value": obj if obj else ""}
 #                                print(f'>>{objectAtom}')
                         else:
-                            objectAtom = {"key": "o", "value": obj.get("@value") or obj.get("@id")}
+                            objectAtom = {"key": "o", "value": obj.get("@value") or obj.get("@id") or ""}
 #                            print(f'--{objectAtom}')
 #                        print([subjectAtom, predicateAtom, objectAtom])
                         resultArray.append([subjectAtom, predicateAtom, objectAtom])
