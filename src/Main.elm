@@ -111,6 +111,9 @@ type alias Nodes = List RdfDict
 
 type alias Edges = List (RdfKey, RdfKey)
 
+extractValues: List SelectAtom -> List String
+extractValues rows =
+    List.map (\r -> r.value) rows
 
 extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
 extractPredicate spec preds =    -- will return [] if spec not present
@@ -208,13 +211,14 @@ update msg model =
         FileLoaded content ->
             ({model | query = content}, Cmd.none)
         DownloadFile -> 
-            (model, downloadFile model.query)
+            (model, downloadFile "query.txt" model.query)
         DownloadResultsAsCSV vars results -> 
-            -- let
-            --     headedResults = List.map (\r -> r.value) results 
-            --                 |> List.append vars 
-            -- in
-                (model, Cmd.none)
+            let
+                headedResults = (String.join "|" vars) :: List.map (\r -> extractValues r
+                                                        |> String.join "|"
+                                                 ) results
+            in
+                (model, downloadFile "result.csv " <| String.join "\n" headedResults)
         ChangeOutputFormat outputFormat ->
             case outputFormat of
                 "table" -> ({model | resultsDisplay = Table}, Cmd.none)
@@ -373,8 +377,8 @@ tableView vars result =
                         tr []
                             (List.map (
                                 \var -> 
-                                    td [][ text var.value]
-                            ) row)
+                                    td [][ text var]
+                            ) (extractValues row))
                     ) result ))
             ]
 
@@ -438,9 +442,9 @@ uploadQueryFromFile =
     [ button [onClick FileRequested][text "Load query"]
     , button [onClick DownloadFile][text "Download query"]]
 
-downloadFile: String -> Cmd msg
-downloadFile query =
-  Download.string "query.txt" "text" query
+downloadFile: String -> String -> Cmd msg
+downloadFile fileName query =
+  Download.string fileName "text" query
 
 view: Model -> Html Msg
 view model = 

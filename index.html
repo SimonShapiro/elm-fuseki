@@ -5976,9 +5976,10 @@ var $elm$file$File$Download$string = F3(
 			$elm$core$Basics$never,
 			A3(_File_download, name, mime, content));
 	});
-var $author$project$Main$downloadFile = function (query) {
-	return A3($elm$file$File$Download$string, 'query.txt', 'text', query);
-};
+var $author$project$Main$downloadFile = F2(
+	function (fileName, query) {
+		return A3($elm$file$File$Download$string, fileName, 'text', query);
+	});
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -6481,6 +6482,14 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
+var $author$project$Main$extractValues = function (rows) {
+	return A2(
+		$elm$core$List$map,
+		function (r) {
+			return r.value;
+		},
+		rows);
+};
 var $elm$file$File$Select$file = F2(
 	function (mimes, toMsg) {
 		return A2(
@@ -6924,7 +6933,28 @@ var $author$project$Main$update = F2(
 			case 'DownloadFile':
 				return _Utils_Tuple2(
 					model,
-					$author$project$Main$downloadFile(model.query));
+					A2($author$project$Main$downloadFile, 'query.txt', model.query));
+			case 'DownloadResultsAsCSV':
+				var vars = msg.a;
+				var results = msg.b;
+				var headedResults = A2(
+					$elm$core$List$cons,
+					A2($elm$core$String$join, '|', vars),
+					A2(
+						$elm$core$List$map,
+						function (r) {
+							return A2(
+								$elm$core$String$join,
+								'|',
+								$author$project$Main$extractValues(r));
+						},
+						results));
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$author$project$Main$downloadFile,
+						'result.csv ',
+						A2($elm$core$String$join, '\n', headedResults)));
 			case 'ChangeOutputFormat':
 				var outputFormat = msg.a;
 				switch (outputFormat) {
@@ -6975,6 +7005,10 @@ var $author$project$Main$BackToQuery = {$: 'BackToQuery'};
 var $author$project$Main$ChangeServer = function (a) {
 	return {$: 'ChangeServer', a: a};
 };
+var $author$project$Main$DownloadResultsAsCSV = F2(
+	function (a, b) {
+		return {$: 'DownloadResultsAsCSV', a: a, b: b};
+	});
 var $author$project$Main$PingServer = {$: 'PingServer'};
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$br = _VirtualDom_node('br');
@@ -7417,10 +7451,10 @@ var $author$project$Main$tableView = F2(
 												_List_Nil,
 												_List_fromArray(
 													[
-														$elm$html$Html$text(_var.value)
+														$elm$html$Html$text(_var)
 													]));
 										},
-										row));
+										$author$project$Main$extractValues(row)));
 							},
 							result)))
 				]));
@@ -7702,7 +7736,11 @@ var $author$project$Main$view = function (model) {
 							$author$project$Main$resultFormatToggle(model.resultsDisplay),
 							A2(
 							$elm$html$Html$button,
-							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									A2($author$project$Main$DownloadResultsAsCSV, vars, result))
+								]),
 							_List_fromArray(
 								[
 									$elm$html$Html$text('Download csv')
