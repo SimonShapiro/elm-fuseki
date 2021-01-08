@@ -88,6 +88,10 @@ insert data {
             :livesIn [
                 a :Country;
                 :countryName "England"
+            ], 
+            [
+                a :Country;
+                :countryName "South Africa"
             ] .
 }}
 

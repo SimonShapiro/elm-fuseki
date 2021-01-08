@@ -31,7 +31,7 @@ type alias ServerVars = (List String)
 
 type alias TripleForm = (List (SelectAtom, SelectAtom, SelectAtom))
 
-type alias ContractedForm = (List (SelectAtom, List (SelectAtom, List SelectAtom)))
+type alias ContractedForm = (List SubjectMolecule) 
 
 makeTripleForm: ServerForm -> Maybe TripleForm 
 makeTripleForm res = res 
@@ -82,9 +82,11 @@ type alias Model =
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
+    , openPredicatesInSubject: OpenPredicatesInSubject
     }
 
-type alias SubjectOrientedAtoms = (List (SelectAtom, List(SelectAtom, SelectAtom)))  -- s, List (pred, obj)
+type alias OpenPredicatesInSubject = List (SelectAtom, SelectAtom)
+type alias SubjectMolecule = (SelectAtom, (List (SelectAtom, List SelectAtom)))  -- s, List (pred, obj)
 
 type KeyboardMode
     = Normal
@@ -116,6 +118,8 @@ type Msg
     | ChangeOutputFormat String
     | ChangePredicateStyle String
     | BackToQuery
+    | RegisterSubjectPredicateOpen (SelectAtom, SelectAtom)
+    | DeregisterSubjectPredicateOpen (SelectAtom, SelectAtom)
 
 type alias Server = String
 
@@ -172,7 +176,7 @@ server: Server
 server = "http://localhost:port"
 
 startWith: Model
-startWith = Model Initialising server "" Normal Table Terse
+startWith = Model Initialising server "" Normal Table Terse []
 
 initialModel: flags -> (Model, (Cmd Msg))
 initialModel _ = (startWith, Cmd.none)
@@ -269,6 +273,10 @@ update msg model =
                "verbose" -> ({model | predicateStyle = Verbose}, Cmd.none)
                "terse" -> ({model | predicateStyle = Terse}, Cmd.none)
                _ -> ({model | predicateStyle = Verbose}, Cmd.none)
+        RegisterSubjectPredicateOpen selected -> 
+            ({model | openPredicatesInSubject = selected::model.openPredicatesInSubject}, Cmd.none)
+        DeregisterSubjectPredicateOpen selected -> 
+            ({model | openPredicatesInSubject = List.Extra.remove selected model.openPredicatesInSubject}, Cmd.none)
 
 msgDecoder : Decoder Msg
 msgDecoder =
@@ -329,20 +337,6 @@ extractTriples results =
     List.map (\result -> makeTriple result) results
     |> combine
 
-pivotToSubject: Maybe (List (SelectAtom, SelectAtom, SelectAtom)) -> Maybe SubjectOrientedAtoms
-pivotToSubject maybeList =
-            case maybeList of
-                Nothing -> Nothing
-                Just l -> l
-                    |> List.map (\triple -> rearrangeTriple triple)
-                    |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
-                    |> separateIntoSubject_PredicateObjects
-                    |> Just
-
-rearrangeTriple: (a, b, c) -> (a, (b, c))
-rearrangeTriple (a, b, c) = 
-    (a, (b, c))
-
 separateIntoSubject_PredicateObjects: List (( SelectAtom, (SelectAtom, SelectAtom) )
                                             , List ( SelectAtom, (SelectAtom, SelectAtom) )) 
                                             -> List (SelectAtom, List(SelectAtom, SelectAtom))
@@ -388,48 +382,62 @@ aka predicateStyle pred =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: PredicateStyle -> ContractedForm -> Html Msg      
-viewSubjects predicateStyle subjs =
+viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> ContractedForm -> Html Msg      
+viewSubjects openPredicates predicateStyle subjs =
         div []
         (List.map (\spo ->
             div []
                 [ h2 [] [text (Tuple.first spo).value]
-                 , viewPredicates predicateStyle (Tuple.second spo)
+                 , viewPredicates openPredicates predicateStyle spo
                  , hr [][]
                 ]
         ) subjs)
 
 
-viewPredicates: PredicateStyle -> List (SelectAtom, List SelectAtom) -> Html Msg
-viewPredicates predicateStyle preds =
-    div []
-        (List.map(\po -> 
-            div []
-                [ b []  [ text (aka predicateStyle (Tuple.first po).value)
-                        , text ": "
-                        ]
-                    , viewObjects (Tuple.second po)
-                ]
-        )
-        preds)
-
-viewObjects: List SelectAtom -> Html Msg
-viewObjects objs =
+viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule -> Html Msg
+viewPredicates openPredicates predicateStyle mole =
     let
+        subj = Tuple.first mole
+        preds = Tuple.second mole
+    in
+        div []
+            (List.map(\po -> 
+                div []
+                    [ b []  [ text (aka predicateStyle (Tuple.first po).value)
+                            , text ": "
+                            ]
+                        , viewObjects openPredicates subj po
+                    ]
+            )
+            preds)
+
+viewObjects: OpenPredicatesInSubject -> SelectAtom -> (SelectAtom, List SelectAtom) -> Html Msg
+viewObjects open subj po =
+    let
+        (pred, objs) = po
         head = List.head objs
         rest = List.tail objs
                 |> Maybe.withDefault []
         restCount = List.length rest
     in
         case head of
-           Just obj -> span [] 
-                            [ text obj.value
-                            , case  restCount of
-                               0 -> text ""
-                               _ -> text <| String.join " " [" ...", (String.fromInt restCount), " more"]
-                            ] 
+           Just obj -> case restCount of
+                                0 -> div [] [text obj.value]
+                                _ -> div [] (viewRestOfObjectList open (subj, pred) obj rest)
+
            Nothing -> text ""
 
+viewRestOfObjectList: OpenPredicatesInSubject -> (SelectAtom, SelectAtom) -> SelectAtom -> List SelectAtom -> List (Html Msg)
+viewRestOfObjectList open selected obj rest =
+    case (List.Extra.find (\o -> o == selected) open) of
+        Just a -> text obj.value
+                  :: button [onClick (DeregisterSubjectPredicateOpen selected)] [text " less"]
+                  :: (List.map (
+                        \r -> div [] [text r.value]
+                    ) rest)
+        Nothing -> [ text obj.value
+                    , button [onClick (RegisterSubjectPredicateOpen selected)] [text ((String.fromInt <| List.length rest)++" more")]
+                    ]
 -- View
 
 
@@ -578,7 +586,7 @@ view model =
                                 , h2 [][text "Subject orientation"]
                                 , predicateStyleToggle model.predicateStyle
                                 , br [] []
-                                , viewSubjects model.predicateStyle a
+                                , viewSubjects model.openPredicatesInSubject model.predicateStyle a
                                 ]
                         Nothing ->                             
                             div []                
