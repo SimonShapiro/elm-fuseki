@@ -7593,7 +7593,15 @@ var $author$project$Main$viewObjects = function (objs) {
 						return $elm$html$Html$text('');
 					} else {
 						return $elm$html$Html$text(
-							$elm$core$String$fromInt(restCount) + 'more');
+							A2(
+								$elm$core$String$join,
+								' ',
+								_List_fromArray(
+									[
+										' ...',
+										$elm$core$String$fromInt(restCount),
+										' more'
+									])));
 					}
 				}()
 				]));

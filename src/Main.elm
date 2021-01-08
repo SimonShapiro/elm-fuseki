@@ -426,7 +426,7 @@ viewObjects objs =
                             [ text obj.value
                             , case  restCount of
                                0 -> text ""
-                               _ -> text <| (String.fromInt restCount) ++ "more"
+                               _ -> text <| String.join " " [" ...", (String.fromInt restCount), " more"]
                             ] 
            Nothing -> text ""
 
