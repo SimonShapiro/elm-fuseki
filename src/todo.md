@@ -7,7 +7,7 @@
 - UI to accomodate lists
 - Elaborate on the structure of SelectAtom
 - Add limit and offset semantics in table and subject oriented list
-- csv download
+- csv download - filename to be input
 - Improve table (a more fully featured table)
 
 # Known Bugs

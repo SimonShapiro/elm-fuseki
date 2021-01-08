@@ -6953,7 +6953,7 @@ var $author$project$Main$update = F2(
 					model,
 					A2(
 						$author$project$Main$downloadFile,
-						'result.csv ',
+						'result.csv',
 						A2($elm$core$String$join, '\n', headedResults)));
 			case 'ChangeOutputFormat':
 				var outputFormat = msg.a;
@@ -7013,7 +7013,136 @@ var $author$project$Main$PingServer = {$: 'PingServer'};
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$br = _VirtualDom_node('br');
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm_community$list_extra$List$Extra$groupWhile = F2(
+	function (isSameGroup, items) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					if (!acc.b) {
+						return _List_fromArray(
+							[
+								_Utils_Tuple2(x, _List_Nil)
+							]);
+					} else {
+						var _v1 = acc.a;
+						var y = _v1.a;
+						var restOfGroup = _v1.b;
+						var groups = acc.b;
+						return A2(isSameGroup, x, y) ? A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(
+								x,
+								A2($elm$core$List$cons, y, restOfGroup)),
+							groups) : A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(x, _List_Nil),
+							acc);
+					}
+				}),
+			_List_Nil,
+			items);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_v0, _v1) {
+			var x = _v0.a;
+			var y = _v0.b;
+			var xs = _v1.a;
+			var ys = _v1.b;
+			return _Utils_Tuple2(
+				A2($elm$core$List$cons, x, xs),
+				A2($elm$core$List$cons, y, ys));
+		});
+	return A3(
+		$elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var $author$project$Main$separateIntoPredicateLists = function (preds) {
+	return A2(
+		$elm$core$List$map,
+		function (p) {
+			var item = p.a.a;
+			var head = p.a.b;
+			var target = A2(
+				$elm$core$List$cons,
+				head,
+				$elm$core$List$unzip(p.b).b);
+			return _Utils_Tuple2(item, target);
+		},
+		preds);
+};
+var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
+	return A2(
+		$elm$core$List$map,
+		function (subject) {
+			var subj = subject.a.a;
+			var predobj = subject.a.b;
+			var predicateObjects = A2(
+				$elm$core$List$cons,
+				predobj,
+				$elm$core$List$unzip(subject.b).b);
+			return _Utils_Tuple2(subj, predicateObjects);
+		},
+		l);
+};
+var $elm$core$List$sortBy = _List_sortBy;
+var $author$project$Main$makeContractedForm = function (triples) {
+	return A2(
+		$elm$core$List$map,
+		function (_v2) {
+			var x = _v2.a;
+			var y = _v2.b;
+			return _Utils_Tuple2(
+				x,
+				$author$project$Main$separateIntoPredicateLists(
+					A2(
+						$elm_community$list_extra$List$Extra$groupWhile,
+						F2(
+							function (a, b) {
+								return _Utils_eq(a.a.value, b.a.value);
+							}),
+						A2(
+							$elm$core$List$sortBy,
+							function (_v3) {
+								var a = _v3.a;
+								var b = _v3.b;
+								return a.value;
+							},
+							y))));
+		},
+		$author$project$Main$separateIntoSubject_PredicateObjects(
+			A2(
+				$elm_community$list_extra$List$Extra$groupWhile,
+				F2(
+					function (a, b) {
+						return _Utils_eq(a.a.value, b.a.value);
+					}),
+				A2(
+					$elm$core$List$sortBy,
+					function (_v1) {
+						var x = _v1.a;
+						var y = _v1.b;
+						return x.value;
+					},
+					A2(
+						$elm$core$List$map,
+						function (_v0) {
+							var s = _v0.a;
+							var p = _v0.b;
+							var o = _v0.c;
+							return _Utils_Tuple2(
+								s,
+								_Utils_Tuple2(p, o));
+						},
+						triples)))));
+};
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -7101,15 +7230,33 @@ var $author$project$Main$makeTriple = function (spo) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Main$extractTriples = function (results) {
+var $author$project$Main$makeTripleForm = function (res) {
 	return $elm_community$maybe_extra$Maybe$Extra$combine(
 		A2(
 			$elm$core$List$map,
-			function (result) {
-				return $author$project$Main$makeTriple(result);
+			function (r) {
+				return $author$project$Main$makeTriple(r);
 			},
-			results));
+			res));
 };
+var $author$project$Main$contractResult = F2(
+	function (vars, res) {
+		if ((((((vars.b && (vars.a === 's')) && vars.b.b) && (vars.b.a === 'p')) && vars.b.b.b) && (vars.b.b.a === 'o')) && (!vars.b.b.b.b)) {
+			var _v1 = vars.b;
+			var _v2 = _v1.b;
+			var maybeTriples = $author$project$Main$makeTripleForm(res);
+			if (maybeTriples.$ === 'Just') {
+				var a = maybeTriples.a;
+				return $elm$core$Maybe$Just(
+					$author$project$Main$makeContractedForm(a));
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$h4 = _VirtualDom_node('h4');
@@ -7161,100 +7308,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$json$Json$Decode$map,
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $elm_community$list_extra$List$Extra$groupWhile = F2(
-	function (isSameGroup, items) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					if (!acc.b) {
-						return _List_fromArray(
-							[
-								_Utils_Tuple2(x, _List_Nil)
-							]);
-					} else {
-						var _v1 = acc.a;
-						var y = _v1.a;
-						var restOfGroup = _v1.b;
-						var groups = acc.b;
-						return A2(isSameGroup, x, y) ? A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(
-								x,
-								A2($elm$core$List$cons, y, restOfGroup)),
-							groups) : A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(x, _List_Nil),
-							acc);
-					}
-				}),
-			_List_Nil,
-			items);
-	});
-var $author$project$Main$rearrangeTriple = function (_v0) {
-	var a = _v0.a;
-	var b = _v0.b;
-	var c = _v0.c;
-	return _Utils_Tuple2(
-		a,
-		_Utils_Tuple2(b, c));
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$core$List$unzip = function (pairs) {
-	var step = F2(
-		function (_v0, _v1) {
-			var x = _v0.a;
-			var y = _v0.b;
-			var xs = _v1.a;
-			var ys = _v1.b;
-			return _Utils_Tuple2(
-				A2($elm$core$List$cons, x, xs),
-				A2($elm$core$List$cons, y, ys));
-		});
-	return A3(
-		$elm$core$List$foldr,
-		step,
-		_Utils_Tuple2(_List_Nil, _List_Nil),
-		pairs);
-};
-var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
-	return A2(
-		$elm$core$List$map,
-		function (subject) {
-			var subj = subject.a.a;
-			var predobj = subject.a.b;
-			var predicateObjects = A2(
-				$elm$core$List$cons,
-				predobj,
-				$elm$core$List$unzip(subject.b).b);
-			return _Utils_Tuple2(subj, predicateObjects);
-		},
-		l);
-};
-var $author$project$Main$pivotToSubject = function (maybeList) {
-	if (maybeList.$ === 'Nothing') {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var l = maybeList.a;
-		return $elm$core$Maybe$Just(
-			$author$project$Main$separateIntoSubject_PredicateObjects(
-				A2(
-					$elm_community$list_extra$List$Extra$groupWhile,
-					F2(
-						function (a, b) {
-							return _Utils_eq(a.a.value, b.a.value);
-						}),
-					A2(
-						$elm$core$List$map,
-						function (triple) {
-							return $author$project$Main$rearrangeTriple(triple);
-						},
-						l))));
-	}
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -7487,6 +7540,7 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
+var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
 		if (maybe.$ === 'Just') {
@@ -7509,62 +7563,96 @@ var $author$project$Main$aka = F2(
 						A2($elm$core$String$split, '/', pred))));
 		}
 	});
-var $elm$html$Html$hr = _VirtualDom_node('hr');
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$viewObjects = function (objs) {
+	var rest = A2(
+		$elm$core$Maybe$withDefault,
+		_List_Nil,
+		$elm$core$List$tail(objs));
+	var restCount = $elm$core$List$length(rest);
+	var head = $elm$core$List$head(objs);
+	if (head.$ === 'Just') {
+		var obj = head.a;
+		return A2(
+			$elm$html$Html$span,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(obj.value),
+					function () {
+					if (!restCount) {
+						return $elm$html$Html$text('');
+					} else {
+						return $elm$html$Html$text(
+							$elm$core$String$fromInt(restCount) + 'more');
+					}
+				}()
+				]));
+	} else {
+		return $elm$html$Html$text('');
+	}
+};
+var $author$project$Main$viewPredicates = F2(
+	function (predicateStyle, preds) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (po) {
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$b,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(
+										A2($author$project$Main$aka, predicateStyle, po.a.value)),
+										$elm$html$Html$text(': ')
+									])),
+								$author$project$Main$viewObjects(po.b)
+							]));
+				},
+				preds));
+	});
 var $author$project$Main$viewSubjects = F2(
-	function (predicateStyle, subjectPredObjs) {
-		if (subjectPredObjs.$ === 'Nothing') {
-			return A2($elm$html$Html$div, _List_Nil, _List_Nil);
-		} else {
-			var subjs = subjectPredObjs.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				A2(
-					$elm$core$List$map,
-					function (spo) {
-						var subject = spo.a;
-						var predObjs = spo.b;
-						return A2(
-							$elm$html$Html$div,
-							_List_Nil,
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$b,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$elm$html$Html$text(subject.value)
-										])),
-									A2(
-									$elm$html$Html$div,
-									_List_Nil,
-									A2(
-										$elm$core$List$map,
-										function (details) {
-											return A2(
-												$elm$html$Html$div,
-												_List_Nil,
-												_List_fromArray(
-													[
-														A2(
-														$elm$html$Html$b,
-														_List_Nil,
-														_List_fromArray(
-															[
-																$elm$html$Html$text(
-																A2($author$project$Main$aka, predicateStyle, details.a.value)),
-																$elm$html$Html$text(': ')
-															])),
-														$elm$html$Html$text(details.b.value)
-													]));
-										},
-										predObjs)),
-									A2($elm$html$Html$hr, _List_Nil, _List_Nil)
-								]));
-					},
-					subjs));
-		}
+	function (predicateStyle, subjs) {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (spo) {
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h2,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(spo.a.value)
+									])),
+								A2($author$project$Main$viewPredicates, predicateStyle, spo.b),
+								A2($elm$html$Html$hr, _List_Nil, _List_Nil)
+							]));
+				},
+				subjs));
 	});
 var $author$project$Main$view = function (model) {
 	var _v0 = model.state;
@@ -7748,9 +7836,9 @@ var $author$project$Main$view = function (model) {
 							A2($author$project$Main$tableView, vars, result)
 						]));
 			} else {
-				if ((((((vars.b && (vars.a === 's')) && vars.b.b) && (vars.b.a === 'p')) && vars.b.b.b) && (vars.b.b.a === 'o')) && (!vars.b.b.b.b)) {
-					var _v4 = vars.b;
-					var _v5 = _v4.b;
+				var contracted = A2($author$project$Main$contractResult, vars, result);
+				if (contracted.$ === 'Just') {
+					var a = contracted.a;
 					return A2(
 						$elm$html$Html$div,
 						_List_Nil,
@@ -7768,11 +7856,7 @@ var $author$project$Main$view = function (model) {
 									])),
 								$author$project$Main$predicateStyleToggle(model.predicateStyle),
 								A2($elm$html$Html$br, _List_Nil, _List_Nil),
-								A2(
-								$author$project$Main$viewSubjects,
-								model.predicateStyle,
-								$author$project$Main$pivotToSubject(
-									$author$project$Main$extractTriples(result)))
+								A2($author$project$Main$viewSubjects, model.predicateStyle, a)
 							]));
 				} else {
 					return A2(

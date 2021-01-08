@@ -17,6 +17,7 @@ import Task
 import List.Extra exposing (uncons, groupWhile)
 import Maybe.Extra exposing (combine)
 import Html exposing (a)
+import List
 
 type Cardinality 
     = OneToOne 
@@ -24,11 +25,52 @@ type Cardinality
     | ZeroToMany 
     | OneToMany 
 
+type alias ServerForm = (List (List SelectAtom))
+
+type alias ServerVars = (List String)
+
+type alias TripleForm = (List (SelectAtom, SelectAtom, SelectAtom))
+
+type alias ContractedForm = (List (SelectAtom, List (SelectAtom, List SelectAtom)))
+
+makeTripleForm: ServerForm -> Maybe TripleForm 
+makeTripleForm res = res 
+-- ensure that serverForm consists of triples (not necessarily spo)
+                    |> List.map (\r -> makeTriple r)
+                    |> combine
+
+makeContractedForm: TripleForm -> ContractedForm
+makeContractedForm triples = triples
+                            |> List.map (\(s, p, o) -> (s, (p, o)))
+                            |> List.sortBy (\(x, y) -> x.value)
+                            |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
+                            |> separateIntoSubject_PredicateObjects
+                            |> List.map (\(x, y) -> (x, List.sortBy (\(a, b) -> a.value) y 
+                                                        |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
+                                                        |> separateIntoPredicateLists
+                                ))
+
+contractResult: ServerVars -> ServerForm -> Maybe ContractedForm
+contractResult vars res =
+-- ContractedForm is only valid when ServerVars in the shape of spo
+    case vars of
+        ["s", "p", "o"] -> 
+            let
+                maybeTriples = makeTripleForm res
+            in
+                case maybeTriples of
+                   Just a -> makeContractedForm a |> Just
+                   _ -> Nothing
+        _ -> Nothing
+
+sortAndGroup: List ( SelectAtom, ( SelectAtom, SelectAtom ) ) -> List ( SelectAtom, ( SelectAtom, SelectAtom ) )
+sortAndGroup l = List.sortBy (\(x, y) -> x.value) l
+
 type UIState 
     = Initialising 
     | Pinging 
     | Querying 
-    | DisplayingSelectResult  (List String) (List (List SelectAtom))
+    | DisplayingSelectResult  ServerVars ServerForm
     | DisplayingSelectError String
     | ApiError Http.Error
     | Waiting
@@ -43,8 +85,6 @@ type alias Model =
     }
 
 type alias SubjectOrientedAtoms = (List (SelectAtom, List(SelectAtom, SelectAtom)))  -- s, List (pred, obj)
-
-type alias CollapsedPredicates = (List (SelectAtom, List (SelectAtom, List SelectAtom)))
 
 type KeyboardMode
     = Normal
@@ -72,7 +112,7 @@ type Msg
     | FileSelected File
     | FileLoaded Sparql
     | DownloadFile
-    | DownloadResultsAsCSV (List String) (List (List SelectAtom))
+    | DownloadResultsAsCSV ServerVars ServerForm
     | ChangeOutputFormat String
     | ChangePredicateStyle String
     | BackToQuery
@@ -87,8 +127,8 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , message: String
     , queryType: String
     , query: Sparql
-    , vars: (List String)
-    , result: (List (List SelectAtom))
+    , vars: ServerVars
+    , result: ServerForm
     }
 
 type alias SelectAtom =
@@ -218,7 +258,7 @@ update msg model =
                                                         |> String.join "|"
                                                  ) results
             in
-                (model, downloadFile "result.csv " <| String.join "\n" headedResults)
+                (model, downloadFile "result.csv" <| String.join "\n" headedResults)
         ChangeOutputFormat outputFormat ->
             case outputFormat of
                 "table" -> ({model | resultsDisplay = Table}, Cmd.none)
@@ -284,7 +324,7 @@ makeTriple spo =
        3 -> Maybe.map3 (\a b c -> (a, b, c)) (List.head spo) (List.head (List.drop 1 spo)) (List.head (List.drop 2 spo))
        _ -> Nothing
 
-extractTriples:  List (List SelectAtom) -> Maybe (List (SelectAtom, SelectAtom, SelectAtom))
+extractTriples:  ServerForm -> Maybe (List (SelectAtom, SelectAtom, SelectAtom))
 extractTriples results = 
     List.map (\result -> makeTriple result) results
     |> combine
@@ -317,6 +357,17 @@ separateIntoSubject_PredicateObjects l =
                             (subj, predicateObjects)
                     )
 
+separateIntoPredicateLists: List ( ( SelectAtom, SelectAtom ), List ( SelectAtom, SelectAtom ) ) -> List (SelectAtom, List(SelectAtom))
+separateIntoPredicateLists preds = 
+                                preds |> List.map(\p ->
+                                    let
+                                        item = Tuple.first (Tuple.first p)
+                                        head = Tuple.second (Tuple.first p)
+                                        target = head :: Tuple.second (List.unzip (Tuple.second p))
+                                    in
+                                        (item, target)
+                                ) 
+
 aka: PredicateStyle -> String -> String
 aka predicateStyle pred = 
     case predicateStyle of
@@ -326,7 +377,7 @@ aka predicateStyle pred =
                 |> List.head
                 |> Maybe.withDefault pred
 
--- pivotToSubject: (List (List SelectAtom)) -> List (List (SelectAtom, (List SelectAtom)))   --   (subject, [pred, obj])
+-- pivotToSubject: ServerForm -> List (List (SelectAtom, (List SelectAtom)))   --   (subject, [pred, obj])
 -- pivotToSubject results =
 --     let
 --         subjects = List.filterMap (\triple -> uncons triple) results -- List (SelectAtom, List SelectAtom) ie ?s of [?s ?p ?o])
@@ -337,37 +388,53 @@ aka predicateStyle pred =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: PredicateStyle -> Maybe SubjectOrientedAtoms -> Html Msg      
-viewSubjects predicateStyle subjectPredObjs =
-    case subjectPredObjs of 
-        Nothing -> div[][]
-        Just subjs ->
+viewSubjects: PredicateStyle -> ContractedForm -> Html Msg      
+viewSubjects predicateStyle subjs =
+        div []
+        (List.map (\spo ->
             div []
-            (List.map (\spo -> 
-                let
-                    subject = Tuple.first spo
-                    predObjs = Tuple.second spo
-                in
-                    div []
-                        [ b [] [text subject.value]
-                        , div [] (List.map (\details ->
-                                    div[]
-                                        [ b []  [ text (aka predicateStyle (Tuple.first details).value)
-                                                , text ": "]
-                                        , text (Tuple.second details).value
-                                        ]
-                            ) predObjs)
-                        , hr [][]
-                        ]
-            ) subjs)
---            |> List.concat
+                [ h2 [] [text (Tuple.first spo).value]
+                 , viewPredicates predicateStyle (Tuple.second spo)
+                 , hr [][]
+                ]
+        ) subjs)
 
+
+viewPredicates: PredicateStyle -> List (SelectAtom, List SelectAtom) -> Html Msg
+viewPredicates predicateStyle preds =
+    div []
+        (List.map(\po -> 
+            div []
+                [ b []  [ text (aka predicateStyle (Tuple.first po).value)
+                        , text ": "
+                        ]
+                    , viewObjects (Tuple.second po)
+                ]
+        )
+        preds)
+
+viewObjects: List SelectAtom -> Html Msg
+viewObjects objs =
+    let
+        head = List.head objs
+        rest = List.tail objs
+                |> Maybe.withDefault []
+        restCount = List.length rest
+    in
+        case head of
+           Just obj -> span [] 
+                            [ text obj.value
+                            , case  restCount of
+                               0 -> text ""
+                               _ -> text <| (String.fromInt restCount) ++ "more"
+                            ] 
+           Nothing -> text ""
 
 -- View
 
 
 -- could refactor below into two steps - shape and show
-tableView: (List String) -> (List (List SelectAtom)) -> Html Msg
+tableView: ServerVars -> ServerForm -> Html Msg
 tableView vars result =
         div [] 
             [ table []
@@ -499,8 +566,11 @@ view model =
                         , tableView vars result
                         ]
                 SubjectOrientation ->
-                    case vars of
-                        ["s", "p", "o"] ->
+                    let
+                        contracted = contractResult vars result
+                    in
+                     case contracted of
+                        Just a ->
                             div []                
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
@@ -508,9 +578,9 @@ view model =
                                 , h2 [][text "Subject orientation"]
                                 , predicateStyleToggle model.predicateStyle
                                 , br [] []
-                                , viewSubjects model.predicateStyle (pivotToSubject <| extractTriples result)
+                                , viewSubjects model.predicateStyle a
                                 ]
-                        _ ->                             
+                        Nothing ->                             
                             div []                
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
