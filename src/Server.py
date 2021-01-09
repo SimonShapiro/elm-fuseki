@@ -45,10 +45,22 @@ def serializeResults(rows):
     return [[JSONSerializer.serialize(a) for a in r] for r in rows ]
 
 def stringifyValue(value):
-    if not isinstance(value, str):
-        return str(value)
+    if value:
+        if not isinstance(value, str):
+            return str(value)
+        else:
+            return value
     else:
-        return value
+        None
+
+def rdfTypeSignature(value):
+    prefix = "http://www.w3.org/2001/XMLSchema#"
+    if isinstance(value, int):
+        return prefix+"integer"
+    elif isinstance(value, float):
+        return prefix+"decimal"
+    elif isinstance(value, bool):
+        return prefix+"boolean"
 
 def processSelectQuery(queryString):
     res = requests.request("POST", SERVER+"/sparql",
@@ -143,20 +155,39 @@ def processConstructQuery(queryString):
         pprint.pprint(result)
         resultArray= []
         for subj in result:
-            subjectAtom = {"key": "s", "value": subj['@id']}
-#            print(f'subject={subjectAtom}')
-#            print('+++++++++++++')
+            subjectAtom = Atom(key="s", 
+                                value=subj['@id'], 
+                                aType="uri"
+                            )  # consider decoding aType into bnode as well 
             # this loop yields predicates
             for predicate in subj.keys():
-                predicateAtom = {"key": "p", "value": predicate if predicate != "@type" else "http://www.w3.org/2000/01/rdf-schema#type"}
+                predicateAtom = Atom(key="p", 
+                                        value=predicate if predicate != "@type" else "http://www.w3.org/2000/01/rdf-schema#type",
+                                        aType="uri"
+                                    )
                 print(predicateAtom)
                 if predicate != '@id':
                     for obj in subj[predicate]:
                         if predicate == '@type':
-                                objectAtom = {"key": "o", "value": obj if obj else ""}
-#                                print(f'>>{objectAtom}')
-                        else:
-                            objectAtom = {"key": "o", "value": stringifyValue(obj.get("@value")) or obj.get("@id") or ""}
+                            objectAtom = Atom(key="o",
+                                                value=obj if obj else "",
+                                                aType="uri"
+                                                )
+                        else:  # need to be careful with sensing difference between @value and @id
+                            # use rdfType where not explicity provided in json-ld
+                            if obj.get("@value"):
+                                objectAtom = Atom(key="o", 
+                                                    value=stringifyValue(obj.get("@value")),
+                                                    aType= obj.get("@datatype") if obj.get("@datatype") else rdfTypeSignature(obj.get("@value"))
+                                                )
+                            elif obj.get("@id"): 
+                                objectAtom = Atom(key="o", 
+                                                    value=obj.get("@id"),
+                                                    aType= "uri"
+                                                )
+                            else:
+                                print("Unexpected empty object in triple")
+                                print(1/0)
 #                            print(f'--{objectAtom}')
 #                        print([subjectAtom, predicateAtom, objectAtom])
                         resultArray.append([subjectAtom, predicateAtom, objectAtom])
@@ -171,7 +202,7 @@ def processConstructQuery(queryString):
             "queryType": "select",
             "query": queryString,
             "vars": ['s', 'p', 'o'],
-            "result": resultArray
+            "result": serializeResults(resultArray)
         })}
 
 @app.route("/sparql", methods=['POST'])
