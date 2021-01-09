@@ -8,8 +8,12 @@ import pprint
 
 @dataclass
 class Atom:
+    key: str
+    value: str
     _type: str = ""
-    value: str = ""
+    datatype: str = ""
+    language: str = ""
+
 
 app = Flask(__name__)
 app.config['API_TITLE'] = 'My API'
@@ -77,7 +81,7 @@ def processAskQuery(queryString):
         result = res.json()  # only works for `ask` and `select`
         print(result)
         vars = ["answer"]
-        rows = [[{"key": "answer", "value": "true"}]]
+        rows = [[{"key": "answer", "value": str(result["boolean"])}]]
     else:
         result = {}
         vars = []
