@@ -138,6 +138,9 @@ type alias KGResponse =  -- a copy of the query is available in the api
 type alias SelectAtom =
     { key: String
     , value: String
+    , aType: String
+    , datatype: String
+    , language: String
     }
 
 type RdfNode 
@@ -168,9 +171,12 @@ extractPredicate spec preds =    -- will return [] if spec not present
 
 selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 
-    map2 SelectAtom
+    map5 SelectAtom
         (field "key" string)
         (field "value" string )
+        (field "aType" string )
+        (field "language" string )
+        (field "datatype" string )
 
 server: Server
 server = "http://localhost:port"

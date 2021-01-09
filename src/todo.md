@@ -6,6 +6,7 @@
 - ~~Bulk up predicates into lists~~
 - ~~UI to accomodate lists~~
 - Elaborate on the structure of SelectAtom
+- Incorporate improved SelectAtom into useful ui interpretation
 - Add limit and offset semantics in table and subject oriented list
 - csv download - filename to be input
 - Improve table (a more fully featured table)

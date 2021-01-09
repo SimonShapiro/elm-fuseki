@@ -6505,15 +6505,19 @@ var $author$project$Main$KGResponse = F7(
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$map7 = _Json_map7;
-var $author$project$Main$SelectAtom = F2(
-	function (key, value) {
-		return {key: key, value: value};
+var $author$project$Main$SelectAtom = F5(
+	function (key, value, aType, datatype, language) {
+		return {aType: aType, datatype: datatype, key: key, language: language, value: value};
 	});
-var $author$project$Main$selectAtomDecoder = A3(
-	$elm$json$Json$Decode$map2,
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Main$selectAtomDecoder = A6(
+	$elm$json$Json$Decode$map5,
 	$author$project$Main$SelectAtom,
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string));
+	A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'aType', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'language', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'datatype', $elm$json$Json$Decode$string));
 var $author$project$Main$mainDecoder = A8(
 	$elm$json$Json$Decode$map7,
 	$author$project$Main$KGResponse,
