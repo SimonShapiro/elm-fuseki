@@ -4,13 +4,14 @@ import requests
 import json
 from pyld import jsonld
 from dataclasses import dataclass
+from dataclasses_serialization.json import JSONSerializer
 import pprint
 
 @dataclass
 class Atom:
     key: str
     value: str
-    _type: str = ""
+    aType: str
     datatype: str = ""
     language: str = ""
 
@@ -47,13 +48,17 @@ def processSelectQuery(queryString):
         rows = []
         for bound in bindings:
             # create atom here
-            atoms = [{"key": v, "value": bound[v]["value"] if bound.get(v) else ""} for v in vars]
+#            atoms = [{"key": v, "value": bound[v]["value"] if bound.get(v) else ""} for v in vars]
+            atoms = [Atom(key=v, 
+                        value=bound[v]["value"] if bound.get(v) else "",
+                        aType=bound[v]["type"]
+                        ) for v in vars]
             rows.append(atoms)
     else:
         result = {}
         vars = []
         rows = []
-    print(status, error, vars, rows)
+    print([[JSONSerializer.serialize(a) for a in r] for r in rows ])
     return {
         "status": 200,
         "response": json.dumps({
@@ -63,7 +68,7 @@ def processSelectQuery(queryString):
             "queryType": "select",
             "query": queryString,
             "vars": vars,
-            "result": rows
+            "result": [[JSONSerializer.serialize(a) for a in r] for r in rows ]  # need to deserialize Atoms here 
         })}
 
 def processAskQuery(queryString):
