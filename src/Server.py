@@ -30,6 +30,17 @@ def hello():
     print(request.url_root[:-1])
     return "Hello"
 
+def buildAtom(v, bound):
+    atom = Atom(key=v, 
+                value=bound[v]["value"] if bound.get(v) else "",
+                aType=bound[v]["type"]
+            )
+    if bound[v].get("xml:lang"):
+        atom.language = bound[v].get("xml:lang")
+    if bound[v].get("datatype"):
+        atom.datatype = bound[v].get("datatype")
+    return atom
+
 def processSelectQuery(queryString):
     res = requests.request("POST", SERVER+"/sparql",
             data = queryString, 
@@ -49,10 +60,7 @@ def processSelectQuery(queryString):
         for bound in bindings:
             # create atom here
 #            atoms = [{"key": v, "value": bound[v]["value"] if bound.get(v) else ""} for v in vars]
-            atoms = [Atom(key=v, 
-                        value=bound[v]["value"] if bound.get(v) else "",
-                        aType=bound[v]["type"]
-                        ) for v in vars]
+            atoms = [buildAtom(v, bound) for v in vars]
             rows.append(atoms)
     else:
         result = {}

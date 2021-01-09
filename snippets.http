@@ -104,3 +104,19 @@ where {
     graph <http://example.com/ElmAndApi>
         {?s ?p ?o.}
 }
+
+#####
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+insert data {
+    graph :ElmAndApi {
+    : a :ToDoList .
+    :4 a :ToDo;
+        :description "English Add graph, predicate lookup to sparlq text area"@en;
+        :status "Pending"^^xsd:string;
+        :priority "1"^^xsd:integer;
+        :related :1 .
+}}
