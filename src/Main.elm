@@ -25,21 +25,28 @@ type Cardinality
     | ZeroToMany 
     | OneToMany 
 
-type alias ServerForm = (List (List SelectAtom))
+type alias ServerForm a = (List (List a))
 
 type alias ServerVars = (List String)
 
-type alias TripleForm = (List (SelectAtom, SelectAtom, SelectAtom))
+type alias TripleForm a = (List (a, a, a))
 
-type alias ContractedForm = (List SubjectMolecule) 
+serverForm2RdfNode: ServerForm SelectAtom -> ServerForm RdfNode
+serverForm2RdfNode serverForm =
+    List.map (\row ->
+                List.map(\col -> selectAtom2RdfNode col
+                    ) row
+            ) serverForm
 
-makeTripleForm: ServerForm -> Maybe TripleForm 
+type alias ContractedForm a = (List (SubjectMolecule a)) 
+
+makeTripleForm: ServerForm a -> Maybe (TripleForm  a)
 makeTripleForm res = res 
 -- ensure that serverForm consists of triples (not necessarily spo)
                     |> List.map (\r -> makeTriple r)
                     |> combine
 
-makeContractedForm: TripleForm -> ContractedForm
+makeContractedForm: TripleForm SelectAtom -> ContractedForm SelectAtom
 makeContractedForm triples = triples
                             |> List.map (\(s, p, o) -> (s, (p, o)))
                             |> List.sortBy (\(x, y) -> x.value)
@@ -50,7 +57,18 @@ makeContractedForm triples = triples
                                                         |> separateIntoPredicateLists
                                 ))
 
-contractResult: ServerVars -> ServerForm -> Maybe ContractedForm
+makeRdfContracteForm: TripleForm comparable ->  ContractedForm comparable
+makeRdfContracteForm triples = triples
+                            |> List.map (\(s, p, o) -> (s, (p, o)))
+                            |> List.sortBy (\(x, y) -> x)
+                            |> groupWhile (\a b -> (Tuple.first a) == (Tuple.first b))
+                            |> separateIntoSubject_PredicateObjects
+                            |> List.map (\(x, y) -> (x, List.sortBy (\(a, b) -> a) y 
+                                                        |> groupWhile (\a b -> (Tuple.first a) == (Tuple.first b))
+                                                        |> separateIntoPredicateLists
+                                ))
+
+contractResult: ServerVars -> ServerForm SelectAtom -> Maybe (ContractedForm SelectAtom)
 contractResult vars res =
 -- ContractedForm is only valid when ServerVars in the shape of spo
     case vars of
@@ -63,14 +81,11 @@ contractResult vars res =
                    _ -> Nothing
         _ -> Nothing
 
-sortAndGroup: List ( SelectAtom, ( SelectAtom, SelectAtom ) ) -> List ( SelectAtom, ( SelectAtom, SelectAtom ) )
-sortAndGroup l = List.sortBy (\(x, y) -> x.value) l
-
 type UIState 
     = Initialising 
     | Pinging 
     | Querying 
-    | DisplayingSelectResult  ServerVars ServerForm
+    | DisplayingSelectResult  ServerVars (ServerForm SelectAtom)
     | DisplayingSelectError String
     | ApiError Http.Error
     | Waiting
@@ -86,7 +101,7 @@ type alias Model =
     }
 
 type alias OpenPredicatesInSubject = List (SelectAtom, SelectAtom)
-type alias SubjectMolecule = (SelectAtom, (List (SelectAtom, List SelectAtom)))  -- s, List (pred, obj)
+type alias SubjectMolecule a = (a, (List (a, List a)))  -- s, List (pred, obj)
 
 type KeyboardMode
     = Normal
@@ -114,7 +129,7 @@ type Msg
     | FileSelected File
     | FileLoaded Sparql
     | DownloadFile
-    | DownloadResultsAsCSV ServerVars ServerForm
+    | DownloadResultsAsCSV ServerVars (ServerForm SelectAtom)
     | ChangeOutputFormat String
     | ChangePredicateStyle String
     | BackToQuery
@@ -132,7 +147,7 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , queryType: String
     , query: Sparql
     , vars: ServerVars
-    , result: ServerForm
+    , result: ServerForm SelectAtom
     }
 
 type alias SelectAtom =
@@ -148,11 +163,33 @@ type RdfNode
     | BlankNode String
     | LiteralOnlyValue {value: String}
     | LiteralValueAndDataType {value: String, dataType: String}
-    | LiteralLanguageString {value: String, language: String}
+    | LiteralValueAndLanguageString {value: String, language: String}
+    | Unknown
 
-type alias RdfKey = (String, String)  -- (simple, full)
+selectAtom2RdfNode: SelectAtom -> RdfNode
+selectAtom2RdfNode atom =
+    case atom.aType of
+        "uri" -> Uri atom.value
+        "blanknode" -> BlankNode atom.value
+        "literal" -> 
+            if atom.language /= ""
+            then
+                LiteralValueAndLanguageString {value=atom.value, language=atom.language}
+            else if atom.datatype /= ""
+                then LiteralValueAndDataType {value=atom.value, dataType=atom.datatype}
+                else Unknown
+        _ -> Unknown
 
-type RdfDict = Dict RdfKey (List RdfNode)
+type alias RdfKey = String
+
+makeRdfKey: RdfNode -> Maybe RdfKey
+makeRdfKey n =
+    case n of
+        Uri a -> 
+            Just a
+        _ -> Nothing       
+
+type RdfDict = Dict RdfKey (List (SubjectMolecule RdfNode))
 
 type alias Nodes = List RdfDict
 
@@ -161,13 +198,6 @@ type alias Edges = List (RdfKey, RdfKey)
 extractValues: List SelectAtom -> List String
 extractValues rows =
     List.map (\r -> r.value) rows
-
-extractPredicate: String -> List((SelectAtom, SelectAtom)) -> List String
-extractPredicate spec preds =    -- will return [] if spec not present
-    List.filter (\a -> (Tuple.first a).value == spec) preds
-    |> List.unzip
-    |> Tuple.second
-    |> List.map (\obj -> obj.value)
 
 selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 
@@ -197,7 +227,7 @@ update msg model =
                 ReadyToAcceptControl -> 
 --                    Debug.log ("Key = "++s)
 --                    (model, Cmd.none)
-                     case s of
+                    case s of
                         "Control" ->
                             Debug.log "Entering Ctrl mode" 
                             ({model | keyboard = Ctrl}, Cmd.none)
@@ -244,6 +274,7 @@ update msg model =
                 Ok okData -> 
                     case okData.status of
                         200 ->
+                            -- could transform to graph here
                             ({model | state = DisplayingSelectResult okData.vars okData.result}, Cmd.none)
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
@@ -332,20 +363,15 @@ submitParametrisedQuery newServer query returnTo =
                     , tracker = Nothing
                     }
 
-makeTriple: List SelectAtom -> Maybe (SelectAtom, SelectAtom, SelectAtom)
+makeTriple: List a -> Maybe (a, a, a)
 makeTriple spo =
     case (List.length spo) of
        3 -> Maybe.map3 (\a b c -> (a, b, c)) (List.head spo) (List.head (List.drop 1 spo)) (List.head (List.drop 2 spo))
        _ -> Nothing
 
-extractTriples:  ServerForm -> Maybe (List (SelectAtom, SelectAtom, SelectAtom))
-extractTriples results = 
-    List.map (\result -> makeTriple result) results
-    |> combine
-
-separateIntoSubject_PredicateObjects: List (( SelectAtom, (SelectAtom, SelectAtom) )
-                                            , List ( SelectAtom, (SelectAtom, SelectAtom) )) 
-                                            -> List (SelectAtom, List(SelectAtom, SelectAtom))
+separateIntoSubject_PredicateObjects: List (( a, (a, a) )
+                                            , List ( a, (a, a) )) 
+                                            -> List (a, List(a, a))
 separateIntoSubject_PredicateObjects l = 
     l |> List.map (\subject ->
                         let
@@ -357,7 +383,7 @@ separateIntoSubject_PredicateObjects l =
                             (subj, predicateObjects)
                     )
 
-separateIntoPredicateLists: List ( ( SelectAtom, SelectAtom ), List ( SelectAtom, SelectAtom ) ) -> List (SelectAtom, List(SelectAtom))
+separateIntoPredicateLists: List ( ( a, a ), List ( a, a ) ) -> List (a, List(a))
 separateIntoPredicateLists preds = 
                                 preds |> List.map(\p ->
                                     let
@@ -388,7 +414,7 @@ aka predicateStyle pred =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> ContractedForm -> Html Msg      
+viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> ContractedForm SelectAtom-> Html Msg 
 viewSubjects openPredicates predicateStyle subjs =
         div []
         (List.map (\spo ->
@@ -400,7 +426,7 @@ viewSubjects openPredicates predicateStyle subjs =
         ) subjs)
 
 
-viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule -> Html Msg
+viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule SelectAtom -> Html Msg
 viewPredicates openPredicates predicateStyle mole =
     let
         subj = Tuple.first mole
@@ -448,7 +474,7 @@ viewRestOfObjectList open selected obj rest =
 
 
 -- could refactor below into two steps - shape and show
-tableView: ServerVars -> ServerForm -> Html Msg
+tableView: ServerVars -> ServerForm SelectAtom -> Html Msg
 tableView vars result =
         div [] 
             [ table []
