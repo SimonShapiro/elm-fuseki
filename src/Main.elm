@@ -18,6 +18,7 @@ import List.Extra exposing (uncons, groupWhile)
 import Maybe.Extra exposing (combine)
 import Html exposing (a)
 import List
+import Dict exposing(Dict)
 
 type Cardinality 
     = OneToOne 
@@ -54,17 +55,6 @@ makeContractedForm triples = triples
                             |> separateIntoSubject_PredicateObjects
                             |> List.map (\(x, y) -> (x, List.sortBy (\(a, b) -> a.value) y 
                                                         |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
-                                                        |> separateIntoPredicateLists
-                                ))
-
-makeRdfContracteForm: TripleForm comparable ->  ContractedForm comparable
-makeRdfContracteForm triples = triples
-                            |> List.map (\(s, p, o) -> (s, (p, o)))
-                            |> List.sortBy (\(x, y) -> x)
-                            |> groupWhile (\a b -> (Tuple.first a) == (Tuple.first b))
-                            |> separateIntoSubject_PredicateObjects
-                            |> List.map (\(x, y) -> (x, List.sortBy (\(a, b) -> a) y 
-                                                        |> groupWhile (\a b -> (Tuple.first a) == (Tuple.first b))
                                                         |> separateIntoPredicateLists
                                 ))
 
@@ -159,8 +149,8 @@ type alias SelectAtom =
     }
 
 type RdfNode 
-    = Uri String
-    | BlankNode String
+    = Uri {value: String}
+    | BlankNode {value: String}
     | LiteralOnlyValue {value: String}
     | LiteralValueAndDataType {value: String, dataType: String}
     | LiteralValueAndLanguageString {value: String, language: String}
@@ -169,8 +159,8 @@ type RdfNode
 selectAtom2RdfNode: SelectAtom -> RdfNode
 selectAtom2RdfNode atom =
     case atom.aType of
-        "uri" -> Uri atom.value
-        "blanknode" -> BlankNode atom.value
+        "uri" -> Uri {value=atom.value}
+        "blanknode" -> BlankNode {value=atom.value}
         "literal" -> 
             if atom.language /= ""
             then
@@ -186,10 +176,26 @@ makeRdfKey: RdfNode -> Maybe RdfKey
 makeRdfKey n =
     case n of
         Uri a -> 
-            Just a
+            Just a.value
         _ -> Nothing       
 
-type RdfDict = Dict RdfKey (List (SubjectMolecule RdfNode))
+type alias RdfDict = Dict RdfKey (SubjectMolecule RdfNode)
+
+subjectMoleculeMap: (SelectAtom -> RdfNode) -> SubjectMolecule SelectAtom -> SubjectMolecule RdfNode
+subjectMoleculeMap fn (subj, po) =
+    (fn subj, (List.map (\(p, lo) ->
+                            (fn p, List.map(\o -> fn o) lo)
+                        ) po)
+    )
+
+makeRdfDict: ContractedForm SelectAtom -> RdfDict
+makeRdfDict cf = List.map (\subjM ->
+                                let
+                                    key = subjM |> Tuple.first |> selectAtom2RdfNode |> makeRdfKey |> Maybe.withDefault "unidentifiable"
+                                in
+                                    (key, subjectMoleculeMap selectAtom2RdfNode subjM)
+                            ) cf
+                |> Dict.fromList
 
 type alias Nodes = List RdfDict
 
@@ -414,7 +420,7 @@ aka predicateStyle pred =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> ContractedForm SelectAtom-> Html Msg 
+viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> RdfDict -> Html Msg 
 viewSubjects openPredicates predicateStyle subjs =
         div []
         (List.map (\spo ->
@@ -607,7 +613,8 @@ view model =
                         ]
                 SubjectOrientation ->
                     let
-                        contracted = contractResult vars result
+                        contracted = contractResult vars result  -- Maybe (ContractedForm SelectAtom)
+                                    |> Maybe.map makeRdfDict     -- Maybe RdfDict
                     in
                      case contracted of
                         Just a ->
