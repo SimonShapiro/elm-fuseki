@@ -44,6 +44,12 @@ def buildAtom(v, bound):
 def serializeResults(rows):
     return [[JSONSerializer.serialize(a) for a in r] for r in rows ]
 
+def stringifyValue(value):
+    if not isinstance(value, str):
+        return str(value)
+    else:
+        return value
+
 def processSelectQuery(queryString):
     res = requests.request("POST", SERVER+"/sparql",
             data = queryString, 
@@ -142,7 +148,7 @@ def processConstructQuery(queryString):
 #            print('+++++++++++++')
             # this loop yields predicates
             for predicate in subj.keys():
-                predicateAtom = {"key": "p", "value": predicate}
+                predicateAtom = {"key": "p", "value": predicate if predicate != "@type" else "http://www.w3.org/2000/01/rdf-schema#type"}
                 print(predicateAtom)
                 if predicate != '@id':
                     for obj in subj[predicate]:
@@ -150,7 +156,7 @@ def processConstructQuery(queryString):
                                 objectAtom = {"key": "o", "value": obj if obj else ""}
 #                                print(f'>>{objectAtom}')
                         else:
-                            objectAtom = {"key": "o", "value": obj.get("@value") or obj.get("@id") or ""}
+                            objectAtom = {"key": "o", "value": stringifyValue(obj.get("@value")) or obj.get("@id") or ""}
 #                            print(f'--{objectAtom}')
 #                        print([subjectAtom, predicateAtom, objectAtom])
                         resultArray.append([subjectAtom, predicateAtom, objectAtom])
