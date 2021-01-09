@@ -41,6 +41,9 @@ def buildAtom(v, bound):
         atom.datatype = bound[v].get("datatype")
     return atom
 
+def serializeResults(rows):
+    return [[JSONSerializer.serialize(a) for a in r] for r in rows ]
+
 def processSelectQuery(queryString):
     res = requests.request("POST", SERVER+"/sparql",
             data = queryString, 
@@ -59,14 +62,13 @@ def processSelectQuery(queryString):
         rows = []
         for bound in bindings:
             # create atom here
-#            atoms = [{"key": v, "value": bound[v]["value"] if bound.get(v) else ""} for v in vars]
             atoms = [buildAtom(v, bound) for v in vars]
             rows.append(atoms)
     else:
         result = {}
         vars = []
         rows = []
-    print([[JSONSerializer.serialize(a) for a in r] for r in rows ])
+    print(serializeResults(rows))
     return {
         "status": 200,
         "response": json.dumps({
@@ -76,7 +78,7 @@ def processSelectQuery(queryString):
             "queryType": "select",
             "query": queryString,
             "vars": vars,
-            "result": [[JSONSerializer.serialize(a) for a in r] for r in rows ]  # need to deserialize Atoms here 
+            "result": serializeResults(rows) 
         })}
 
 def processAskQuery(queryString):
@@ -94,7 +96,12 @@ def processAskQuery(queryString):
         result = res.json()  # only works for `ask` and `select`
         print(result)
         vars = ["answer"]
-        rows = [[{"key": "answer", "value": str(result["boolean"])}]]
+        rows = [[Atom(key="answer", 
+                        value=str(result["boolean"]), 
+                        aType="literal", 
+                        datatype="http://www.w3.org/2001/XMLSchema#boolean"
+                    )
+                ]]
     else:
         result = {}
         vars = []
@@ -109,7 +116,7 @@ def processAskQuery(queryString):
             "queryType": "select",
             "query": queryString,
             "vars": vars,
-            "result": rows
+            "result": serializeResults(rows)
         })}
 
 def processConstructQuery(queryString):
