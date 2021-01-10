@@ -7296,6 +7296,106 @@ var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$h4 = _VirtualDom_node('h4');
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $author$project$Main$makeRdfKey = function (n) {
+	switch (n.$) {
+		case 'Uri':
+			var a = n.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'BlankNode':
+			var a = n.a;
+			return $elm$core$Maybe$Just(a.value);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$BlankNode = function (a) {
+	return {$: 'BlankNode', a: a};
+};
+var $author$project$Main$LiteralValueAndDataType = function (a) {
+	return {$: 'LiteralValueAndDataType', a: a};
+};
+var $author$project$Main$LiteralValueAndLanguageString = function (a) {
+	return {$: 'LiteralValueAndLanguageString', a: a};
+};
+var $author$project$Main$Unknown = {$: 'Unknown'};
+var $author$project$Main$Uri = function (a) {
+	return {$: 'Uri', a: a};
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Main$selectAtom2RdfNode = function (atom) {
+	var _v0 = atom.aType;
+	switch (_v0) {
+		case 'uri':
+			return $author$project$Main$Uri(
+				{value: atom.value});
+		case 'bnode':
+			return $author$project$Main$BlankNode(
+				{value: atom.value});
+		case 'literal':
+			return (atom.language !== '') ? $author$project$Main$LiteralValueAndLanguageString(
+				{language: atom.language, value: atom.value}) : ((atom.datatype !== '') ? $author$project$Main$LiteralValueAndDataType(
+				{dataType: atom.datatype, value: atom.value}) : $author$project$Main$Unknown);
+		default:
+			return $author$project$Main$Unknown;
+	}
+};
+var $author$project$Main$subjectMoleculeMap = F2(
+	function (fn, _v0) {
+		var subj = _v0.a;
+		var po = _v0.b;
+		return _Utils_Tuple2(
+			fn(subj),
+			A2(
+				$elm$core$List$map,
+				function (_v1) {
+					var p = _v1.a;
+					var lo = _v1.b;
+					return _Utils_Tuple2(
+						fn(p),
+						A2(
+							$elm$core$List$map,
+							function (o) {
+								return fn(o);
+							},
+							lo));
+				},
+				po));
+	});
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Main$makeRdfDict = function (cf) {
+	return $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			function (subjM) {
+				var key = A2(
+					$elm$core$Maybe$withDefault,
+					'unidentifiable',
+					$author$project$Main$makeRdfKey(
+						$author$project$Main$selectAtom2RdfNode(subjM.a)));
+				return _Utils_Tuple2(
+					key,
+					A2($author$project$Main$subjectMoleculeMap, $author$project$Main$selectAtom2RdfNode, subjM));
+			},
+			cf));
+};
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -7576,187 +7676,6 @@ var $author$project$Main$uploadQueryFromFile = A2(
 				]))
 		]));
 var $elm$html$Html$hr = _VirtualDom_node('hr');
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Main$aka = F2(
-	function (predicateStyle, pred) {
-		if (predicateStyle.$ === 'Verbose') {
-			return pred;
-		} else {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				pred,
-				$elm$core$List$head(
-					$elm$core$List$reverse(
-						A2($elm$core$String$split, '/', pred))));
-		}
-	});
-var $elm$core$List$tail = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(xs);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
-	return {$: 'DeregisterSubjectPredicateOpen', a: a};
-};
-var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
-	return {$: 'RegisterSubjectPredicateOpen', a: a};
-};
-var $elm_community$list_extra$List$Extra$find = F2(
-	function (predicate, list) {
-		find:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var first = list.a;
-				var rest = list.b;
-				if (predicate(first)) {
-					return $elm$core$Maybe$Just(first);
-				} else {
-					var $temp$predicate = predicate,
-						$temp$list = rest;
-					predicate = $temp$predicate;
-					list = $temp$list;
-					continue find;
-				}
-			}
-		}
-	});
-var $author$project$Main$viewRestOfObjectList = F4(
-	function (open, selected, obj, rest) {
-		var _v0 = A2(
-			$elm_community$list_extra$List$Extra$find,
-			function (o) {
-				return _Utils_eq(o, selected);
-			},
-			open);
-		if (_v0.$ === 'Just') {
-			var a = _v0.a;
-			return A2(
-				$elm$core$List$cons,
-				$elm$html$Html$text(obj.value),
-				A2(
-					$elm$core$List$cons,
-					A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$DeregisterSubjectPredicateOpen(selected))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(' less')
-							])),
-					A2(
-						$elm$core$List$map,
-						function (r) {
-							return A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(r.value)
-									]));
-						},
-						rest)));
-		} else {
-			return _List_fromArray(
-				[
-					$elm$html$Html$text(obj.value),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$Main$RegisterSubjectPredicateOpen(selected))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(
-								$elm$core$List$length(rest)) + ' more')
-						]))
-				]);
-		}
-	});
-var $author$project$Main$viewObjects = F3(
-	function (open, subj, po) {
-		var _v0 = po;
-		var pred = _v0.a;
-		var objs = _v0.b;
-		var head = $elm$core$List$head(objs);
-		var rest = A2(
-			$elm$core$Maybe$withDefault,
-			_List_Nil,
-			$elm$core$List$tail(objs));
-		var restCount = $elm$core$List$length(rest);
-		if (head.$ === 'Just') {
-			var obj = head.a;
-			if (!restCount) {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(obj.value)
-						]));
-			} else {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					A4(
-						$author$project$Main$viewRestOfObjectList,
-						open,
-						_Utils_Tuple2(subj, pred),
-						obj,
-						rest));
-			}
-		} else {
-			return $elm$html$Html$text('');
-		}
-	});
-var $author$project$Main$viewPredicates = F3(
-	function (openPredicates, predicateStyle, mole) {
-		var subj = mole.a;
-		var preds = mole.b;
-		return A2(
-			$elm$html$Html$div,
-			_List_Nil,
-			A2(
-				$elm$core$List$map,
-				function (po) {
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$b,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$elm$html$Html$text(
-										A2($author$project$Main$aka, predicateStyle, po.a.value)),
-										$elm$html$Html$text(': ')
-									])),
-								A3($author$project$Main$viewObjects, openPredicates, subj, po)
-							]));
-				},
-				preds));
-	});
 var $author$project$Main$viewSubjects = F3(
 	function (openPredicates, predicateStyle, subjs) {
 		return A2(
@@ -7764,7 +7683,7 @@ var $author$project$Main$viewSubjects = F3(
 			_List_Nil,
 			A2(
 				$elm$core$List$map,
-				function (spo) {
+				function (spoKey) {
 					return A2(
 						$elm$html$Html$div,
 						_List_Nil,
@@ -7775,13 +7694,12 @@ var $author$project$Main$viewSubjects = F3(
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text(spo.a.value)
+										$elm$html$Html$text(spoKey)
 									])),
-								A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, spo),
 								A2($elm$html$Html$hr, _List_Nil, _List_Nil)
 							]));
 				},
-				subjs));
+				$elm$core$Dict$keys(subjs)));
 	});
 var $author$project$Main$view = function (model) {
 	var _v0 = model.state;
@@ -7965,7 +7883,10 @@ var $author$project$Main$view = function (model) {
 							A2($author$project$Main$tableView, vars, result)
 						]));
 			} else {
-				var contracted = A2($author$project$Main$contractResult, vars, result);
+				var contracted = A2(
+					$elm$core$Maybe$map,
+					$author$project$Main$makeRdfDict,
+					A2($author$project$Main$contractResult, vars, result));
 				if (contracted.$ === 'Just') {
 					var a = contracted.a;
 					return A2(

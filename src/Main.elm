@@ -160,7 +160,7 @@ selectAtom2RdfNode: SelectAtom -> RdfNode
 selectAtom2RdfNode atom =
     case atom.aType of
         "uri" -> Uri {value=atom.value}
-        "blanknode" -> BlankNode {value=atom.value}
+        "bnode" -> BlankNode {value=atom.value}
         "literal" -> 
             if atom.language /= ""
             then
@@ -176,6 +176,8 @@ makeRdfKey: RdfNode -> Maybe RdfKey
 makeRdfKey n =
     case n of
         Uri a -> 
+            Just a.value
+        BlankNode a ->
             Just a.value
         _ -> Nothing       
 
@@ -423,13 +425,13 @@ aka predicateStyle pred =
 viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> RdfDict -> Html Msg 
 viewSubjects openPredicates predicateStyle subjs =
         div []
-        (List.map (\spo ->
+        (List.map (\spoKey ->
             div []
-                [ h2 [] [text (Tuple.first spo).value]
-                 , viewPredicates openPredicates predicateStyle spo
+                [ h2 [] [text spoKey] 
+--                 , viewPredicates openPredicates predicateStyle spo
                  , hr [][]
                 ]
-        ) subjs)
+        ) (Dict.keys subjs))
 
 
 viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule SelectAtom -> Html Msg
