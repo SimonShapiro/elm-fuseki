@@ -7311,6 +7311,9 @@ var $author$project$Main$makeRdfKey = function (n) {
 var $author$project$Main$BlankNode = function (a) {
 	return {$: 'BlankNode', a: a};
 };
+var $author$project$Main$LiteralOnlyValue = function (a) {
+	return {$: 'LiteralOnlyValue', a: a};
+};
 var $author$project$Main$LiteralValueAndDataType = function (a) {
 	return {$: 'LiteralValueAndDataType', a: a};
 };
@@ -7334,7 +7337,8 @@ var $author$project$Main$selectAtom2RdfNode = function (atom) {
 		case 'literal':
 			return (atom.language !== '') ? $author$project$Main$LiteralValueAndLanguageString(
 				{language: atom.language, value: atom.value}) : ((atom.datatype !== '') ? $author$project$Main$LiteralValueAndDataType(
-				{dataType: atom.datatype, value: atom.value}) : $author$project$Main$Unknown);
+				{dataType: atom.datatype, value: atom.value}) : $author$project$Main$LiteralOnlyValue(
+				{value: atom.value}));
 		default:
 			return $author$project$Main$Unknown;
 	}
@@ -7676,6 +7680,229 @@ var $author$project$Main$uploadQueryFromFile = A2(
 				]))
 		]));
 var $elm$html$Html$hr = _VirtualDom_node('hr');
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$viewRdfNode = function (node) {
+	switch (node.$) {
+		case 'Uri':
+			var a = node.a;
+			return $elm$html$Html$text(a.value);
+		case 'BlankNode':
+			var a = node.a;
+			return $elm$html$Html$text(a.value);
+		case 'LiteralOnlyValue':
+			var a = node.a;
+			return $elm$html$Html$text(a.value);
+		case 'LiteralValueAndDataType':
+			var a = node.a;
+			return $elm$html$Html$text(a.value);
+		case 'LiteralValueAndLanguageString':
+			var a = node.a;
+			return $elm$html$Html$text(a.value);
+		default:
+			return A2(
+				$elm$html$Html$b,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Unrecognised Atom')
+					]));
+	}
+};
+var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
+	return {$: 'DeregisterSubjectPredicateOpen', a: a};
+};
+var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
+	return {$: 'RegisterSubjectPredicateOpen', a: a};
+};
+var $elm_community$list_extra$List$Extra$find = F2(
+	function (predicate, list) {
+		find:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var first = list.a;
+				var rest = list.b;
+				if (predicate(first)) {
+					return $elm$core$Maybe$Just(first);
+				} else {
+					var $temp$predicate = predicate,
+						$temp$list = rest;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue find;
+				}
+			}
+		}
+	});
+var $author$project$Main$viewRestOfObjectList = F4(
+	function (open, selected, obj, rest) {
+		var _v0 = A2(
+			$elm_community$list_extra$List$Extra$find,
+			function (o) {
+				return _Utils_eq(o, selected);
+			},
+			open);
+		if (_v0.$ === 'Just') {
+			var a = _v0.a;
+			return A2(
+				$elm$core$List$cons,
+				$author$project$Main$viewRdfNode(obj),
+				A2(
+					$elm$core$List$cons,
+					A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick(
+								$author$project$Main$DeregisterSubjectPredicateOpen(selected))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(' less')
+							])),
+					A2(
+						$elm$core$List$map,
+						function (r) {
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$Main$viewRdfNode(r)
+									]));
+						},
+						rest)));
+		} else {
+			return _List_fromArray(
+				[
+					$author$project$Main$viewRdfNode(obj),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							$author$project$Main$RegisterSubjectPredicateOpen(selected))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(
+								$elm$core$List$length(rest)) + ' more')
+						]))
+				]);
+		}
+	});
+var $author$project$Main$viewObjects = F3(
+	function (open, subj, po) {
+		var _v0 = po;
+		var pred = _v0.a;
+		var objs = _v0.b;
+		var head = $elm$core$List$head(objs);
+		var rest = A2(
+			$elm$core$Maybe$withDefault,
+			_List_Nil,
+			$elm$core$List$tail(objs));
+		var restCount = $elm$core$List$length(rest);
+		if (head.$ === 'Just') {
+			var obj = head.a;
+			if (!restCount) {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$author$project$Main$viewRdfNode(obj)
+						]));
+			} else {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					A4(
+						$author$project$Main$viewRestOfObjectList,
+						open,
+						_Utils_Tuple2(subj, pred),
+						obj,
+						rest));
+			}
+		} else {
+			return $elm$html$Html$text('');
+		}
+	});
+var $author$project$Main$aka = F2(
+	function (predicateStyle, pred) {
+		if (predicateStyle.$ === 'Verbose') {
+			return pred;
+		} else {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				pred,
+				$elm$core$List$head(
+					$elm$core$List$reverse(
+						A2($elm$core$String$split, '/', pred))));
+		}
+	});
+var $author$project$Main$viewRdfNodeAsPredicate = F2(
+	function (predicateStyle, node) {
+		if (node.$ === 'Uri') {
+			var a = node.a;
+			return A2(
+				$elm$html$Html$b,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						A2($author$project$Main$aka, predicateStyle, a.value)),
+						$elm$html$Html$text(': ')
+					]));
+		} else {
+			return A2(
+				$elm$html$Html$b,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text('All predicates should be Uri')
+					]));
+		}
+	});
+var $author$project$Main$viewPredicates = F3(
+	function (openPredicates, predicateStyle, mole) {
+		var subj = mole.a;
+		var preds = mole.b;
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				function (po) {
+					return A2(
+						$elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2($author$project$Main$viewRdfNodeAsPredicate, predicateStyle, po.a),
+								A3($author$project$Main$viewObjects, openPredicates, subj, po)
+							]));
+				},
+				preds));
+	});
+var $author$project$Main$viewSubjectMolecule = F3(
+	function (openPredicates, predicateStyle, subjM) {
+		if (subjM.$ === 'Nothing') {
+			return $elm$html$Html$text('Lost subject molecule');
+		} else {
+			var a = subjM.a;
+			return A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, a);
+		}
+	});
 var $author$project$Main$viewSubjects = F3(
 	function (openPredicates, predicateStyle, subjs) {
 		return A2(
@@ -7696,6 +7923,11 @@ var $author$project$Main$viewSubjects = F3(
 									[
 										$elm$html$Html$text(spoKey)
 									])),
+								A3(
+								$author$project$Main$viewSubjectMolecule,
+								openPredicates,
+								predicateStyle,
+								A2($elm$core$Dict$get, spoKey, subjs)),
 								A2($elm$html$Html$hr, _List_Nil, _List_Nil)
 							]));
 				},

@@ -90,7 +90,7 @@ type alias Model =
     , openPredicatesInSubject: OpenPredicatesInSubject
     }
 
-type alias OpenPredicatesInSubject = List (SelectAtom, SelectAtom)
+type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
 type alias SubjectMolecule a = (a, (List (a, List a)))  -- s, List (pred, obj)
 
 type KeyboardMode
@@ -123,8 +123,8 @@ type Msg
     | ChangeOutputFormat String
     | ChangePredicateStyle String
     | BackToQuery
-    | RegisterSubjectPredicateOpen (SelectAtom, SelectAtom)
-    | DeregisterSubjectPredicateOpen (SelectAtom, SelectAtom)
+    | RegisterSubjectPredicateOpen (RdfNode, RdfNode)
+    | DeregisterSubjectPredicateOpen (RdfNode, RdfNode)
 
 type alias Server = String
 
@@ -167,7 +167,7 @@ selectAtom2RdfNode atom =
                 LiteralValueAndLanguageString {value=atom.value, language=atom.language}
             else if atom.datatype /= ""
                 then LiteralValueAndDataType {value=atom.value, dataType=atom.datatype}
-                else Unknown
+                else LiteralOnlyValue {value=atom.value}
         _ -> Unknown
 
 type alias RdfKey = String
@@ -427,14 +427,20 @@ viewSubjects openPredicates predicateStyle subjs =
         div []
         (List.map (\spoKey ->
             div []
-                [ h2 [] [text spoKey] 
---                 , viewPredicates openPredicates predicateStyle spo
+                [ h2 [] [text spoKey] -- make case here to clean up the view function below
+                 , viewSubjectMolecule openPredicates predicateStyle (Dict.get spoKey subjs)
                  , hr [][]
                 ]
         ) (Dict.keys subjs))
 
 
-viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule SelectAtom -> Html Msg
+viewSubjectMolecule: OpenPredicatesInSubject -> PredicateStyle -> Maybe (SubjectMolecule RdfNode) -> Html Msg
+viewSubjectMolecule openPredicates predicateStyle subjM =
+    case subjM of
+        Nothing -> text "Lost subject molecule"
+        Just a -> viewPredicates openPredicates predicateStyle a
+
+viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule RdfNode -> Html Msg
 viewPredicates openPredicates predicateStyle mole =
     let
         subj = Tuple.first mole
@@ -443,15 +449,38 @@ viewPredicates openPredicates predicateStyle mole =
         div []
             (List.map(\po -> 
                 div []
-                    [ b []  [ text (aka predicateStyle (Tuple.first po).value)
-                            , text ": "
-                            ]
-                        , viewObjects openPredicates subj po
+                    [ viewRdfNodeAsPredicate predicateStyle (Tuple.first po)
+                    , viewObjects openPredicates subj po
                     ]
             )
             preds)
 
-viewObjects: OpenPredicatesInSubject -> SelectAtom -> (SelectAtom, List SelectAtom) -> Html Msg
+viewRdfNodeAsPredicate: PredicateStyle -> RdfNode -> Html Msg
+viewRdfNodeAsPredicate predicateStyle node = 
+    case node of
+        Uri a ->
+            b []    [ text (aka predicateStyle a.value)
+                    , text ": "
+                    ]
+        _ ->
+            b []    [ text "All predicates should be Uri"]
+viewRdfNode: RdfNode -> Html Msg
+viewRdfNode node = 
+    case node of
+        Uri a ->
+            text a.value
+        BlankNode a ->
+            text a.value
+        LiteralOnlyValue a ->
+            text a.value
+        LiteralValueAndDataType a ->
+            text a.value
+        LiteralValueAndLanguageString a ->
+            text a.value
+        Unknown ->
+            b []    [ text "Unrecognised Atom"]
+
+viewObjects: OpenPredicatesInSubject -> RdfNode -> (RdfNode, List RdfNode) -> Html Msg
 viewObjects open subj po =
     let
         (pred, objs) = po
@@ -462,20 +491,20 @@ viewObjects open subj po =
     in
         case head of
            Just obj -> case restCount of
-                                0 -> div [] [text obj.value]
+                                0 -> div [] [viewRdfNode obj]
                                 _ -> div [] (viewRestOfObjectList open (subj, pred) obj rest)
 
            Nothing -> text ""
 
-viewRestOfObjectList: OpenPredicatesInSubject -> (SelectAtom, SelectAtom) -> SelectAtom -> List SelectAtom -> List (Html Msg)
+viewRestOfObjectList: OpenPredicatesInSubject -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Html Msg)
 viewRestOfObjectList open selected obj rest =
     case (List.Extra.find (\o -> o == selected) open) of
-        Just a -> text obj.value
+        Just a -> viewRdfNode obj
                   :: button [onClick (DeregisterSubjectPredicateOpen selected)] [text " less"]
                   :: (List.map (
-                        \r -> div [] [text r.value]
+                        \r -> div [] [viewRdfNode r]
                     ) rest)
-        Nothing -> [ text obj.value
+        Nothing -> [ viewRdfNode obj
                     , button [onClick (RegisterSubjectPredicateOpen selected)] [text ((String.fromInt <| List.length rest)++" more")]
                     ]
 -- View
