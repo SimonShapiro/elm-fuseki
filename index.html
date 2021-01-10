@@ -6506,7 +6506,7 @@ var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$map7 = _Json_map7;
 var $author$project$Main$SelectAtom = F5(
-	function (key, value, aType, datatype, language) {
+	function (key, value, aType, language, datatype) {
 		return {aType: aType, datatype: datatype, key: key, language: language, value: value};
 	});
 var $elm$json$Json$Decode$map5 = _Json_map5;
@@ -7689,6 +7689,8 @@ var $elm$core$List$tail = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$html$Html$small = _VirtualDom_node('small');
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$viewRdfNode = function (node) {
 	switch (node.$) {
 		case 'Uri':
@@ -7702,10 +7704,40 @@ var $author$project$Main$viewRdfNode = function (node) {
 			return $elm$html$Html$text(a.value);
 		case 'LiteralValueAndDataType':
 			var a = node.a;
-			return $elm$html$Html$text(a.value);
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(a.value),
+						A2(
+						$elm$html$Html$small,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('  ('),
+								$elm$html$Html$text(a.dataType),
+								$elm$html$Html$text(')')
+							]))
+					]));
 		case 'LiteralValueAndLanguageString':
 			var a = node.a;
-			return $elm$html$Html$text(a.value);
+			return A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(a.value),
+						A2(
+						$elm$html$Html$small,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('  ('),
+								$elm$html$Html$text(a.language),
+								$elm$html$Html$text(')')
+							]))
+					]));
 		default:
 			return A2(
 				$elm$html$Html$b,

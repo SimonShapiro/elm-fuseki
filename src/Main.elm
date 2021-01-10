@@ -1,7 +1,7 @@
 module Main exposing(..)
 
 import Browser exposing (..)
-import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td)
+import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td, small)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
@@ -144,8 +144,8 @@ type alias SelectAtom =
     { key: String
     , value: String
     , aType: String
-    , datatype: String
     , language: String
+    , datatype: String
     }
 
 type RdfNode 
@@ -474,9 +474,11 @@ viewRdfNode node =
         LiteralOnlyValue a ->
             text a.value
         LiteralValueAndDataType a ->
-            text a.value
+            span [] [ text a.value
+                    , small [] [text "  (", text a.dataType, text ")"]]
         LiteralValueAndLanguageString a ->
-            text a.value
+            span [] [ text a.value
+                    , small [] [text "  (", text a.language, text ")"]]
         Unknown ->
             b []    [ text "Unrecognised Atom"]
 
