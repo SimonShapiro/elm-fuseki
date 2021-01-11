@@ -332,6 +332,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Browser.Events.onKeyDown msgDecoder
 
+pingServer : Server -> (Cmd Msg)
 pingServer newServer = 
   --  let
         Debug.log ("Pinging"++newServer)

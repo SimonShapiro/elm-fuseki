@@ -4,9 +4,11 @@ import requests
 import json
 from pyld import jsonld
 from dataclasses import dataclass
-from dataclasses_serialization.json import JSONSerializer
+from dataclasses_json import dataclass_json
 import pprint
+from optparse import OptionParser
 
+@dataclass_json
 @dataclass
 class Atom:
     key: str
@@ -23,7 +25,7 @@ app.config['OPENAPI_VERSION'] = '3.0.2'
 
 CORS(app)
 
-SERVER = "http://localhost:3030/latest"
+SERVER = ""#"http://localhost:3030/latest"
 
 @app.route('/hello', methods=['GET'])
 def hello():
@@ -42,7 +44,7 @@ def buildAtom(v, bound):
     return atom
 
 def serializeResults(rows):
-    return [[JSONSerializer.serialize(a) for a in r] for r in rows ]
+    return [[a.to_dict() for a in r] for r in rows ]
 
 def stringifyValue(value):
     if value:
@@ -229,4 +231,13 @@ def sparql():
         )
     
 if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("-s", "--server", dest="server",
+                    help="Location of fuseki server", metavar="SERVER")
+    # parser.add_option("-q", "--quiet",
+    #                 action="store_false", dest="verbose", default=True,
+    #                 help="don't print status messages to stdout")
+    (options, args) = parser.parse_args()
+    print(options, args)
+    SERVER = options.server
     app.run()

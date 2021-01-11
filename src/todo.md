@@ -6,7 +6,12 @@
 - ~~Bulk up predicates into lists~~
 - ~~UI to accomodate lists~~
 - ~~Elaborate on the structure of SelectAtom~~
-- Incorporate improved SelectAtom into useful ui interpretation
+- ~~Incorporate improved SelectAtom into useful ui interpretation~~
+- Make target fuseki a command parameter
+- Dockerise server.py
+- Single subject molecule url
+- Links over single url views
+- graph view
 - Add limit and offset semantics in table and subject oriented list
 - csv download - filename to be input
 - Improve table (a more fully featured table)
