@@ -177,11 +177,16 @@ def processConstructQuery(queryString):
                                                 )
                         else:  # need to be careful with sensing difference between @value and @id
                             # use rdfType where not explicity provided in json-ld
+                            print(obj)
                             if obj.get("@value"):
                                 objectAtom = Atom(key="o", 
                                                     value=stringifyValue(obj.get("@value")),
-                                                    aType= obj.get("@datatype") if obj.get("@datatype") else rdfTypeSignature(obj.get("@value"))
+                                                    aType= 'literal'
                                                 )
+                                if obj.get("@language"):
+                                    objectAtom.language = obj.get("@language")
+                                if rdfTypeSignature(obj.get("@value")):
+                                    objectAtom.datatype = rdfTypeSignature(obj.get("@value"))
                             elif obj.get("@id"): 
                                 objectAtom = Atom(key="o", 
                                                     value=obj.get("@id"),
