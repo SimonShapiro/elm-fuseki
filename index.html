@@ -5510,7 +5510,14 @@ var $elm$core$Task$perform = F2(
 			$elm$core$Task$Perform(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
-var $elm$browser$Browser$document = _Browser_document;
+var $elm$browser$Browser$application = _Browser_application;
+var $author$project$Main$NoOp = {$: 'NoOp'};
+var $author$project$Main$handleUrlChange = function (url) {
+	return $author$project$Main$NoOp;
+};
+var $author$project$Main$handleUrlRequest = function (req) {
+	return $author$project$Main$NoOp;
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$Initialising = {$: 'Initialising'};
@@ -5523,9 +5530,10 @@ var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $author$project$Main$server = 'http://localhost:port';
 var $author$project$Main$startWith = A7($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse, _List_Nil);
-var $author$project$Main$initialModel = function (_v0) {
-	return _Utils_Tuple2($author$project$Main$startWith, $elm$core$Platform$Cmd$none);
-};
+var $author$project$Main$initialFn = F3(
+	function (_v0, url, key) {
+		return _Utils_Tuple2($author$project$Main$startWith, $elm$core$Platform$Cmd$none);
+	});
 var $author$project$Main$PressedKey = function (a) {
 	return {$: 'PressedKey', a: a};
 };
@@ -6497,6 +6505,7 @@ var $elm$file$File$Select$file = F2(
 			toMsg,
 			_File_uploadOne(mimes));
 	});
+var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $elm$core$Debug$log = _Debug_log;
 var $author$project$Main$KGResponse = F7(
 	function (server, status, message, queryType, query, vars, result) {
@@ -6776,6 +6785,17 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'NoOp':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'ClickedLink':
+				var urlRequest = msg.a;
+				if (urlRequest.$ === 'Internal') {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var url = urlRequest.a;
+					return _Utils_Tuple2(
+						model,
+						$elm$browser$Browser$Navigation$load(url));
+				}
 			case 'BackToQuery':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -6784,8 +6804,8 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'PressedKey':
 				var s = msg.a;
-				var _v1 = model.keyboard;
-				switch (_v1.$) {
+				var _v2 = model.keyboard;
+				switch (_v2.$) {
 					case 'ReadyToAcceptControl':
 						if (s === 'Control') {
 							return A2(
@@ -6867,8 +6887,8 @@ var $author$project$Main$update = F2(
 				}
 			case 'ChangeQuery':
 				var newQuery = msg.a;
-				var _v5 = model.keyboard;
-				if (_v5.$ === 'ReadyToAcceptControl') {
+				var _v6 = model.keyboard;
+				if (_v6.$ === 'ReadyToAcceptControl') {
 					return A2(
 						$elm$core$Debug$log,
 						'Query ' + newQuery,
@@ -6893,8 +6913,8 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v7 = okData.status;
-					if (_v7 === 200) {
+					var _v8 = okData.status;
+					if (_v8 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8203,8 +8223,8 @@ var $author$project$Main$view = function (model) {
 		title: 'Sparql Query Playground'
 	};
 };
-var $author$project$Main$main = $elm$browser$Browser$document(
-	{init: $author$project$Main$initialModel, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
+var $author$project$Main$main = $elm$browser$Browser$application(
+	{init: $author$project$Main$initialFn, onUrlChange: $author$project$Main$handleUrlChange, onUrlRequest: $author$project$Main$handleUrlRequest, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
 

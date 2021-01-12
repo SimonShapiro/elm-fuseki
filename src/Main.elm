@@ -2,11 +2,13 @@ module Main exposing(..)
 
 import Browser exposing (..)
 import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td, small)
+import Html exposing (textarea)
+import Html exposing (a)
 import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
+import Browser.Navigation exposing (pushUrl, load, Key)
 import Http
-import Html exposing (textarea)
 import Html.Events exposing (on)
 import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, map7, list, int, decodeString, at, andThen)
 
@@ -16,15 +18,14 @@ import File.Download as Download
 import Task
 import List.Extra exposing (uncons, groupWhile)
 import Maybe.Extra exposing (combine)
-import Html exposing (a)
 import List
 import Dict exposing(Dict)
+import Url exposing (..)
 
 type alias Document msg =
     { title : String
     , body : List (Html msg)
     }
-
 type Cardinality 
     = OneToOne 
     | ZeroOrOne 
@@ -93,6 +94,7 @@ type alias Model =
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
     , openPredicatesInSubject: OpenPredicatesInSubject
+--    , key: Key
     }
 
 type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
@@ -130,6 +132,7 @@ type Msg
     | BackToQuery
     | RegisterSubjectPredicateOpen (RdfNode, RdfNode)
     | DeregisterSubjectPredicateOpen (RdfNode, RdfNode)
+    | ClickedLink UrlRequest
 
 type alias Server = String
 
@@ -225,15 +228,25 @@ server: Server
 server = "http://localhost:port"
 
 startWith: Model
-startWith = Model Initialising server "" Normal Table Terse []
+startWith = Model Initialising server "" Normal Table Terse [] 
 
-initialModel: flags -> (Model, (Cmd Msg))
-initialModel _ = (startWith, Cmd.none)
+initialFn: flags -> Url -> Key -> (Model, (Cmd Msg))
+initialFn _ url key = (startWith, Cmd.none)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         NoOp -> (model, Cmd.none)
+        ClickedLink urlRequest ->
+            case urlRequest of
+                Internal url ->
+                    ( model
+                    , Cmd.none -- pushUrl model.key (Url.toString url)
+                    )
+                External url ->
+                    ( model
+                    , load url
+                    )
         BackToQuery -> ({model | state = Querying}, Cmd.none)
         PressedKey s -> 
             case model.keyboard of
@@ -327,6 +340,12 @@ update msg model =
             ({model | openPredicatesInSubject = selected::model.openPredicatesInSubject}, Cmd.none)
         DeregisterSubjectPredicateOpen selected -> 
             ({model | openPredicatesInSubject = List.Extra.remove selected model.openPredicatesInSubject}, Cmd.none)
+
+handleUrlRequest: UrlRequest -> Msg
+handleUrlRequest req = NoOp
+
+handleUrlChange: Url -> Msg
+handleUrlChange url = NoOp
 
 msgDecoder : Decoder Msg
 msgDecoder =
@@ -692,9 +711,11 @@ mainDecoder =
 
 main: Program () Model Msg
 main =
-  Browser.document
-    { init = initialModel
+  Browser.application
+    { init = initialFn
     , update = update
     , subscriptions = subscriptions
     , view = view
+    , onUrlChange = handleUrlChange
+    , onUrlRequest = handleUrlRequest
     }
