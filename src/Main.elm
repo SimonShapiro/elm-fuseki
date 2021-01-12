@@ -20,6 +20,11 @@ import Html exposing (a)
 import List
 import Dict exposing(Dict)
 
+type alias Document msg =
+    { title : String
+    , body : List (Html msg)
+    }
+
 type Cardinality 
     = OneToOne 
     | ZeroOrOne 
@@ -593,81 +598,83 @@ downloadFile: String -> String -> Cmd msg
 downloadFile fileName query =
   Download.string fileName "text" query
 
-view: Model -> Html Msg
-view model = 
-    case model.state of
-        Initialising ->
-            div [] 
-                [ h1 [][text "hello world"]
-                , div [] 
-                    [ input [placeholder "Server", onInput ChangeServer, value model.server][]
-                    , button [onClick PingServer][text "Connect"]
-                    ]
-                ]
-        Pinging -> 
-            div [][text <| "Pinging"++model.server]
-        Querying -> div []
-                [ uploadQueryFromFile
-                , queryInput model.server model.query
-                , resultFormatToggle model.resultsDisplay
-                ]
-        Waiting -> div [style "cursor" "progress"]
-                [ uploadQueryFromFile
-                , queryInput model.server model.query
-                , b [] [text "Wating for server response..."]
-                ]
-        ApiError error -> 
-            case error of
-                Http.BadBody err ->
-                    div []
-                        [ h1 [][text "ApiError: I can't interpret the response"]
-                        , div [][text err]
-                        , button [onClick BackToQuery][text "Back"]
-                        ]
-                _ ->
-                    div [][
-                        h1 [][text "ApiError: Oops - something went wrong! :-("]
-                        , button [onClick BackToQuery][text "Back"]
-                    ]
-        DisplayingSelectError message ->
-            div []                
-                [ uploadQueryFromFile
-                , queryInput model.server model.query
-                , div [][text message]
-                ]
-        DisplayingSelectResult vars result ->
-            case model.resultsDisplay of
-                Table ->
-                    div []                
-                        [ uploadQueryFromFile
-                        , queryInput model.server model.query
-                        , resultFormatToggle model.resultsDisplay
-                        , button [onClick <| DownloadResultsAsCSV vars result][text "Download csv"]
-                        , tableView vars result
-                        ]
-                SubjectOrientation ->
-                    let
-                        contracted = contractResult vars result  -- Maybe (ContractedForm SelectAtom)
-                                    |> Maybe.map makeRdfDict     -- Maybe RdfDict
-                    in
-                     case contracted of
-                        Just a ->
-                            div []                
+view: Model -> Document Msg
+view model = { title = "Sparql Query Playground"
+            , body = (List.singleton <|
+                    case model.state of
+                        Initialising ->
+                            div [] 
+                                [ h1 [][text "hello world"]
+                                , div [] 
+                                    [ input [placeholder "Server", onInput ChangeServer, value model.server][]
+                                    , button [onClick PingServer][text "Connect"]
+                                    ]
+                                ]
+                        Pinging -> 
+                            div [][text <| "Pinging"++model.server]
+                        Querying -> div []
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
                                 , resultFormatToggle model.resultsDisplay
-                                , h2 [][text "Subject orientation"]
-                                , predicateStyleToggle model.predicateStyle
-                                , br [] []
-                                , viewSubjects model.openPredicatesInSubject model.predicateStyle a
                                 ]
-                        Nothing ->                             
+                        Waiting -> div [style "cursor" "progress"]
+                                [ uploadQueryFromFile
+                                , queryInput model.server model.query
+                                , b [] [text "Wating for server response..."]
+                                ]
+                        ApiError error -> 
+                            case error of
+                                Http.BadBody err ->
+                                    div []
+                                        [ h1 [][text "ApiError: I can't interpret the response"]
+                                        , div [][text err]
+                                        , button [onClick BackToQuery][text "Back"]
+                                        ]
+                                _ ->
+                                    div [][
+                                        h1 [][text "ApiError: Oops - something went wrong! :-("]
+                                        , button [onClick BackToQuery][text "Back"]
+                                    ]
+                        DisplayingSelectError message ->
                             div []                
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
-                                , resultFormatToggle model.resultsDisplay
-                                , h4 [][text "Subject orientation only where results are in the shape of ?s ?p ?o"]
+                                , div [][text message]
                                 ]
+                        DisplayingSelectResult vars result ->
+                            case model.resultsDisplay of
+                                Table ->
+                                    div []                
+                                        [ uploadQueryFromFile
+                                        , queryInput model.server model.query
+                                        , resultFormatToggle model.resultsDisplay
+                                        , button [onClick <| DownloadResultsAsCSV vars result][text "Download csv"]
+                                        , tableView vars result
+                                        ]
+                                SubjectOrientation ->
+                                    let
+                                        contracted = contractResult vars result  -- Maybe (ContractedForm SelectAtom)
+                                                    |> Maybe.map makeRdfDict     -- Maybe RdfDict
+                                    in
+                                    case contracted of
+                                        Just a ->
+                                            div []                
+                                                [ uploadQueryFromFile
+                                                , queryInput model.server model.query
+                                                , resultFormatToggle model.resultsDisplay
+                                                , h2 [][text "Subject orientation"]
+                                                , predicateStyleToggle model.predicateStyle
+                                                , br [] []
+                                                , viewSubjects model.openPredicatesInSubject model.predicateStyle a
+                                                ]
+                                        Nothing ->                             
+                                            div []                
+                                                [ uploadQueryFromFile
+                                                , queryInput model.server model.query
+                                                , resultFormatToggle model.resultsDisplay
+                                                , h4 [][text "Subject orientation only where results are in the shape of ?s ?p ?o"]
+                                                ]
+            )}
 
 -- Decoders
 
@@ -685,7 +692,7 @@ mainDecoder =
 
 main: Program () Model Msg
 main =
-  Browser.element
+  Browser.document
     { init = initialModel
     , update = update
     , subscriptions = subscriptions

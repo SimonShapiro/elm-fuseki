@@ -5510,7 +5510,7 @@ var $elm$core$Task$perform = F2(
 			$elm$core$Task$Perform(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
-var $elm$browser$Browser$element = _Browser_element;
+var $elm$browser$Browser$document = _Browser_document;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$Initialising = {$: 'Initialising'};
@@ -7596,6 +7596,10 @@ var $author$project$Main$resultFormatToggle = function (selected) {
 				$elm$html$Html$text('Subjects')
 			]));
 };
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$html$Html$table = _VirtualDom_node('table');
@@ -7966,234 +7970,240 @@ var $author$project$Main$viewSubjects = F3(
 				$elm$core$Dict$keys(subjs)));
 	});
 var $author$project$Main$view = function (model) {
-	var _v0 = model.state;
-	switch (_v0.$) {
-		case 'Initialising':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h1,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('hello world')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$placeholder('Server'),
-										$elm$html$Html$Events$onInput($author$project$Main$ChangeServer),
-										$elm$html$Html$Attributes$value(model.server)
-									]),
-								_List_Nil),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Main$PingServer)
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Connect')
-									]))
-							]))
-					]));
-		case 'Pinging':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Pinging' + model.server)
-					]));
-		case 'Querying':
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$uploadQueryFromFile,
-						A2($author$project$Main$queryInput, model.server, model.query),
-						$author$project$Main$resultFormatToggle(model.resultsDisplay)
-					]));
-		case 'Waiting':
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'cursor', 'progress')
-					]),
-				_List_fromArray(
-					[
-						$author$project$Main$uploadQueryFromFile,
-						A2($author$project$Main$queryInput, model.server, model.query),
-						A2(
-						$elm$html$Html$b,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Wating for server response...')
-							]))
-					]));
-		case 'ApiError':
-			var error = _v0.a;
-			if (error.$ === 'BadBody') {
-				var err = error.a;
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$h1,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('ApiError: I can\'t interpret the response')
-								])),
-							A2(
+	return {
+		body: $elm$core$List$singleton(
+			function () {
+				var _v0 = model.state;
+				switch (_v0.$) {
+					case 'Initialising':
+						return A2(
 							$elm$html$Html$div,
 							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$text(err)
-								])),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick($author$project$Main$BackToQuery)
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Back')
-								]))
-						]));
-			} else {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$h1,
+									A2(
+									$elm$html$Html$h1,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('hello world')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$input,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$placeholder('Server'),
+													$elm$html$Html$Events$onInput($author$project$Main$ChangeServer),
+													$elm$html$Html$Attributes$value(model.server)
+												]),
+											_List_Nil),
+											A2(
+											$elm$html$Html$button,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onClick($author$project$Main$PingServer)
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Connect')
+												]))
+										]))
+								]));
+					case 'Pinging':
+						return A2(
+							$elm$html$Html$div,
 							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$text('ApiError: Oops - something went wrong! :-(')
-								])),
-							A2(
-							$elm$html$Html$button,
+									$elm$html$Html$text('Pinging' + model.server)
+								]));
+					case 'Querying':
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
 							_List_fromArray(
 								[
-									$elm$html$Html$Events$onClick($author$project$Main$BackToQuery)
+									$author$project$Main$uploadQueryFromFile,
+									A2($author$project$Main$queryInput, model.server, model.query),
+									$author$project$Main$resultFormatToggle(model.resultsDisplay)
+								]));
+					case 'Waiting':
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									A2($elm$html$Html$Attributes$style, 'cursor', 'progress')
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Back')
-								]))
-						]));
-			}
-		case 'DisplayingSelectError':
-			var message = _v0.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$uploadQueryFromFile,
-						A2($author$project$Main$queryInput, model.server, model.query),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text(message)
-							]))
-					]));
-		default:
-			var vars = _v0.a;
-			var result = _v0.b;
-			var _v2 = model.resultsDisplay;
-			if (_v2.$ === 'Table') {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$author$project$Main$uploadQueryFromFile,
-							A2($author$project$Main$queryInput, model.server, model.query),
-							$author$project$Main$resultFormatToggle(model.resultsDisplay),
-							A2(
-							$elm$html$Html$button,
-							_List_fromArray(
-								[
-									$elm$html$Html$Events$onClick(
-									A2($author$project$Main$DownloadResultsAsCSV, vars, result))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Download csv')
-								])),
-							A2($author$project$Main$tableView, vars, result)
-						]));
-			} else {
-				var contracted = A2(
-					$elm$core$Maybe$map,
-					$author$project$Main$makeRdfDict,
-					A2($author$project$Main$contractResult, vars, result));
-				if (contracted.$ === 'Just') {
-					var a = contracted.a;
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$author$project$Main$uploadQueryFromFile,
-								A2($author$project$Main$queryInput, model.server, model.query),
-								$author$project$Main$resultFormatToggle(model.resultsDisplay),
-								A2(
-								$elm$html$Html$h2,
+									$author$project$Main$uploadQueryFromFile,
+									A2($author$project$Main$queryInput, model.server, model.query),
+									A2(
+									$elm$html$Html$b,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Wating for server response...')
+										]))
+								]));
+					case 'ApiError':
+						var error = _v0.a;
+						if (error.$ === 'BadBody') {
+							var err = error.a;
+							return A2(
+								$elm$html$Html$div,
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Subject orientation')
-									])),
-								$author$project$Main$predicateStyleToggle(model.predicateStyle),
-								A2($elm$html$Html$br, _List_Nil, _List_Nil),
-								A3($author$project$Main$viewSubjects, model.openPredicatesInSubject, model.predicateStyle, a)
-							]));
-				} else {
-					return A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$author$project$Main$uploadQueryFromFile,
-								A2($author$project$Main$queryInput, model.server, model.query),
-								$author$project$Main$resultFormatToggle(model.resultsDisplay),
-								A2(
-								$elm$html$Html$h4,
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('ApiError: I can\'t interpret the response')
+											])),
+										A2(
+										$elm$html$Html$div,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text(err)
+											])),
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Events$onClick($author$project$Main$BackToQuery)
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Back')
+											]))
+									]));
+						} else {
+							return A2(
+								$elm$html$Html$div,
 								_List_Nil,
 								_List_fromArray(
 									[
-										$elm$html$Html$text('Subject orientation only where results are in the shape of ?s ?p ?o')
-									]))
-							]));
+										A2(
+										$elm$html$Html$h1,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text('ApiError: Oops - something went wrong! :-(')
+											])),
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Events$onClick($author$project$Main$BackToQuery)
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Back')
+											]))
+									]));
+						}
+					case 'DisplayingSelectError':
+						var message = _v0.a;
+						return A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$author$project$Main$uploadQueryFromFile,
+									A2($author$project$Main$queryInput, model.server, model.query),
+									A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$elm$html$Html$text(message)
+										]))
+								]));
+					default:
+						var vars = _v0.a;
+						var result = _v0.b;
+						var _v2 = model.resultsDisplay;
+						if (_v2.$ === 'Table') {
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$Main$uploadQueryFromFile,
+										A2($author$project$Main$queryInput, model.server, model.query),
+										$author$project$Main$resultFormatToggle(model.resultsDisplay),
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Events$onClick(
+												A2($author$project$Main$DownloadResultsAsCSV, vars, result))
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Download csv')
+											])),
+										A2($author$project$Main$tableView, vars, result)
+									]));
+						} else {
+							var contracted = A2(
+								$elm$core$Maybe$map,
+								$author$project$Main$makeRdfDict,
+								A2($author$project$Main$contractResult, vars, result));
+							if (contracted.$ === 'Just') {
+								var a = contracted.a;
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$author$project$Main$uploadQueryFromFile,
+											A2($author$project$Main$queryInput, model.server, model.query),
+											$author$project$Main$resultFormatToggle(model.resultsDisplay),
+											A2(
+											$elm$html$Html$h2,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Subject orientation')
+												])),
+											$author$project$Main$predicateStyleToggle(model.predicateStyle),
+											A2($elm$html$Html$br, _List_Nil, _List_Nil),
+											A3($author$project$Main$viewSubjects, model.openPredicatesInSubject, model.predicateStyle, a)
+										]));
+							} else {
+								return A2(
+									$elm$html$Html$div,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$author$project$Main$uploadQueryFromFile,
+											A2($author$project$Main$queryInput, model.server, model.query),
+											$author$project$Main$resultFormatToggle(model.resultsDisplay),
+											A2(
+											$elm$html$Html$h4,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Subject orientation only where results are in the shape of ?s ?p ?o')
+												]))
+										]));
+							}
+						}
 				}
-			}
-	}
+			}()),
+		title: 'Sparql Query Playground'
+	};
 };
-var $author$project$Main$main = $elm$browser$Browser$element(
+var $author$project$Main$main = $elm$browser$Browser$document(
 	{init: $author$project$Main$initialModel, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

@@ -7,7 +7,7 @@
 - ~~UI to accomodate lists~~
 - ~~Elaborate on the structure of SelectAtom~~
 - ~~Incorporate improved SelectAtom into useful ui interpretation~~
-- Make target fuseki a command parameter
+- ~~Make target fuseki a command parameter~~
 - Dockerise server.py
 - Single subject molecule url
 - Links over single url views

@@ -47,7 +47,7 @@ def serializeResults(rows):
     return [[a.to_dict() for a in r] for r in rows ]
 
 def stringifyValue(value):
-    if value:
+    if value != None:
         if not isinstance(value, str):
             return str(value)
         else:
@@ -178,7 +178,7 @@ def processConstructQuery(queryString):
                         else:  # need to be careful with sensing difference between @value and @id
                             # use rdfType where not explicity provided in json-ld
                             print(obj)
-                            if obj.get("@value"):
+                            if obj.get("@value") is not None:
                                 objectAtom = Atom(key="o", 
                                                     value=stringifyValue(obj.get("@value")),
                                                     aType= 'literal'
