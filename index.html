@@ -5512,25 +5512,7 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$application = _Browser_application;
 var $author$project$Main$NoOp = {$: 'NoOp'};
-var $author$project$Main$handleUrlChange = function (url) {
-	return $author$project$Main$NoOp;
-};
-var $author$project$Main$handleUrlRequest = function (req) {
-	return $author$project$Main$NoOp;
-};
 var $elm$core$Debug$log = _Debug_log;
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$Initialising = {$: 'Initialising'};
-var $author$project$Main$Model = F7(
-	function (state, server, query, keyboard, resultsDisplay, predicateStyle, openPredicatesInSubject) {
-		return {keyboard: keyboard, openPredicatesInSubject: openPredicatesInSubject, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state};
-	});
-var $author$project$Main$Normal = {$: 'Normal'};
-var $author$project$Main$Table = {$: 'Table'};
-var $author$project$Main$Terse = {$: 'Terse'};
-var $author$project$Main$server = 'http://localhost:port';
-var $author$project$Main$startWith = A7($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse, _List_Nil);
 var $elm$url$Url$addPort = F2(
 	function (maybePort, starter) {
 		if (maybePort.$ === 'Nothing') {
@@ -5575,12 +5557,47 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
+var $author$project$Main$handleUrlChange = function (url) {
+	return A2(
+		$elm$core$Debug$log,
+		'Handling change to ' + $elm$url$Url$toString(url),
+		$author$project$Main$NoOp);
+};
+var $author$project$Main$ClickedLink = function (a) {
+	return {$: 'ClickedLink', a: a};
+};
+var $author$project$Main$handleUrlRequest = function (req) {
+	if (req.$ === 'Internal') {
+		var url = req.a;
+		return A3(
+			$elm$core$Debug$log,
+			'Handling request to ' + $elm$url$Url$toString(url),
+			$author$project$Main$ClickedLink,
+			req);
+	} else {
+		var url = req.a;
+		return A3($elm$core$Debug$log, 'Handling request to ' + url, $author$project$Main$ClickedLink, req);
+	}
+};
+var $author$project$Main$Initialising = {$: 'Initialising'};
+var $author$project$Main$Model = F8(
+	function (state, server, query, keyboard, resultsDisplay, predicateStyle, openPredicatesInSubject, key) {
+		return {key: key, keyboard: keyboard, openPredicatesInSubject: openPredicatesInSubject, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state};
+	});
+var $author$project$Main$Normal = {$: 'Normal'};
+var $author$project$Main$Table = {$: 'Table'};
+var $author$project$Main$Terse = {$: 'Terse'};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$server = 'http://localhost:port';
 var $author$project$Main$initialFn = F3(
 	function (_v0, url, key) {
 		return A2(
 			$elm$core$Debug$log,
 			'Initializing with ' + $elm$url$Url$toString(url),
-			_Utils_Tuple2($author$project$Main$startWith, $elm$core$Platform$Cmd$none));
+			_Utils_Tuple2(
+				A8($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse, _List_Nil, key),
+				$elm$core$Platform$Cmd$none));
 	});
 var $author$project$Main$PressedKey = function (a) {
 	return {$: 'PressedKey', a: a};
@@ -6776,6 +6793,7 @@ var $author$project$Main$pingServer = function (newServer) {
 			url: newServer + '/hello'
 		});
 };
+var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
 var $elm_community$list_extra$List$Extra$remove = F2(
 	function (x, xs) {
 		if (!xs.b) {
@@ -6836,7 +6854,12 @@ var $author$project$Main$update = F2(
 				var urlRequest = msg.a;
 				if (urlRequest.$ === 'Internal') {
 					var url = urlRequest.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(
+						model,
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							model.key,
+							$elm$url$Url$toString(url)));
 				} else {
 					var url = urlRequest.a;
 					return _Utils_Tuple2(
@@ -7112,6 +7135,7 @@ var $author$project$Main$DownloadResultsAsCSV = F2(
 		return {$: 'DownloadResultsAsCSV', a: a, b: b};
 	});
 var $author$project$Main$PingServer = {$: 'PingServer'};
+var $elm$html$Html$a = _VirtualDom_node('a');
 var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$br = _VirtualDom_node('br');
 var $elm$html$Html$button = _VirtualDom_node('button');
@@ -7362,6 +7386,20 @@ var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$h4 = _VirtualDom_node('h4');
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
 var $elm$html$Html$input = _VirtualDom_node('input');
 var $author$project$Main$makeRdfKey = function (n) {
 	switch (n.$) {
@@ -7515,14 +7553,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $author$project$Main$ChangePredicateStyle = function (a) {
 	return {$: 'ChangePredicateStyle', a: a};
@@ -8053,7 +8083,16 @@ var $author$project$Main$view = function (model) {
 									_List_Nil,
 									_List_fromArray(
 										[
-											$elm$html$Html$text('hello world')
+											A2(
+											$elm$html$Html$a,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$href('http://www.cnn.com')
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('hello world')
+												]))
 										])),
 									A2(
 									$elm$html$Html$div,

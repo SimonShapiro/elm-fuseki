@@ -2,9 +2,8 @@ module Main exposing(..)
 
 import Browser exposing (..)
 import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td, small)
-import Html exposing (textarea)
-import Html exposing (a)
-import Html.Attributes exposing (placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
+import Html exposing (textarea, a)
+import Html.Attributes exposing (href, placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (pushUrl, load, Key)
@@ -243,7 +242,7 @@ update msg model =
             case urlRequest of
                 Internal url ->
                     ( model
-                    , Cmd.none -- pushUrl model.key (Url.toString url)
+                    , pushUrl model.key (Url.toString url)
                     )
                 External url ->
                     ( model
@@ -344,10 +343,20 @@ update msg model =
             ({model | openPredicatesInSubject = List.Extra.remove selected model.openPredicatesInSubject}, Cmd.none)
 
 handleUrlRequest: UrlRequest -> Msg
-handleUrlRequest req = NoOp
+handleUrlRequest req = 
+    case req of
+        Internal url ->
+            Debug.log ("Handling request to "++(Url.toString url))
+            ClickedLink req
+        External url ->
+            Debug.log ("Handling request to "++url)
+            ClickedLink req
+
 
 handleUrlChange: Url -> Msg
-handleUrlChange url = NoOp
+handleUrlChange url = 
+    Debug.log ("Handling change to "++(Url.toString url))
+    NoOp
 
 msgDecoder : Decoder Msg
 msgDecoder =
@@ -625,7 +634,7 @@ view model = { title = "Sparql Query Playground"
                     case model.state of
                         Initialising ->
                             div [] 
-                                [ h1 [][text "hello world"]
+                                [ h1 [][a [href "http://www.cnn.com"][text "hello world"]]
                                 , div [] 
                                     [ input [placeholder "Server", onInput ChangeServer, value model.server][]
                                     , button [onClick PingServer][text "Connect"]
