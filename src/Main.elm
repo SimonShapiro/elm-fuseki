@@ -94,7 +94,7 @@ type alias Model =
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
     , openPredicatesInSubject: OpenPredicatesInSubject
---    , key: Key
+    , key: Key
     }
 
 type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
@@ -227,11 +227,13 @@ selectAtomDecoder =
 server: Server
 server = "http://localhost:port"
 
-startWith: Model
-startWith = Model Initialising server "" Normal Table Terse [] 
+-- startWith: Model
+-- startWith = Model Initialising server "" Normal Table Terse [] 
 
 initialFn: flags -> Url -> Key -> (Model, (Cmd Msg))
-initialFn _ url key = (startWith, Cmd.none)
+initialFn _ url key =
+    Debug.log  ("Initializing with "++(Url.toString url))
+    (Model Initialising server "" Normal Table Terse [] key, Cmd.none)
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
