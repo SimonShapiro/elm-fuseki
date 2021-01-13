@@ -6,7 +6,7 @@ import Html exposing (textarea, a)
 import Html.Attributes exposing (href, placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
-import Browser.Navigation exposing (pushUrl, load, Key)
+import Browser.Navigation exposing (pushUrl, replaceUrl, load, Key)
 import Http
 import Html.Events exposing (on)
 import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, map7, list, int, decodeString, at, andThen)
@@ -16,10 +16,13 @@ import File.Select as Select
 import File.Download as Download
 import Task
 import List.Extra exposing (uncons, groupWhile)
-import Maybe.Extra exposing (combine)
+import Maybe.Extra exposing (combine, join)
 import List
 import Dict exposing(Dict)
 import Url exposing (..)
+import Url.Parser.Query as Query
+import Url.Parser exposing (Parser, (<?>), s)
+
 
 type alias Document msg =
     { title : String
@@ -241,9 +244,27 @@ update msg model =
         ClickedLink urlRequest ->
             case urlRequest of
                 Internal url ->
-                    ( model
-                    , pushUrl model.key (Url.toString url)
-                    )
+                    let
+                        subject: Query.Parser (Maybe String)
+                        subject = 
+                            Query.string "subject"
+                        parseQuery =
+                            (s "details" <?> subject)
+
+                        parseResult = Url.Parser.parse parseQuery url |> join
+
+                    in
+                        case parseResult of
+                            Nothing ->
+                                Debug.log ("Internal update running on NOTHING")    --(Url.toString url)) 
+                                ( model
+                                , replaceUrl model.key (Url.toString url) 
+                                )
+                            Just a -> 
+                                Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
+                                ( model
+                                , replaceUrl model.key (Url.toString url) 
+                                )
                 External url ->
                     ( model
                     , load url
@@ -346,10 +367,10 @@ handleUrlRequest: UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
         Internal url ->
-            Debug.log ("Handling request to "++(Url.toString url))
+            Debug.log ("Handling internal request to "++(Url.toString url))
             ClickedLink req
         External url ->
-            Debug.log ("Handling request to "++url)
+            Debug.log ("Handling external request to "++url)
             ClickedLink req
 
 
@@ -504,7 +525,7 @@ viewRdfNode: RdfNode -> Html Msg
 viewRdfNode node = 
     case node of
         Uri a ->
-            text a.value
+            Html.a [href ("/details?subject="++a.value)][text a.value]
         BlankNode a ->
             text a.value
         LiteralOnlyValue a ->
