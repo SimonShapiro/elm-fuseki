@@ -122,7 +122,8 @@ type Msg
     | PingServer 
     | Pinged (Result Http.Error ())
     | ChangeQuery Sparql
-    | SubmitQuery 
+    | SubmitQuery Sparql
+    | SubmitQueryWhileNavigating Sparql
     | GotSparqlResponse (Result Http.Error KGResponse)
     | FileRequested 
     | FileSelected File
@@ -237,6 +238,16 @@ initialFn _ url key =
     Debug.log  ("Initializing with "++(Url.toString url))
     (Model Initialising server "" Normal Table Terse [] key, Cmd.none)
 
+parseUrlForDetailsSubject url =
+    let
+        subject: Query.Parser (Maybe String)
+        subject = 
+            Query.string "subject"
+        parseQuery =
+            (s "details" <?> subject)
+    in
+        Url.Parser.parse parseQuery url |> join
+
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -244,27 +255,17 @@ update msg model =
         ClickedLink urlRequest ->
             case urlRequest of
                 Internal url ->
-                    let
-                        subject: Query.Parser (Maybe String)
-                        subject = 
-                            Query.string "subject"
-                        parseQuery =
-                            (s "details" <?> subject)
-
-                        parseResult = Url.Parser.parse parseQuery url |> join
-
-                    in
-                        case parseResult of
-                            Nothing ->
-                                Debug.log ("Internal update running on NOTHING")    --(Url.toString url)) 
-                                ( model
-                                , replaceUrl model.key (Url.toString url) 
-                                )
-                            Just a -> 
-                                Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
-                                ( {model | query = "describe <"++a++">"}
-                                , pushUrl model.key (Url.toString url) 
-                                )
+                    case parseUrlForDetailsSubject url of
+                        Nothing ->
+                            Debug.log ("Internal update running on NOTHING")    --(Url.toString url)) 
+                            ( model
+                            , replaceUrl model.key (Url.toString url) 
+                            )
+                        Just a -> 
+                            Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
+                            ( {model | query = "describe <"++a++">"}
+                            , pushUrl model.key (Url.toString url) 
+                            )
                 External url ->
                     ( model
                     , load url
@@ -314,9 +315,15 @@ update msg model =
                     ({model | query = newQuery, state = Querying}, Cmd.none)
                 _ ->
                     (model, Cmd.none) 
-        SubmitQuery -> 
+        SubmitQuery query -> 
             Debug.log ("Submitting Query "++model.query)
-            ({model | state = Waiting}, submitQuery model.server model.query)
+            ({model | state = Waiting}, submitQuery model.server query)
+        SubmitQueryWhileNavigating query ->
+            let
+                newModel = {model | query = query, state = Waiting}
+            in
+                Debug.log newModel.query
+                (newModel, submitQuery newModel.server newModel.query)
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
@@ -376,8 +383,13 @@ handleUrlRequest req =
 
 handleUrlChange: Url -> Msg
 handleUrlChange url = 
-    Debug.log ("Handling change to "++(Url.toString url))
-    SubmitQuery
+    case (parseUrlForDetailsSubject url) of -- have to reparse url
+        Nothing ->
+            Debug.log ("fwd/bck update running on NOTHING")    --(Url.toString url)) 
+            NoOp
+        Just a -> 
+            Debug.log ("fwd/bck update running "++ a)    --(Url.toString url)) 
+            SubmitQueryWhileNavigating  ("describe <"++a++">")
 
 msgDecoder : Decoder Msg
 msgDecoder =
@@ -596,7 +608,7 @@ queryInput newServer query =
                     , onInput ChangeQuery
                     , value query
                     ][]
-                , button [onClick SubmitQuery][text "Submit"]
+                , button [onClick (SubmitQuery query)][text "Submit"]
                 ]
 resultFormatToggle: ResultsDisplay -> Html Msg
 resultFormatToggle selected = 
