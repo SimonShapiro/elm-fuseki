@@ -262,8 +262,8 @@ update msg model =
                                 )
                             Just a -> 
                                 Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
-                                ( model
-                                , replaceUrl model.key (Url.toString url) 
+                                ( {model | query = "describe <"++a++">"}
+                                , pushUrl model.key (Url.toString url) 
                                 )
                 External url ->
                     ( model
@@ -377,7 +377,7 @@ handleUrlRequest req =
 handleUrlChange: Url -> Msg
 handleUrlChange url = 
     Debug.log ("Handling change to "++(Url.toString url))
-    NoOp
+    SubmitQuery
 
 msgDecoder : Decoder Msg
 msgDecoder =
