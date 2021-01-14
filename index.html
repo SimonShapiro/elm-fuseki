@@ -6297,22 +6297,22 @@ var $elm$url$Url$Parser$Query$string = function (key) {
 			}
 		});
 };
-var $author$project$Main$parseUrlForDetailsSubject = function (url) {
-	var subject = $elm$url$Url$Parser$Query$string('subject');
+var $author$project$Main$parseUrlForIndexQuery = function (url) {
+	var subject = $elm$url$Url$Parser$Query$string('query');
 	var parseQuery = A2(
 		$elm$url$Url$Parser$questionMark,
-		$elm$url$Url$Parser$s('details'),
+		$elm$url$Url$Parser$s('index.html'),
 		subject);
 	return $elm_community$maybe_extra$Maybe$Extra$join(
 		A2($elm$url$Url$Parser$parse, parseQuery, url));
 };
 var $author$project$Main$handleUrlChange = function (url) {
-	var _v0 = $author$project$Main$parseUrlForDetailsSubject(url);
+	var _v0 = $author$project$Main$parseUrlForIndexQuery(url);
 	if (_v0.$ === 'Nothing') {
 		return A2($elm$core$Debug$log, 'fwd/bck update running on NOTHING', $author$project$Main$NoOp);
 	} else {
 		var a = _v0.a;
-		return A3($elm$core$Debug$log, 'fwd/bck update running ' + a, $author$project$Main$SubmitQueryWhileNavigating, 'describe <' + (a + '>'));
+		return A3($elm$core$Debug$log, 'fwd/bck update running ' + a, $author$project$Main$SubmitQueryWhileNavigating, a);
 	}
 };
 var $author$project$Main$ClickedLink = function (a) {
@@ -6376,9 +6376,9 @@ var $author$project$Main$handleUrlRequest = function (req) {
 	}
 };
 var $author$project$Main$Initialising = {$: 'Initialising'};
-var $author$project$Main$Model = F8(
-	function (state, server, query, keyboard, resultsDisplay, predicateStyle, openPredicatesInSubject, key) {
-		return {key: key, keyboard: keyboard, openPredicatesInSubject: openPredicatesInSubject, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state};
+var $author$project$Main$Model = F9(
+	function (state, server, urlQuery, query, keyboard, resultsDisplay, predicateStyle, openPredicatesInSubject, key) {
+		return {key: key, keyboard: keyboard, openPredicatesInSubject: openPredicatesInSubject, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state, urlQuery: urlQuery};
 	});
 var $author$project$Main$Normal = {$: 'Normal'};
 var $author$project$Main$Table = {$: 'Table'};
@@ -6388,12 +6388,10 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$server = 'http://localhost:port';
 var $author$project$Main$initialFn = F3(
 	function (_v0, url, key) {
-		return A2(
-			$elm$core$Debug$log,
-			'Initializing with ' + $elm$url$Url$toString(url),
-			_Utils_Tuple2(
-				A8($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse, _List_Nil, key),
-				$elm$core$Platform$Cmd$none));
+		var initialQuery = $author$project$Main$parseUrlForIndexQuery(url);
+		return _Utils_Tuple2(
+			A9($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, initialQuery, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse, _List_Nil, key),
+			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Main$PressedKey = function (a) {
 	return {$: 'PressedKey', a: a};
@@ -7136,7 +7134,7 @@ var $author$project$Main$update = F2(
 				var urlRequest = msg.a;
 				if (urlRequest.$ === 'Internal') {
 					var url = urlRequest.a;
-					var _v2 = $author$project$Main$parseUrlForDetailsSubject(url);
+					var _v2 = $author$project$Main$parseUrlForIndexQuery(url);
 					if (_v2.$ === 'Nothing') {
 						return A2(
 							$elm$core$Debug$log,
@@ -7155,11 +7153,8 @@ var $author$project$Main$update = F2(
 							_Utils_Tuple2(
 								_Utils_update(
 									model,
-									{query: 'describe <' + (a + '>')}),
-								A2(
-									$elm$browser$Browser$Navigation$pushUrl,
-									model.key,
-									$elm$url$Url$toString(url))));
+									{query: a}),
+								A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'http://127.0.0.1:5500/index.html?query=' + a)));
 					}
 				} else {
 					var url = urlRequest.a;
@@ -7237,14 +7232,27 @@ var $author$project$Main$update = F2(
 			case 'Pinged':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
-					return A2(
-						$elm$core$Debug$log,
-						'Pinged OK',
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
-							$elm$core$Platform$Cmd$none));
+					var _v7 = model.urlQuery;
+					if (_v7.$ === 'Nothing') {
+						return A2(
+							$elm$core$Debug$log,
+							'Pinged OK - no initial query',
+							_Utils_Tuple2(
+								_Utils_update(
+									model,
+									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
+								$elm$core$Platform$Cmd$none));
+					} else {
+						var query = _v7.a;
+						return A2(
+							$elm$core$Debug$log,
+							'Pinged OK with' + query,
+							_Utils_Tuple2(
+								_Utils_update(
+									model,
+									{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
+								A2($author$project$Main$submitQuery, model.server, query)));
+					}
 				} else {
 					var e = result.a;
 					return A2(
@@ -7258,8 +7266,8 @@ var $author$project$Main$update = F2(
 				}
 			case 'ChangeQuery':
 				var newQuery = msg.a;
-				var _v7 = model.keyboard;
-				if (_v7.$ === 'ReadyToAcceptControl') {
+				var _v8 = model.keyboard;
+				if (_v8.$ === 'ReadyToAcceptControl') {
 					return A2(
 						$elm$core$Debug$log,
 						'Query ' + newQuery,
@@ -7296,8 +7304,8 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v9 = okData.status;
-					if (_v9 === 200) {
+					var _v10 = okData.status;
+					if (_v10 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8107,7 +8115,7 @@ var $author$project$Main$viewRdfNode = function (node) {
 				$elm$html$Html$a,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$href('/details?subject=' + a.value)
+						$elm$html$Html$Attributes$href('/index.html?query=describe <' + (a.value + '>'))
 					]),
 				_List_fromArray(
 					[

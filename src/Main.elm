@@ -91,6 +91,7 @@ type UIState
 type alias Model = 
     { state: UIState
     , server: Server
+    , urlQuery: Maybe Sparql
     , query: Sparql 
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
@@ -235,9 +236,12 @@ server = "http://localhost:port"
 
 initialFn: flags -> Url -> Key -> (Model, (Cmd Msg))
 initialFn _ url key =
-    Debug.log  ("Initializing with "++(Url.toString url))
-    (Model Initialising server "" Normal Table Terse [] key, Cmd.none)
+    let
+        initialQuery = parseUrlForIndexQuery url
+    in
+        (Model Initialising server initialQuery "" Normal Table Terse [] key, Cmd.none)
 
+parseUrlForDetailsSubject : Url -> Maybe String
 parseUrlForDetailsSubject url =
     let
         subject: Query.Parser (Maybe String)
@@ -248,6 +252,17 @@ parseUrlForDetailsSubject url =
     in
         Url.Parser.parse parseQuery url |> join
 
+parseUrlForIndexQuery : Url -> Maybe String
+parseUrlForIndexQuery url =
+    let
+        subject: Query.Parser (Maybe String)
+        subject = 
+            Query.string "query"
+        parseQuery =
+            (s "index.html" <?> subject)
+    in
+        Url.Parser.parse parseQuery url |> join
+
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -255,7 +270,7 @@ update msg model =
         ClickedLink urlRequest ->
             case urlRequest of
                 Internal url ->
-                    case parseUrlForDetailsSubject url of
+                    case parseUrlForIndexQuery url of
                         Nothing ->
                             Debug.log ("Internal update running on NOTHING")    --(Url.toString url)) 
                             ( model
@@ -263,8 +278,8 @@ update msg model =
                             )
                         Just a -> 
                             Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
-                            ( {model | query = "describe <"++a++">"}
-                            , pushUrl model.key (Url.toString url) 
+                            ( {model | query = a}
+                            , pushUrl model.key ("http://127.0.0.1:5500/index.html?query="++a) 
                             )
                 External url ->
                     ( model
@@ -303,8 +318,17 @@ update msg model =
         Pinged result ->
             case result of
                 Ok _ -> 
-                    Debug.log "Pinged OK"
-                    ({model | state = Querying, keyboard = ReadyToAcceptControl}, Cmd.none)
+                    case model.urlQuery of
+                        Nothing ->
+                            Debug.log "Pinged OK - no initial query"
+                            ({model | state = Querying, keyboard = ReadyToAcceptControl}, Cmd.none)
+                        Just query -> 
+                            Debug.log ("Pinged OK with"++query)
+                            (   { model | state = Querying 
+                                , keyboard = ReadyToAcceptControl
+                                , query = query
+                                }
+                            , submitQuery model.server query)
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
@@ -383,13 +407,13 @@ handleUrlRequest req =
 
 handleUrlChange: Url -> Msg
 handleUrlChange url = 
-    case (parseUrlForDetailsSubject url) of -- have to reparse url
+    case (parseUrlForIndexQuery url) of -- have to reparse url
         Nothing ->
             Debug.log ("fwd/bck update running on NOTHING")    --(Url.toString url)) 
             NoOp
         Just a -> 
             Debug.log ("fwd/bck update running "++ a)    --(Url.toString url)) 
-            SubmitQueryWhileNavigating  ("describe <"++a++">")
+            SubmitQueryWhileNavigating  a
 
 msgDecoder : Decoder Msg
 msgDecoder =
@@ -537,7 +561,7 @@ viewRdfNode: RdfNode -> Html Msg
 viewRdfNode node = 
     case node of
         Uri a ->
-            Html.a [href ("/details?subject="++a.value)][text a.value]
+            Html.a [href ("/index.html?query=describe <"++a.value++">")][text a.value]
         BlankNode a ->
             text a.value
         LiteralOnlyValue a ->
