@@ -8,9 +8,9 @@
 - ~~Elaborate on the structure of SelectAtom~~
 - ~~Incorporate improved SelectAtom into useful ui interpretation~~
 - ~~Make target fuseki a command parameter~~
+- ~~Single subject molecule url~~
+- ~~Links over single url views~~
 - Dockerise server.py
-- Single subject molecule url
-- Links over single url views
 - graph view
 - Add limit and offset semantics in table and subject oriented list
 - csv download - filename to be input
@@ -21,3 +21,4 @@
 
 - ~~Scan jsonld for `null` value~~
 - ~~Make error pages return to query screen~~ Untested because it relates to APIError
+- Push url on submit

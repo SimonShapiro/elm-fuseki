@@ -7281,6 +7281,7 @@ var $author$project$Main$update = F2(
 				}
 			case 'SubmitQuery':
 				var query = msg.a;
+				var push = A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'http://127.0.0.1/index.html?query=' + query);
 				return A2(
 					$elm$core$Debug$log,
 					'Submitting Query ' + model.query,
@@ -7288,7 +7289,7 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{state: $author$project$Main$Waiting}),
-						A2($author$project$Main$submitQuery, model.server, query)));
+						A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'http://127.0.0.1:5500/index.html?query=' + query)));
 			case 'SubmitQueryWhileNavigating':
 				var query = msg.a;
 				var newModel = _Utils_update(

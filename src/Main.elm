@@ -340,8 +340,12 @@ update msg model =
                 _ ->
                     (model, Cmd.none) 
         SubmitQuery query -> 
+            let
+                push = pushUrl model.key ("http://127.0.0.1/index.html?query="++query)
+            in
+            
             Debug.log ("Submitting Query "++model.query)
-            ({model | state = Waiting}, submitQuery model.server query)
+            ({model | state = Waiting}, pushUrl model.key ("http://127.0.0.1:5500/index.html?query="++query)) -- submitQuery model.server query)
         SubmitQueryWhileNavigating query ->
             let
                 newModel = {model | query = query, state = Waiting}
