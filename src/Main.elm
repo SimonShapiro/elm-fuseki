@@ -20,8 +20,10 @@ import Maybe.Extra exposing (combine, join)
 import List
 import Dict exposing(Dict)
 import Url exposing (..)
+import Url.Builder exposing (relative)
 import Url.Parser.Query as Query
 import Url.Parser exposing (Parser, (<?>), s)
+import Url.Parser exposing (query)
 
 
 type alias Document msg =
@@ -279,7 +281,7 @@ update msg model =
                         Just a -> 
                             Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
                             ( {model | query = a}
-                            , pushUrl model.key ("http://127.0.0.1:5500/index.html?query="++a) 
+                            , pushUrl model.key (relative [][Url.Builder.string "query" a]) 
                             )
                 External url ->
                     ( model
@@ -340,12 +342,8 @@ update msg model =
                 _ ->
                     (model, Cmd.none) 
         SubmitQuery query -> 
-            let
-                push = pushUrl model.key ("http://127.0.0.1/index.html?query="++query)
-            in
-            
             Debug.log ("Submitting Query "++model.query)
-            ({model | state = Waiting}, pushUrl model.key ("http://127.0.0.1:5500/index.html?query="++query)) -- submitQuery model.server query)
+            ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" query])) -- submitQuery model.server query)
         SubmitQueryWhileNavigating query ->
             let
                 newModel = {model | query = query, state = Waiting}

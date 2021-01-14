@@ -7073,6 +7073,27 @@ var $author$project$Main$pingServer = function (newServer) {
 		});
 };
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$relative = F2(
+	function (pathSegments, parameters) {
+		return _Utils_ap(
+			A2($elm$core$String$join, '/', pathSegments),
+			$elm$url$Url$Builder$toQuery(parameters));
+	});
 var $elm_community$list_extra$List$Extra$remove = F2(
 	function (x, xs) {
 		if (!xs.b) {
@@ -7087,6 +7108,18 @@ var $elm_community$list_extra$List$Extra$remove = F2(
 		}
 	});
 var $elm$browser$Browser$Navigation$replaceUrl = _Browser_replaceUrl;
+var $elm$url$Url$Builder$QueryParameter = F2(
+	function (a, b) {
+		return {$: 'QueryParameter', a: a, b: b};
+	});
+var $elm$url$Url$percentEncode = _Url_percentEncode;
+var $elm$url$Url$Builder$string = F2(
+	function (key, value) {
+		return A2(
+			$elm$url$Url$Builder$QueryParameter,
+			$elm$url$Url$percentEncode(key),
+			$elm$url$Url$percentEncode(value));
+	});
 var $elm$http$Http$Header = F2(
 	function (a, b) {
 		return {$: 'Header', a: a, b: b};
@@ -7154,7 +7187,16 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{query: a}),
-								A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'http://127.0.0.1:5500/index.html?query=' + a)));
+								A2(
+									$elm$browser$Browser$Navigation$pushUrl,
+									model.key,
+									A2(
+										$elm$url$Url$Builder$relative,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2($elm$url$Url$Builder$string, 'query', a)
+											])))));
 					}
 				} else {
 					var url = urlRequest.a;
@@ -7281,7 +7323,6 @@ var $author$project$Main$update = F2(
 				}
 			case 'SubmitQuery':
 				var query = msg.a;
-				var push = A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'http://127.0.0.1/index.html?query=' + query);
 				return A2(
 					$elm$core$Debug$log,
 					'Submitting Query ' + model.query,
@@ -7289,7 +7330,16 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{state: $author$project$Main$Waiting}),
-						A2($elm$browser$Browser$Navigation$pushUrl, model.key, 'http://127.0.0.1:5500/index.html?query=' + query)));
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							model.key,
+							A2(
+								$elm$url$Url$Builder$relative,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2($elm$url$Url$Builder$string, 'query', query)
+									])))));
 			case 'SubmitQueryWhileNavigating':
 				var query = msg.a;
 				var newModel = _Utils_update(

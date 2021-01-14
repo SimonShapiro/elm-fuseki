@@ -21,4 +21,5 @@
 
 - ~~Scan jsonld for `null` value~~
 - ~~Make error pages return to query screen~~ Untested because it relates to APIError
-- Push url on submit
+- ~~Push url on submit~~
+- ~~Remove hard coding of localhost 127.0.0.1 and port~~
