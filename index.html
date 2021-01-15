@@ -6799,6 +6799,9 @@ var $author$project$Main$subscriptions = function (_v0) {
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
 };
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
 var $author$project$Main$Ctrl = {$: 'Ctrl'};
 var $author$project$Main$DisplayingSelectError = function (a) {
 	return {$: 'DisplayingSelectError', a: a};
@@ -6939,9 +6942,6 @@ var $elm$core$Result$mapError = F2(
 				f(e));
 		}
 	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
 var $elm$http$Http$BadStatus = function (a) {
 	return {$: 'BadStatus', a: a};
 };
@@ -7296,6 +7296,10 @@ var $author$project$Main$submitParametrisedQuery = F3(
 				url: newServer + '/sparql'
 			});
 	});
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
 var $author$project$Main$prepareHttpRequest = F4(
 	function (newServer, header, qtype, query) {
 		return $elm$http$Http$request(
@@ -7330,7 +7334,10 @@ var $author$project$Main$submitQuery = F2(
 				var query = sparql.a;
 				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/ld+json', 'describe', query);
 			default:
-				return $elm$core$Platform$Cmd$none;
+				return A2(
+					$elm$core$Task$perform,
+					$elm$core$Basics$always($author$project$Main$NoOp),
+					$elm$core$Task$succeed(_Utils_Tuple0));
 		}
 	});
 var $elm$file$File$toString = _File_toString;
@@ -7502,23 +7509,35 @@ var $author$project$Main$update = F2(
 				}
 			case 'SubmitQuery':
 				var query = msg.a;
-				return A2(
-					$elm$core$Debug$log,
-					'Submitting Query ' + model.query,
-					_Utils_Tuple2(
+				var _v9 = $author$project$Main$establishQueryType(model.query);
+				if (_v9.$ === 'Unrecognised') {
+					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{state: $author$project$Main$Waiting}),
-						A2(
-							$elm$browser$Browser$Navigation$pushUrl,
-							model.key,
+							{
+								state: $author$project$Main$ApiError(
+									$elm$http$Http$BadBody('I don\'t recognise this query type ' + model.query))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return A2(
+						$elm$core$Debug$log,
+						'Submitting Query ' + model.query,
+						_Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Waiting}),
 							A2(
-								$elm$url$Url$Builder$relative,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2($elm$url$Url$Builder$string, 'query', query)
-									])))));
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.key,
+								A2(
+									$elm$url$Url$Builder$relative,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2($elm$url$Url$Builder$string, 'query', query)
+										])))));
+				}
 			case 'SubmitQueryWhileNavigating':
 				var query = msg.a;
 				var newModel = _Utils_update(
@@ -7537,8 +7556,8 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v10 = okData.status;
-					if (_v10 === 200) {
+					var _v11 = okData.status;
+					if (_v11 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,

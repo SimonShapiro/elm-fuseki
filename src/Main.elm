@@ -364,8 +364,11 @@ update msg model =
                 _ ->
                     (model, Cmd.none) 
         SubmitQuery query -> 
-            Debug.log ("Submitting Query "++model.query)
-            ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" query])) -- submitQuery model.server query)
+            case establishQueryType model.query of
+               Unrecognised -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++model.query))}, Cmd.none)
+               _ ->
+                    Debug.log ("Submitting Query "++model.query)
+                    ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" query])) -- submitQuery model.server query)
         SubmitQueryWhileNavigating query ->
             let
                 newModel = {model | query = query, state = Waiting}
@@ -487,7 +490,7 @@ submitQuery newServer sparql =
         Ask query -> prepareHttpRequest newServer "application/json" "ask" query
         Construct query -> prepareHttpRequest newServer "application/ld+json" "construct" query
         Describe query -> prepareHttpRequest newServer "application/ld+json" "describe" query
-        _ -> Cmd.none
+        Unrecognised -> Task.perform (always NoOp) (Task.succeed ()) 
 
 submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd msg)
 submitParametrisedQuery newServer query returnTo = 
