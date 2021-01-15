@@ -120,3 +120,16 @@ insert data {
         :priority "1"^^xsd:integer;
         :related :1 .
 }}
+
+######
+#####
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+insert data {
+    graph :ElmAndApi {
+    :Simon :hasProfile <https://www.linkedin.com/in/smshapiro/> .
+    :Simon :bookmark <https://simonshapiro.github.io/breadrecipe/main.html> .
+}}

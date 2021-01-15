@@ -2,8 +2,8 @@ module Main exposing(..)
 
 import Browser exposing (..)
 import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td, small)
-import Html exposing (textarea, a)
-import Html.Attributes exposing (href, placeholder, value, class, rows, cols, wrap, style, type_, name, checked)
+import Html exposing (textarea, a, img)
+import Html.Attributes exposing (href, placeholder, value, class, rows, cols, wrap, style, type_, name, checked, src, target)
 import Html.Events exposing (onInput, onClick)
 import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (pushUrl, replaceUrl, load, Key)
@@ -444,6 +444,7 @@ pingServer newServer =
 
 submitQuery: Server -> Sparql -> (Cmd  Msg)
 submitQuery newServer query = 
+        Debug.log ("using "++newServer)
         Http.request
                     { method = "POST"
                     , headers = [Http.header "Content-Type" "application/sparql-request"]
@@ -456,6 +457,7 @@ submitQuery newServer query =
 
 submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd msg)
 submitParametrisedQuery newServer query returnTo = 
+        Debug.log ("using "++newServer)
         Http.request
                     { method = "POST"
                     , headers = [Http.header "Content-Type" "application/sparql-request"]
@@ -563,7 +565,9 @@ viewRdfNode: RdfNode -> Html Msg
 viewRdfNode node = 
     case node of
         Uri a ->
-            Html.a [href ("/index.html?query=describe <"++a.value++">")][text a.value]
+            span [] [ Html.a [href ("/index.html?query=describe <"++a.value++">")][text a.value]
+                    , Html.a [href a.value, target "_blank"][img [src "language-24px.svg"][]]
+                    ]
         BlankNode a ->
             text a.value
         LiteralOnlyValue a ->

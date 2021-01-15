@@ -7127,7 +7127,10 @@ var $elm$http$Http$Header = F2(
 var $elm$http$Http$header = $elm$http$Http$Header;
 var $author$project$Main$submitParametrisedQuery = F3(
 	function (newServer, query, returnTo) {
-		return $elm$http$Http$request(
+		return A3(
+			$elm$core$Debug$log,
+			'using ' + newServer,
+			$elm$http$Http$request,
 			{
 				body: A2($elm$http$Http$stringBody, 'text', query),
 				expect: returnTo,
@@ -7143,7 +7146,10 @@ var $author$project$Main$submitParametrisedQuery = F3(
 	});
 var $author$project$Main$submitQuery = F2(
 	function (newServer, query) {
-		return $elm$http$Http$request(
+		return A3(
+			$elm$core$Debug$log,
+			'using ' + newServer,
+			$elm$http$Http$request,
 			{
 				body: A2($elm$http$Http$stringBody, 'text', query),
 				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder),
@@ -8156,21 +8162,52 @@ var $elm$core$List$tail = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$small = _VirtualDom_node('small');
 var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
 var $author$project$Main$viewRdfNode = function (node) {
 	switch (node.$) {
 		case 'Uri':
 			var a = node.a;
 			return A2(
-				$elm$html$Html$a,
+				$elm$html$Html$span,
+				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$href('/index.html?query=describe <' + (a.value + '>'))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(a.value)
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$href('/index.html?query=describe <' + (a.value + '>'))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(a.value)
+							])),
+						A2(
+						$elm$html$Html$a,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$href(a.value),
+								$elm$html$Html$Attributes$target('_blank')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$img,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$src('language-24px.svg')
+									]),
+								_List_Nil)
+							]))
 					]));
 		case 'BlankNode':
 			var a = node.a;
