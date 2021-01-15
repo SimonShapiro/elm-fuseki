@@ -4566,6 +4566,107 @@ function _File_toUrl(blob)
 
 
 
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
 
 // SEND REQUEST
 
@@ -6736,6 +6837,57 @@ var $author$project$Main$downloadFile = F2(
 	function (fileName, query) {
 		return A3($elm$file$File$Download$string, fileName, 'text', query);
 	});
+var $author$project$Main$Ask = function (a) {
+	return {$: 'Ask', a: a};
+};
+var $author$project$Main$Construct = function (a) {
+	return {$: 'Construct', a: a};
+};
+var $author$project$Main$Describe = function (a) {
+	return {$: 'Describe', a: a};
+};
+var $author$project$Main$Select = function (a) {
+	return {$: 'Select', a: a};
+};
+var $author$project$Main$Unrecognised = {$: 'Unrecognised'};
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$contains = _Regex_contains;
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$never = _Regex_never;
+var $author$project$Main$establishQueryType = function (query) {
+	var selectRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^select'));
+	var describeRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^describe'));
+	var constructRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^construct'));
+	var askRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^ask'));
+	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Main$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Main$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Main$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Main$Describe(query) : $author$project$Main$Unrecognised)));
+};
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -7144,24 +7296,42 @@ var $author$project$Main$submitParametrisedQuery = F3(
 				url: newServer + '/sparql'
 			});
 	});
-var $author$project$Main$submitQuery = F2(
-	function (newServer, query) {
-		return A3(
-			$elm$core$Debug$log,
-			'using ' + newServer,
-			$elm$http$Http$request,
+var $author$project$Main$prepareHttpRequest = F4(
+	function (newServer, header, qtype, query) {
+		return $elm$http$Http$request(
 			{
 				body: A2($elm$http$Http$stringBody, 'text', query),
 				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder),
 				headers: _List_fromArray(
 					[
-						A2($elm$http$Http$header, 'Content-Type', 'application/sparql-request')
+						A2($elm$http$Http$header, 'Content-Type', 'application/sparql-request'),
+						A2($elm$http$Http$header, 'Accept', header),
+						A2($elm$http$Http$header, 'x-Qtype', qtype)
 					]),
 				method: 'POST',
 				timeout: $elm$core$Maybe$Nothing,
 				tracker: $elm$core$Maybe$Nothing,
 				url: newServer + '/sparql'
 			});
+	});
+var $author$project$Main$submitQuery = F2(
+	function (newServer, sparql) {
+		switch (sparql.$) {
+			case 'Select':
+				var query = sparql.a;
+				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/json', 'select', query);
+			case 'Ask':
+				var query = sparql.a;
+				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/json', 'ask', query);
+			case 'Construct':
+				var query = sparql.a;
+				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/ld+json', 'construct', query);
+			case 'Describe':
+				var query = sparql.a;
+				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/ld+json', 'describe', query);
+			default:
+				return $elm$core$Platform$Cmd$none;
+		}
 	});
 var $elm$file$File$toString = _File_toString;
 var $author$project$Main$update = F2(
@@ -7299,7 +7469,10 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
-								A2($author$project$Main$submitQuery, model.server, query)));
+								A2(
+									$author$project$Main$submitQuery,
+									model.server,
+									$author$project$Main$establishQueryType(query))));
 					}
 				} else {
 					var e = result.a;
@@ -7356,7 +7529,10 @@ var $author$project$Main$update = F2(
 					newModel.query,
 					_Utils_Tuple2(
 						newModel,
-						A2($author$project$Main$submitQuery, newModel.server, newModel.query)));
+						A2(
+							$author$project$Main$submitQuery,
+							newModel.server,
+							$author$project$Main$establishQueryType(newModel.query))));
 			case 'GotSparqlResponse':
 				var response = msg.a;
 				if (response.$ === 'Ok') {
@@ -8204,7 +8380,7 @@ var $author$project$Main$viewRdfNode = function (node) {
 								$elm$html$Html$img,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$src('language-24px.svg')
+										$elm$html$Html$Attributes$src('www-12px.svg')
 									]),
 								_List_Nil)
 							]))

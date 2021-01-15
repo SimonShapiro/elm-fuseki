@@ -64,13 +64,7 @@ def rdfTypeSignature(value):
     elif isinstance(value, bool):
         return prefix+"boolean"
 
-def processSelectQuery(queryString):
-    res = requests.request("POST", SERVER+"/sparql",
-            data = queryString, 
-            headers = {
-                'Content-Type': 'application/sparql-query',
-                'Accept': 'application/json'
-                })
+def processSelectQuery(qType, queryString, res):
     print(res.status_code)
     print(res.text)
     status = res.status_code
@@ -95,19 +89,13 @@ def processSelectQuery(queryString):
             "server": request.url_root[:-1],
             "status": status,
             "reason": error,
-            "queryType": "select",
+            "queryType": qType,
             "query": queryString,
             "vars": vars,
             "result": serializeResults(rows) 
         })}
 
-def processAskQuery(queryString):
-    res = requests.request("POST", SERVER+"/sparql",
-            data = queryString, 
-            headers = {
-                'Content-Type': 'application/sparql-query',
-                'Accept': 'application/json'
-                })
+def processAskQuery(qType, queryString, res):
     print(res.status_code)
     print(res.text)
     status = res.status_code
@@ -133,19 +121,14 @@ def processAskQuery(queryString):
             "server": request.url_root[:-1],
             "status": status,
             "reason": error,
-            "queryType": "select",
+            "queryType": qType,
             "query": queryString,
             "vars": vars,
             "result": serializeResults(rows)
         })}
 
-def processConstructQuery(queryString):
-    res = requests.request("POST", SERVER+"/sparql",
-            data = queryString, 
-            headers = {
-                'Content-Type': 'application/sparql-query',
-                'Accept': 'application/ld+json'
-                })
+def processConstructQuery(qType, queryString, res):
+    print("Going for construct query", queryString)
     print(res.status_code)
     print(res.text)
     status = res.status_code
@@ -206,7 +189,7 @@ def processConstructQuery(queryString):
             "server": request.url_root[:-1],
             "status": status,
             "reason": error,
-            "queryType": "select",
+            "queryType": qType,
             "query": queryString,
             "vars": ['s', 'p', 'o'],
             "result": serializeResults(resultArray)
@@ -216,25 +199,35 @@ def processConstructQuery(queryString):
 def sparql():
     queryString = request.data.decode()
     print(queryString)
-    if "select" in queryString.lower():
-        result = processSelectQuery(queryString)
+    print(request.headers)
+    clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"
+    res = requests.request("POST", SERVER+"/sparql",
+            data = queryString, 
+            headers = {
+                'Content-Type': 'application/sparql-query',
+                'Accept': clientAcceptHeader
+                })
+    qType = request.headers.get("X-Qtype")
+    if  qType == "select":
+        result = processSelectQuery(qType, queryString, res)
         return Response(
             status = result["status"],
             response = result["response"]
         )
-    elif "ask" in queryString.lower():
-        result = processAskQuery(queryString)
+    elif  qType == "ask":
+        result = processAskQuery(qType, queryString, res)
         return Response(
             status = result["status"],
             response = result["response"]
         )
-    elif ("construct" in queryString.lower()) or ("describe" in queryString.lower()):
-        result = processConstructQuery(queryString)
+    elif (qType == "construct") or (qType == "describe"):
+        print("Constrcuting a response")
+        result = processConstructQuery(qType, queryString, res)
         return Response(
             status = result["status"],
             response = result["response"]
         )
-    
+
 if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-s", "--server", dest="server",

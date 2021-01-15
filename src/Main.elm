@@ -24,7 +24,16 @@ import Url.Builder exposing (relative)
 import Url.Parser.Query as Query
 import Url.Parser exposing (Parser, (<?>), s)
 import Url.Parser exposing (query)
+import Task exposing (succeed)
+import Regex exposing (Regex)
+import Html exposing (select)
 
+type SparqlQuery 
+    = Select Sparql
+    | Ask Sparql
+    | Construct Sparql
+    | Describe Sparql
+    | Unrecognised
 
 type alias Document msg =
     { title : String
@@ -169,6 +178,19 @@ type RdfNode
     | LiteralValueAndDataType {value: String, dataType: String}
     | LiteralValueAndLanguageString {value: String, language: String}
     | Unknown
+establishQueryType: Sparql -> SparqlQuery
+establishQueryType query = 
+    let
+        selectRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^select"
+        askRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^ask"
+        constructRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^construct"
+        describeRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^describe"
+    in
+        if Regex.contains selectRe query then Select query
+        else if Regex.contains askRe query then Ask query
+        else if Regex.contains constructRe query then Construct query
+        else if Regex.contains describeRe query then Describe query
+        else Unrecognised  
 
 selectAtom2RdfNode: SelectAtom -> RdfNode
 selectAtom2RdfNode atom =
@@ -330,7 +352,7 @@ update msg model =
                                 , keyboard = ReadyToAcceptControl
                                 , query = query
                                 }
-                            , submitQuery model.server query)
+                            , submitQuery model.server (establishQueryType query))
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
@@ -349,7 +371,7 @@ update msg model =
                 newModel = {model | query = query, state = Waiting}
             in
                 Debug.log newModel.query
-                (newModel, submitQuery newModel.server newModel.query)
+                (newModel, submitQuery newModel.server (establishQueryType newModel.query))
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
@@ -442,18 +464,30 @@ pingServer newServer =
                     , tracker = Nothing
                     }
 
-submitQuery: Server -> Sparql -> (Cmd  Msg)
-submitQuery newServer query = 
-        Debug.log ("using "++newServer)
-        Http.request
-                    { method = "POST"
-                    , headers = [Http.header "Content-Type" "application/sparql-request"]
-                    , url = newServer++"/sparql"
-                    , body = Http.stringBody "text" query
-                    , expect = Http.expectJson GotSparqlResponse mainDecoder
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
+prepareHttpRequest: Server -> String -> String -> String -> (Cmd Msg)
+prepareHttpRequest newServer header qtype query =
+    Http.request
+                { method = "POST"
+                , headers = [ Http.header "Content-Type" "application/sparql-request"
+                            , Http.header "Accept" header
+                            , Http.header "x-Qtype" qtype
+                            ]
+                , url = newServer++"/sparql"
+                , body = Http.stringBody "text" query
+                , expect = Http.expectJson GotSparqlResponse mainDecoder
+                , timeout = Nothing
+                , tracker = Nothing
+                }
+
+
+submitQuery: Server -> SparqlQuery -> (Cmd  Msg)
+submitQuery newServer sparql = 
+    case sparql of
+        Select query -> prepareHttpRequest newServer "application/json" "select" query
+        Ask query -> prepareHttpRequest newServer "application/json" "ask" query
+        Construct query -> prepareHttpRequest newServer "application/ld+json" "construct" query
+        Describe query -> prepareHttpRequest newServer "application/ld+json" "describe" query
+        _ -> Cmd.none
 
 submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd msg)
 submitParametrisedQuery newServer query returnTo = 
@@ -566,7 +600,7 @@ viewRdfNode node =
     case node of
         Uri a ->
             span [] [ Html.a [href ("/index.html?query=describe <"++a.value++">")][text a.value]
-                    , Html.a [href a.value, target "_blank"][img [src "language-24px.svg"][]]
+                    , Html.a [href a.value, target "_blank"][img [src "www-12px.svg"][]]
                     ]
         BlankNode a ->
             text a.value
