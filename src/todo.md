@@ -30,5 +30,5 @@
 - ~~Push url on submit~~
 - ~~Remove hard coding of localhost 127.0.0.1 and port~~
 - ~~Resolve apparent differences between safari and chrome on back from history after eternal url click~~
-- Improve methods of recognising query type in api to fine tune headers
+- ~~Improve methods of recognising query type in api to fine tune headers~~
 - Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to _:bo 

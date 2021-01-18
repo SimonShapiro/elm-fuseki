@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from dataclasses_json import dataclass_json
 import pprint
 from optparse import OptionParser
+import re
 
 @dataclass_json
 @dataclass
@@ -195,6 +196,23 @@ def processConstructQuery(qType, queryString, res):
             "result": serializeResults(resultArray)
         })}
 
+def establishQueryType(queryString):
+    q = queryString.lower()
+    selectRe = r"^select"
+    askRe = r"^ask"
+    constructRe = r"^construct"
+    describeRe = r"^describe"
+    if re.search(selectRe, q, re.M):
+        return "select"
+    elif re.search(askRe, q, re.M):
+        return "ask"
+    elif re.search(constructRe, q, re.M):
+        return "construct"
+    elif re.search(describeRe, q, re.M):
+        return "describe"
+    else:
+        return "select"  #  might need something else here
+
 @app.route("/sparql", methods=['POST'])
 def sparql():
     queryString = request.data.decode()
@@ -207,7 +225,7 @@ def sparql():
                 'Content-Type': 'application/sparql-query',
                 'Accept': clientAcceptHeader
                 })
-    qType = request.headers.get("X-Qtype")
+    qType = establishQueryType(queryString)  # request.headers.get("X-Qtype")  # replace with python function to remove reliaze on headers
     if  qType == "select":
         result = processSelectQuery(qType, queryString, res)
         return Response(

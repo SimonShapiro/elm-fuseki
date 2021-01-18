@@ -477,7 +477,7 @@ prepareHttpRequest newServer header qtype query =
                             ]
                 , url = newServer++"/sparql"
                 , body = Http.stringBody "text" query
-                , expect = Http.expectJson GotSparqlResponse mainDecoder
+                , expect = Http.expectJson GotSparqlResponse mainDecoder -- this could be parameterised
                 , timeout = Nothing
                 , tracker = Nothing
                 }
@@ -492,18 +492,10 @@ submitQuery newServer sparql =
         Describe query -> prepareHttpRequest newServer "application/ld+json" "describe" query
         Unrecognised -> Task.perform (always NoOp) (Task.succeed ()) 
 
-submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd msg)
+submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd Msg)
 submitParametrisedQuery newServer query returnTo = 
         Debug.log ("using "++newServer)
-        Http.request
-                    { method = "POST"
-                    , headers = [Http.header "Content-Type" "application/sparql-request"]
-                    , url = newServer++"/sparql"
-                    , body = Http.stringBody "text" query
-                    , expect = returnTo
-                    , timeout = Nothing
-                    , tracker = Nothing
-                    }
+        prepareHttpRequest newServer "application/json" "select" query
 
 makeTriple: List a -> Maybe (a, a, a)
 makeTriple spo =
@@ -560,19 +552,20 @@ viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> RdfDict -> Html Msg
 viewSubjects openPredicates predicateStyle subjs =
         div []
         (List.map (\spoKey ->
-            div []
-                [ h2 [] [text spoKey] -- make case here to clean up the view function below
-                 , viewSubjectMolecule openPredicates predicateStyle (Dict.get spoKey subjs)
-                 , hr [][]
+            div [ class "container"]
+                [  viewSubjectMolecule spoKey openPredicates predicateStyle (Dict.get spoKey subjs)
                 ]
         ) (Dict.keys subjs))
 
 
-viewSubjectMolecule: OpenPredicatesInSubject -> PredicateStyle -> Maybe (SubjectMolecule RdfNode) -> Html Msg
-viewSubjectMolecule openPredicates predicateStyle subjM =
-    case subjM of
-        Nothing -> text "Lost subject molecule"
-        Just a -> viewPredicates openPredicates predicateStyle a
+viewSubjectMolecule: String -> OpenPredicatesInSubject -> PredicateStyle -> Maybe (SubjectMolecule RdfNode) -> Html Msg
+viewSubjectMolecule spoKey openPredicates predicateStyle subjM =
+            case subjM of
+                Nothing -> text "Lost subject molecule"
+                Just a ->   div [class "card"]
+                                [ h2 [] [ Html.a [href ("/index.html?query=describe <"++spoKey++">")][text spoKey]] -- make case here to clean up the view function below
+                                , viewPredicates openPredicates predicateStyle a
+                                ]
 
 viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule RdfNode -> Html Msg
 viewPredicates openPredicates predicateStyle mole =
@@ -774,7 +767,7 @@ view model = { title = "Sparql Query Playground"
                         DisplayingSelectResult vars result ->
                             case model.resultsDisplay of
                                 Table ->
-                                    div []                
+                                    div [class "main"]                
                                         [ uploadQueryFromFile
                                         , queryInput model.server model.query
                                         , resultFormatToggle model.resultsDisplay
@@ -788,7 +781,7 @@ view model = { title = "Sparql Query Playground"
                                     in
                                     case contracted of
                                         Just a ->
-                                            div []                
+                                            div [class "main"]                
                                                 [ uploadQueryFromFile
                                                 , queryInput model.server model.query
                                                 , resultFormatToggle model.resultsDisplay

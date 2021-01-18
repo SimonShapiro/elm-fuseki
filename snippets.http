@@ -133,3 +133,35 @@ insert data {
     :Simon :hasProfile <https://www.linkedin.com/in/smshapiro/> .
     :Simon :bookmark <https://simonshapiro.github.io/breadrecipe/main.html> .
 }}
+
+#####  invertAs inference ##########
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+insert  {
+    graph :Inference {
+        ?o ?p2 ?p .
+}}
+where
+{
+        ?s ?p1 ?o .
+        ?p1 <http://atlaskg.global.hsbc/global/archi31/invertedAs> ?p2 . 
+}
+
+##############  Invert partOF
+post http://localhost:3030/latest/update
+Content-Type: application/sparql-update
+
+prefix : <http://example.com/>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+insert  {
+    graph :Inference {
+        ?o <http://atlaskg.global.hsbc/global/archi31/consistsOf> ?p .
+}}
+where
+{
+        ?s ?p1 ?o .
+        ?p1 <http://atlaskg.global.hsbc/global/archi31/isPartOf> ?p2 . 
+}
