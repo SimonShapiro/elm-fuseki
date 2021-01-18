@@ -11,9 +11,10 @@
 - ~~Single subject molecule url~~
 - ~~Links over single url views~~
 - ~~Icon for fully external url lookup~~
+- ~~Link on subject as well~~
 - Add settings - api url; allow implied external links
 - Simple styling
-- Link on subject as well
+- Consider doing something special with #type???
 - Save ttl in subject view
 - Tableview to get hyperlink logic
 - Dockerise server.py
@@ -31,4 +32,5 @@
 - ~~Remove hard coding of localhost 127.0.0.1 and port~~
 - ~~Resolve apparent differences between safari and chrome on back from history after eternal url click~~
 - ~~Improve methods of recognising query type in api to fine tune headers~~
+- ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
 - Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to _:bo 

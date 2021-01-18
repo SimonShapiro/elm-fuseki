@@ -51,13 +51,6 @@ type alias ServerVars = (List String)
 
 type alias TripleForm a = (List (a, a, a))
 
-serverForm2RdfNode: ServerForm SelectAtom -> ServerForm RdfNode
-serverForm2RdfNode serverForm =
-    List.map (\row ->
-                List.map(\col -> selectAtom2RdfNode col
-                    ) row
-            ) serverForm
-
 type alias ContractedForm a = (List (SubjectMolecule a)) 
 
 makeTripleForm: ServerForm a -> Maybe (TripleForm  a)
@@ -319,6 +312,9 @@ update msg model =
                         "Control" ->
                             Debug.log "Entering Ctrl mode" 
                             ({model | keyboard = Ctrl}, Cmd.none)
+                        "{" -> 
+                            Debug.log "Opening brace" 
+                            ({model | query = model.query++"}"}, Cmd.none)
                         _ -> (model, Cmd.none)
                 Ctrl ->
                     case s of 
@@ -591,11 +587,23 @@ viewRdfNodeAsPredicate predicateStyle node =
                     ]
         _ ->
             b []    [ text "All predicates should be Uri"]
+
+removeUrlFragment: String -> String
+removeUrlFragment urlString =
+    urlString 
+    |> String.split "#"
+    |> List.head
+    |> Maybe.withDefault urlString 
+
+encodeUrlFragmentMarker: String -> String
+encodeUrlFragmentMarker urlString =
+    String.replace "#" "%23" urlString
+
 viewRdfNode: RdfNode -> Html Msg
 viewRdfNode node = 
     case node of
         Uri a ->
-            span [] [ Html.a [href ("/index.html?query=describe <"++a.value++">")][text a.value]
+            span [] [ Html.a [href ("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")][text a.value]  -- remove fragment on anchor
                     , Html.a [href a.value, target "_blank"][img [src "www-12px.svg"][]]
                     ]
         BlankNode a ->

@@ -7369,17 +7369,27 @@ var $author$project$Main$update = F2(
 				var _v3 = model.keyboard;
 				switch (_v3.$) {
 					case 'ReadyToAcceptControl':
-						if (s === 'Control') {
-							return A2(
-								$elm$core$Debug$log,
-								'Entering Ctrl mode',
-								_Utils_Tuple2(
-									_Utils_update(
-										model,
-										{keyboard: $author$project$Main$Ctrl}),
-									$elm$core$Platform$Cmd$none));
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						switch (s) {
+							case 'Control':
+								return A2(
+									$elm$core$Debug$log,
+									'Entering Ctrl mode',
+									_Utils_Tuple2(
+										_Utils_update(
+											model,
+											{keyboard: $author$project$Main$Ctrl}),
+										$elm$core$Platform$Cmd$none));
+							case '{':
+								return A2(
+									$elm$core$Debug$log,
+									'Opening brace',
+									_Utils_Tuple2(
+										_Utils_update(
+											model,
+											{query: model.query + '}'}),
+										$elm$core$Platform$Cmd$none));
+							default:
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						}
 					case 'Ctrl':
 						if (s === 'Shift') {
@@ -8328,6 +8338,16 @@ var $elm$core$List$tail = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
+var $author$project$Main$encodeUrlFragmentMarker = function (urlString) {
+	return A3($elm$core$String$replace, '#', '%23', urlString);
+};
 var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$small = _VirtualDom_node('small');
 var $elm$html$Html$span = _VirtualDom_node('span');
@@ -8351,7 +8371,8 @@ var $author$project$Main$viewRdfNode = function (node) {
 						$elm$html$Html$a,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$href('/index.html?query=describe <' + (a.value + '>'))
+								$elm$html$Html$Attributes$href(
+								'/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>'))
 							]),
 						_List_fromArray(
 							[
