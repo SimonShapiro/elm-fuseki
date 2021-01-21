@@ -28,6 +28,12 @@ import Task exposing (succeed)
 import Regex exposing (Regex)
 import Html exposing (select)
 
+import Graph
+import Json.Decode exposing (index)
+import String
+
+graph1 = Graph.fromNodesAndEdges[Graph.Node 1 (Select "")][Graph.Edge 1 1 ""]
+
 type SparqlQuery 
     = Select Sparql
     | Ask Sparql
@@ -58,7 +64,6 @@ makeTripleForm res = res
 -- ensure that serverForm consists of triples (not necessarily spo)
                     |> List.map (\r -> makeTriple r)
                     |> combine
-
 makeContractedForm: TripleForm SelectAtom -> ContractedForm SelectAtom
 makeContractedForm triples = triples
                             |> List.map (\(s, p, o) -> (s, (p, o)))
@@ -69,6 +74,9 @@ makeContractedForm triples = triples
                                                         |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
                                                         |> separateIntoPredicateLists
                                 ))
+
+-- List.indexedMap Tuple.pair a |>                            -- Dict.fromList  will make an Dict
+-- List.map (\x -> (Tuple.second x, Tuple.first x)) c
 
 contractResult: ServerVars -> ServerForm SelectAtom -> Maybe (ContractedForm SelectAtom)
 contractResult vars res =
@@ -210,7 +218,7 @@ makeRdfKey n =
             Just a.value
         _ -> Nothing       
 
-type alias RdfDict = Dict RdfKey (SubjectMolecule RdfNode)
+type alias RdfDict = Dict RdfKey (SubjectMolecule RdfNode)  -- the main form of the graph -- consider replacing with elm-community/graph
 
 subjectMoleculeMap: (SelectAtom -> RdfNode) -> SubjectMolecule SelectAtom -> SubjectMolecule RdfNode
 subjectMoleculeMap fn (subj, po) =
@@ -227,10 +235,48 @@ makeRdfDict cf = List.map (\subjM ->
                                     (key, subjectMoleculeMap selectAtom2RdfNode subjM)
                             ) cf
                 |> Dict.fromList
+rdfNodeToMaybeString: RdfNode -> Maybe String
+rdfNodeToMaybeString node =
+    case node of
+        Uri a -> Just a.value
+        BlankNode a -> Just a.value
+        LiteralOnlyValue a -> Just a.value
+        LiteralValueAndDataType a -> Just a.value
+        LiteralValueAndLanguageString a -> Just a.value
+        Unknown -> Nothing
 
-type alias Nodes = List RdfDict
+convertRdfDict2CommunityGraph: RdfDict -> Graph.Graph (SubjectMolecule RdfNode) String 
+convertRdfDict2CommunityGraph d = 
+--(List (Graph.Node (SubjectMolecule RdfNode)), Dict String Int) 
+    let
+        (index, values) = Dict.toList d
+                            |> List.unzip
+        reverseDict = List.indexedMap Tuple.pair index
+                        |> List.map(\(x, y) -> (y, x))
+                        |> Dict.fromList
+        nodes = List.indexedMap Tuple.pair values
+                |> List.map (\(x, y) -> Graph.Node x y)
 
-type alias Edges = List (RdfKey, RdfKey)
+        edges = List.map (\(k, node) ->
+                            let
+                                id = Maybe.withDefault -1 <| Dict.get k reverseDict
+                                spo = Tuple.second node
+                            in
+                            List.map (\(p, po) ->
+                                List.map (\o ->
+                                    Dict.get (Maybe.withDefault "???" <| rdfNodeToMaybeString o) reverseDict
+                                ) po
+                                |> Maybe.Extra.values
+                                |> List.map (\e -> Graph.Edge id e (Maybe.withDefault "???" <| rdfNodeToMaybeString p)) 
+                            ) spo
+                            |> List.concat
+                        ) (Dict.toList d)
+                        |> List.concat
+                
+    in
+        Debug.log ("Inside conversion"++(List.length values |> String.fromInt))
+        Debug.log ("Building graph of "++(List.length nodes |> String.fromInt)++":"++(List.length edges |> String.fromInt))
+        Graph.fromNodesAndEdges nodes edges
 
 extractValues: List SelectAtom -> List String
 extractValues rows =
@@ -548,19 +594,24 @@ viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> RdfDict -> Html Msg
 viewSubjects openPredicates predicateStyle subjs =
         div []
         (List.map (\spoKey ->
-            div [ class "container"]
-                [  viewSubjectMolecule spoKey openPredicates predicateStyle (Dict.get spoKey subjs)
-                ]
+            case (Dict.get spoKey subjs) of
+                Nothing ->            div [ class "container"]
+                                [ text "Lost subject molecule"]
+                Just a ->                div [ class "container"]
+                            [ viewSubjectMolecule openPredicates predicateStyle a]
         ) (Dict.keys subjs))
 
 
-viewSubjectMolecule: String -> OpenPredicatesInSubject -> PredicateStyle -> Maybe (SubjectMolecule RdfNode) -> Html Msg
-viewSubjectMolecule spoKey openPredicates predicateStyle subjM =
-            case subjM of
-                Nothing -> text "Lost subject molecule"
-                Just a ->   div [class "card"]
-                                [ h2 [] [ Html.a [href ("/index.html?query=describe <"++spoKey++">")][text spoKey]] -- make case here to clean up the view function below
-                                , viewPredicates openPredicates predicateStyle a
+viewSubjectMolecule: OpenPredicatesInSubject -> PredicateStyle -> (SubjectMolecule RdfNode) -> Html Msg
+viewSubjectMolecule openPredicates predicateStyle mole =
+    let
+        subj = Tuple.first mole
+    in
+              div [class "card"]
+                                [ h2 [] [ Html.a [href ("/index.html?query=describe <"
+                                    ++ (makeRdfKey subj |> Maybe.withDefault "unknown") 
+                                    ++">")][(viewRdfNode subj)]] -- make case here to clean up the view function below
+                                , viewPredicates openPredicates predicateStyle mole
                                 ]
 
 viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule RdfNode -> Html Msg
@@ -797,6 +848,10 @@ view model = { title = "Sparql Query Playground"
                                                 , predicateStyleToggle model.predicateStyle
                                                 , br [] []
                                                 , viewSubjects model.openPredicatesInSubject model.predicateStyle a
+                                                , hr [] []
+                                                , div []
+                                                    (List.map (\n -> viewSubjectMolecule model.openPredicatesInSubject model.predicateStyle n.label) 
+                                                                            (Graph.nodes (convertRdfDict2CommunityGraph a)))
                                                 ]
                                         Nothing ->                             
                                             div []                
@@ -806,6 +861,10 @@ view model = { title = "Sparql Query Playground"
                                                 , h4 [][text "Subject orientation only where results are in the shape of ?s ?p ?o"]
                                                 ]
             )}
+
+-- viewGraphNode: Graph.Node (SubjectMolecule RdfNode) -> Html Msg
+-- viewGraphNode n =
+--      viewSubjectMolecule n
 
 -- Decoders
 

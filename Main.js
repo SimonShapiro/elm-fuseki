@@ -4826,7 +4826,44 @@ function _Http_track(router, xhr, tracker)
 			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
-}var $elm$core$Basics$EQ = {$: 'EQ'};
+}
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
@@ -7945,10 +7982,389 @@ var $author$project$Main$contractResult = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
+var $elm_community$graph$Graph$Edge = F3(
+	function (from, to, label) {
+		return {from: from, label: label, to: to};
+	});
+var $elm_community$graph$Graph$Node = F2(
+	function (id, label) {
+		return {id: id, label: label};
+	});
+var $elm_community$graph$Graph$Graph = function (a) {
+	return {$: 'Graph', a: a};
+};
+var $elm_community$graph$Graph$NodeContext = F3(
+	function (node, incoming, outgoing) {
+		return {incoming: incoming, node: node, outgoing: outgoing};
+	});
+var $elm_community$intdict$IntDict$Empty = {$: 'Empty'};
+var $elm_community$intdict$IntDict$empty = $elm_community$intdict$IntDict$Empty;
+var $elm_community$intdict$IntDict$Inner = function (a) {
+	return {$: 'Inner', a: a};
+};
+var $elm_community$intdict$IntDict$size = function (dict) {
+	switch (dict.$) {
+		case 'Empty':
+			return 0;
+		case 'Leaf':
+			return 1;
+		default:
+			var i = dict.a;
+			return i.size;
+	}
+};
+var $elm_community$intdict$IntDict$inner = F3(
+	function (p, l, r) {
+		var _v0 = _Utils_Tuple2(l, r);
+		if (_v0.a.$ === 'Empty') {
+			var _v1 = _v0.a;
+			return r;
+		} else {
+			if (_v0.b.$ === 'Empty') {
+				var _v2 = _v0.b;
+				return l;
+			} else {
+				return $elm_community$intdict$IntDict$Inner(
+					{
+						left: l,
+						prefix: p,
+						right: r,
+						size: $elm_community$intdict$IntDict$size(l) + $elm_community$intdict$IntDict$size(r)
+					});
+			}
+		}
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $elm$core$Bitwise$complement = _Bitwise_complement;
+var $elm$core$Bitwise$or = _Bitwise_or;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm_community$intdict$IntDict$highestBitSet = function (n) {
+	var shiftOr = F2(
+		function (i, shift) {
+			return i | (i >>> shift);
+		});
+	var n1 = A2(shiftOr, n, 1);
+	var n2 = A2(shiftOr, n1, 2);
+	var n3 = A2(shiftOr, n2, 4);
+	var n4 = A2(shiftOr, n3, 8);
+	var n5 = A2(shiftOr, n4, 16);
+	return n5 & (~(n5 >>> 1));
+};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm_community$intdict$IntDict$signBit = $elm_community$intdict$IntDict$highestBitSet(-1);
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm_community$intdict$IntDict$isBranchingBitSet = function (p) {
+	return A2(
+		$elm$core$Basics$composeR,
+		$elm$core$Bitwise$xor($elm_community$intdict$IntDict$signBit),
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Bitwise$and(p.branchingBit),
+			$elm$core$Basics$neq(0)));
+};
+var $elm_community$intdict$IntDict$higherBitMask = function (branchingBit) {
+	return branchingBit ^ (~(branchingBit - 1));
+};
+var $elm_community$intdict$IntDict$lcp = F2(
+	function (x, y) {
+		var branchingBit = $elm_community$intdict$IntDict$highestBitSet(x ^ y);
+		var mask = $elm_community$intdict$IntDict$higherBitMask(branchingBit);
+		var prefixBits = x & mask;
+		return {branchingBit: branchingBit, prefixBits: prefixBits};
+	});
+var $elm_community$intdict$IntDict$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $elm_community$intdict$IntDict$leaf = F2(
+	function (k, v) {
+		return $elm_community$intdict$IntDict$Leaf(
+			{key: k, value: v});
+	});
+var $elm_community$intdict$IntDict$prefixMatches = F2(
+	function (p, n) {
+		return _Utils_eq(
+			n & $elm_community$intdict$IntDict$higherBitMask(p.branchingBit),
+			p.prefixBits);
+	});
+var $elm_community$intdict$IntDict$update = F3(
+	function (key, alter, dict) {
+		var join = F2(
+			function (_v2, _v3) {
+				var k1 = _v2.a;
+				var l = _v2.b;
+				var k2 = _v3.a;
+				var r = _v3.b;
+				var prefix = A2($elm_community$intdict$IntDict$lcp, k1, k2);
+				return A2($elm_community$intdict$IntDict$isBranchingBitSet, prefix, k2) ? A3($elm_community$intdict$IntDict$inner, prefix, l, r) : A3($elm_community$intdict$IntDict$inner, prefix, r, l);
+			});
+		var alteredNode = function (mv) {
+			var _v1 = alter(mv);
+			if (_v1.$ === 'Just') {
+				var v = _v1.a;
+				return A2($elm_community$intdict$IntDict$leaf, key, v);
+			} else {
+				return $elm_community$intdict$IntDict$empty;
+			}
+		};
+		switch (dict.$) {
+			case 'Empty':
+				return alteredNode($elm$core$Maybe$Nothing);
+			case 'Leaf':
+				var l = dict.a;
+				return _Utils_eq(l.key, key) ? alteredNode(
+					$elm$core$Maybe$Just(l.value)) : A2(
+					join,
+					_Utils_Tuple2(
+						key,
+						alteredNode($elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(l.key, dict));
+			default:
+				var i = dict.a;
+				return A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key) ? (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key) ? A3(
+					$elm_community$intdict$IntDict$inner,
+					i.prefix,
+					i.left,
+					A3($elm_community$intdict$IntDict$update, key, alter, i.right)) : A3(
+					$elm_community$intdict$IntDict$inner,
+					i.prefix,
+					A3($elm_community$intdict$IntDict$update, key, alter, i.left),
+					i.right)) : A2(
+					join,
+					_Utils_Tuple2(
+						key,
+						alteredNode($elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(i.prefix.prefixBits, dict));
+		}
+	});
+var $elm_community$intdict$IntDict$insert = F3(
+	function (key, value, dict) {
+		return A3(
+			$elm_community$intdict$IntDict$update,
+			key,
+			$elm$core$Basics$always(
+				$elm$core$Maybe$Just(value)),
+			dict);
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Basics$not = _Basics_not;
+var $elm_community$intdict$IntDict$get = F2(
+	function (key, dict) {
+		get:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return $elm$core$Maybe$Nothing;
+				case 'Leaf':
+					var l = dict.a;
+					return _Utils_eq(l.key, key) ? $elm$core$Maybe$Just(l.value) : $elm$core$Maybe$Nothing;
+				default:
+					var i = dict.a;
+					if (!A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key)) {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						if (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key)) {
+							var $temp$key = key,
+								$temp$dict = i.right;
+							key = $temp$key;
+							dict = $temp$dict;
+							continue get;
+						} else {
+							var $temp$key = key,
+								$temp$dict = i.left;
+							key = $temp$key;
+							dict = $temp$dict;
+							continue get;
+						}
+					}
+			}
+		}
+	});
+var $elm_community$intdict$IntDict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm_community$intdict$IntDict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm_community$graph$Graph$fromNodesAndEdges = F2(
+	function (nodes_, edges_) {
+		var nodeRep = A3(
+			$elm$core$List$foldl,
+			function (n) {
+				return A2(
+					$elm_community$intdict$IntDict$insert,
+					n.id,
+					A3($elm_community$graph$Graph$NodeContext, n, $elm_community$intdict$IntDict$empty, $elm_community$intdict$IntDict$empty));
+			},
+			$elm_community$intdict$IntDict$empty,
+			nodes_);
+		var addEdge = F2(
+			function (edge, rep) {
+				var updateOutgoing = function (ctx) {
+					return _Utils_update(
+						ctx,
+						{
+							outgoing: A3($elm_community$intdict$IntDict$insert, edge.to, edge.label, ctx.outgoing)
+						});
+				};
+				var updateIncoming = function (ctx) {
+					return _Utils_update(
+						ctx,
+						{
+							incoming: A3($elm_community$intdict$IntDict$insert, edge.from, edge.label, ctx.incoming)
+						});
+				};
+				return A3(
+					$elm_community$intdict$IntDict$update,
+					edge.to,
+					$elm$core$Maybe$map(updateIncoming),
+					A3(
+						$elm_community$intdict$IntDict$update,
+						edge.from,
+						$elm$core$Maybe$map(updateOutgoing),
+						rep));
+			});
+		var addEdgeIfValid = F2(
+			function (edge, rep) {
+				return (A2($elm_community$intdict$IntDict$member, edge.from, rep) && A2($elm_community$intdict$IntDict$member, edge.to, rep)) ? A2(addEdge, edge, rep) : rep;
+			});
+		return $elm_community$graph$Graph$Graph(
+			A3($elm$core$List$foldl, addEdgeIfValid, nodeRep, edges_));
+	});
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $author$project$Main$rdfNodeToMaybeString = function (node) {
+	switch (node.$) {
+		case 'Uri':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'BlankNode':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'LiteralOnlyValue':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'LiteralValueAndDataType':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'LiteralValueAndLanguageString':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm_community$maybe_extra$Maybe$Extra$cons = F2(
+	function (item, list) {
+		if (item.$ === 'Just') {
+			var v = item.a;
+			return A2($elm$core$List$cons, v, list);
+		} else {
+			return list;
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$values = A2($elm$core$List$foldr, $elm_community$maybe_extra$Maybe$Extra$cons, _List_Nil);
+var $author$project$Main$convertRdfDict2CommunityGraph = function (d) {
+	var _v0 = $elm$core$List$unzip(
+		$elm$core$Dict$toList(d));
+	var index = _v0.a;
+	var values = _v0.b;
+	var reverseDict = $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			function (_v4) {
+				var x = _v4.a;
+				var y = _v4.b;
+				return _Utils_Tuple2(y, x);
+			},
+			A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, index)));
+	var edges = $elm$core$List$concat(
+		A2(
+			$elm$core$List$map,
+			function (_v2) {
+				var k = _v2.a;
+				var node = _v2.b;
+				var spo = node.b;
+				var id = A2(
+					$elm$core$Maybe$withDefault,
+					-1,
+					A2($elm$core$Dict$get, k, reverseDict));
+				return $elm$core$List$concat(
+					A2(
+						$elm$core$List$map,
+						function (_v3) {
+							var p = _v3.a;
+							var po = _v3.b;
+							return A2(
+								$elm$core$List$map,
+								function (e) {
+									return A3(
+										$elm_community$graph$Graph$Edge,
+										id,
+										e,
+										A2(
+											$elm$core$Maybe$withDefault,
+											'???',
+											$author$project$Main$rdfNodeToMaybeString(p)));
+								},
+								$elm_community$maybe_extra$Maybe$Extra$values(
+									A2(
+										$elm$core$List$map,
+										function (o) {
+											return A2(
+												$elm$core$Dict$get,
+												A2(
+													$elm$core$Maybe$withDefault,
+													'???',
+													$author$project$Main$rdfNodeToMaybeString(o)),
+												reverseDict);
+										},
+										po)));
+						},
+						spo));
+			},
+			$elm$core$Dict$toList(d)));
+	var nodes = A2(
+		$elm$core$List$map,
+		function (_v1) {
+			var x = _v1.a;
+			var y = _v1.b;
+			return A2($elm_community$graph$Graph$Node, x, y);
+		},
+		A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, values));
+	return A6(
+		$elm$core$Debug$log,
+		'Inside conversion' + $elm$core$String$fromInt(
+			$elm$core$List$length(values)),
+		$elm$core$Debug$log,
+		'Building graph of ' + ($elm$core$String$fromInt(
+			$elm$core$List$length(nodes)) + (':' + $elm$core$String$fromInt(
+			$elm$core$List$length(edges)))),
+		$elm_community$graph$Graph$fromNodesAndEdges,
+		nodes,
+		edges);
+};
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
 var $elm$html$Html$h4 = _VirtualDom_node('h4');
+var $elm$html$Html$hr = _VirtualDom_node('hr');
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -7984,7 +8400,6 @@ var $author$project$Main$Unknown = {$: 'Unknown'};
 var $author$project$Main$Uri = function (a) {
 	return {$: 'Uri', a: a};
 };
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Main$selectAtom2RdfNode = function (atom) {
 	var _v0 = atom.aType;
 	switch (_v0) {
@@ -8041,16 +8456,52 @@ var $author$project$Main$makeRdfDict = function (cf) {
 			},
 			cf));
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
+var $elm_community$graph$Graph$unGraph = function (graph) {
+	var rep = graph.a;
+	return rep;
+};
+var $elm_community$intdict$IntDict$foldr = F3(
+	function (f, acc, dict) {
+		foldr:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldr, f, acc, i.right),
+						$temp$dict = i.left;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldr;
+			}
 		}
 	});
+var $elm_community$intdict$IntDict$values = function (dict) {
+	return A3(
+		$elm_community$intdict$IntDict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm_community$graph$Graph$nodes = A2(
+	$elm$core$Basics$composeR,
+	$elm_community$graph$Graph$unGraph,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm_community$intdict$IntDict$values,
+		$elm$core$List$map(
+			function ($) {
+				return $.node;
+			})));
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -8626,39 +9077,39 @@ var $author$project$Main$viewPredicates = F3(
 				},
 				preds));
 	});
-var $author$project$Main$viewSubjectMolecule = F4(
-	function (spoKey, openPredicates, predicateStyle, subjM) {
-		if (subjM.$ === 'Nothing') {
-			return $elm$html$Html$text('Lost subject molecule');
-		} else {
-			var a = subjM.a;
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('card')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h2,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$href('/index.html?query=describe <' + (spoKey + '>'))
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text(spoKey)
-									]))
-							])),
-						A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, a)
-					]));
-		}
+var $author$project$Main$viewSubjectMolecule = F3(
+	function (openPredicates, predicateStyle, mole) {
+		var subj = mole.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h2,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href(
+									'/index.html?query=describe <' + (A2(
+										$elm$core$Maybe$withDefault,
+										'unknown',
+										$author$project$Main$makeRdfKey(subj)) + '>'))
+								]),
+							_List_fromArray(
+								[
+									$author$project$Main$viewRdfNode(subj)
+								]))
+						])),
+					A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, mole)
+				]));
 	});
 var $author$project$Main$viewSubjects = F3(
 	function (openPredicates, predicateStyle, subjs) {
@@ -8668,21 +9119,31 @@ var $author$project$Main$viewSubjects = F3(
 			A2(
 				$elm$core$List$map,
 				function (spoKey) {
-					return A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('container')
-							]),
-						_List_fromArray(
-							[
-								A4(
-								$author$project$Main$viewSubjectMolecule,
-								spoKey,
-								openPredicates,
-								predicateStyle,
-								A2($elm$core$Dict$get, spoKey, subjs))
-							]));
+					var _v0 = A2($elm$core$Dict$get, spoKey, subjs);
+					if (_v0.$ === 'Nothing') {
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('container')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Lost subject molecule')
+								]));
+					} else {
+						var a = _v0.a;
+						return A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('container')
+								]),
+							_List_fromArray(
+								[
+									A3($author$project$Main$viewSubjectMolecule, openPredicates, predicateStyle, a)
+								]));
+					}
 				},
 				$elm$core$Dict$keys(subjs)));
 	});
@@ -8909,7 +9370,18 @@ var $author$project$Main$view = function (model) {
 												])),
 											$author$project$Main$predicateStyleToggle(model.predicateStyle),
 											A2($elm$html$Html$br, _List_Nil, _List_Nil),
-											A3($author$project$Main$viewSubjects, model.openPredicatesInSubject, model.predicateStyle, a)
+											A3($author$project$Main$viewSubjects, model.openPredicatesInSubject, model.predicateStyle, a),
+											A2($elm$html$Html$hr, _List_Nil, _List_Nil),
+											A2(
+											$elm$html$Html$div,
+											_List_Nil,
+											A2(
+												$elm$core$List$map,
+												function (n) {
+													return A3($author$project$Main$viewSubjectMolecule, model.openPredicatesInSubject, model.predicateStyle, n.label);
+												},
+												$elm_community$graph$Graph$nodes(
+													$author$project$Main$convertRdfDict2CommunityGraph(a))))
 										]));
 							} else {
 								return A2(

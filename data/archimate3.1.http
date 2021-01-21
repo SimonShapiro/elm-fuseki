@@ -14,6 +14,8 @@ prefix app: <http://example.com/ApplictionInstance/>
 prefix apf: <http://example.com/ApplictionFunction/> 
 prefix cc: <http://example.com/CostCentre/> 
 
+drop graph <archimate> ;
+
 insert  data { graph <archimate3> {
 
 :  a owl:Ontology ;
