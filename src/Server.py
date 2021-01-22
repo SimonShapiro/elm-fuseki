@@ -141,10 +141,13 @@ def processConstructQuery(qType, queryString, res):
         pprint.pprint(result)
         resultArray= []
         for subj in result:
-            subjectAtom = Atom(key="s", 
+            subjectAtom =  Atom(key="s", 
                                 value=subj['@id'], 
                                 aType="uri"
-                            )  # consider decoding aType into bnode as well 
+                            ) if not ("_:" in subj['@id']) else Atom(key="s", 
+                                value=subj['@id'], 
+                                aType="bnode"
+                            )# decoding aType into bnode as well 
             # this loop yields predicates
             for predicate in subj.keys():
                 predicateAtom = Atom(key="p", 
@@ -175,7 +178,10 @@ def processConstructQuery(qType, queryString, res):
                                 objectAtom = Atom(key="o", 
                                                     value=obj.get("@id"),
                                                     aType= "uri"
-                                                )
+                                                ) if not "_:" in obj['@id'] else Atom(key="s", 
+                                                        value=obj['@id'], 
+                                                        aType="bnode"
+                                                    )
                             else:
                                 print("Unexpected empty object in triple")
                                 print(1/0)

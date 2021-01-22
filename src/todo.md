@@ -12,7 +12,7 @@
 - ~~Links over single url views~~
 - ~~Icon for fully external url lookup~~
 - ~~Link on subject as well~~
-- Add settings - api url; allow implied external links
+- Add settings - api url; allow implied external links to model
 - check for accessability of object uri
 - Simple styling
 - Consider doing something special with #type???

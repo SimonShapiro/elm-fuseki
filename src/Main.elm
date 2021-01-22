@@ -105,6 +105,7 @@ type alias Model =
     , server: Server
     , urlQuery: Maybe Sparql
     , query: Sparql 
+    , currentRdfDict: Maybe RdfDict
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
@@ -302,7 +303,7 @@ initialFn _ url key =
     let
         initialQuery = parseUrlForIndexQuery url
     in
-        (Model Initialising server initialQuery "" Normal Table Terse [] key, Cmd.none)
+        (Model Initialising server initialQuery "" Nothing Normal Table Terse [] key, Cmd.none)
 
 parseUrlForDetailsSubject : Url -> Maybe String
 parseUrlForDetailsSubject url =
@@ -423,7 +424,10 @@ update msg model =
                     case okData.status of
                         200 ->
                             -- could transform to graph here
-                            ({model | state = DisplayingSelectResult okData.vars okData.result}, Cmd.none)
+                            ({ model | state = DisplayingSelectResult okData.vars okData.result
+                             , currentRdfDict = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
+                                                |> Maybe.map makeRdfDict 
+                             }, Cmd.none)
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
                 Err e -> 
@@ -607,12 +611,19 @@ viewSubjectMolecule openPredicates predicateStyle mole =
     let
         subj = Tuple.first mole
     in
+        case subj of
+           BlankNode a -> span [] [] -- "blank node detected"
+           _ ->
               div [class "card"]
                                 [ h2 [] [ Html.a [href ("/index.html?query=describe <"
                                     ++ (makeRdfKey subj |> Maybe.withDefault "unknown") 
                                     ++">")][(viewRdfNode subj)]] -- make case here to clean up the view function below
                                 , viewPredicates openPredicates predicateStyle mole
                                 ]
+
+expandObjectInPlace: RdfKey -> RdfDict -> Html Msg
+expandObjectInPlace k dict =
+    span [] []
 
 viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule RdfNode -> Html Msg
 viewPredicates openPredicates predicateStyle mole =
@@ -658,7 +669,7 @@ viewRdfNode node =
                     , Html.a [href a.value, target "_blank"][img [src "www-12px.svg"][]]
                     ]
         BlankNode a ->
-            text a.value
+            text a.value  -- a is now an RdfKey and can be expanded
         LiteralOnlyValue a ->
             text a.value
         LiteralValueAndDataType a ->

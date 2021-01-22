@@ -6500,10 +6500,27 @@ var $author$project$Main$handleUrlRequest = function (req) {
 	}
 };
 var $author$project$Main$Initialising = {$: 'Initialising'};
-var $author$project$Main$Model = F9(
-	function (state, server, urlQuery, query, keyboard, resultsDisplay, predicateStyle, openPredicatesInSubject, key) {
-		return {key: key, keyboard: keyboard, openPredicatesInSubject: openPredicatesInSubject, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state, urlQuery: urlQuery};
-	});
+var $author$project$Main$Model = function (state) {
+	return function (server) {
+		return function (urlQuery) {
+			return function (query) {
+				return function (currentRdfDict) {
+					return function (keyboard) {
+						return function (resultsDisplay) {
+							return function (predicateStyle) {
+								return function (openPredicatesInSubject) {
+									return function (key) {
+										return {currentRdfDict: currentRdfDict, key: key, keyboard: keyboard, openPredicatesInSubject: openPredicatesInSubject, predicateStyle: predicateStyle, query: query, resultsDisplay: resultsDisplay, server: server, state: state, urlQuery: urlQuery};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var $author$project$Main$Normal = {$: 'Normal'};
 var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
@@ -6514,7 +6531,7 @@ var $author$project$Main$initialFn = F3(
 	function (_v0, url, key) {
 		var initialQuery = $author$project$Main$parseUrlForIndexQuery(url);
 		return _Utils_Tuple2(
-			A9($author$project$Main$Model, $author$project$Main$Initialising, $author$project$Main$server, initialQuery, '', $author$project$Main$Normal, $author$project$Main$Table, $author$project$Main$Terse, _List_Nil, key),
+			$author$project$Main$Model($author$project$Main$Initialising)($author$project$Main$server)(initialQuery)('')($elm$core$Maybe$Nothing)($author$project$Main$Normal)($author$project$Main$Table)($author$project$Main$Terse)(_List_Nil)(key),
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Main$PressedKey = function (a) {
@@ -6848,6 +6865,249 @@ var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
 var $author$project$Main$SubjectOrientation = {$: 'SubjectOrientation'};
 var $author$project$Main$Verbose = {$: 'Verbose'};
 var $author$project$Main$Waiting = {$: 'Waiting'};
+var $elm_community$list_extra$List$Extra$groupWhile = F2(
+	function (isSameGroup, items) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					if (!acc.b) {
+						return _List_fromArray(
+							[
+								_Utils_Tuple2(x, _List_Nil)
+							]);
+					} else {
+						var _v1 = acc.a;
+						var y = _v1.a;
+						var restOfGroup = _v1.b;
+						var groups = acc.b;
+						return A2(isSameGroup, x, y) ? A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(
+								x,
+								A2($elm$core$List$cons, y, restOfGroup)),
+							groups) : A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(x, _List_Nil),
+							acc);
+					}
+				}),
+			_List_Nil,
+			items);
+	});
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$List$unzip = function (pairs) {
+	var step = F2(
+		function (_v0, _v1) {
+			var x = _v0.a;
+			var y = _v0.b;
+			var xs = _v1.a;
+			var ys = _v1.b;
+			return _Utils_Tuple2(
+				A2($elm$core$List$cons, x, xs),
+				A2($elm$core$List$cons, y, ys));
+		});
+	return A3(
+		$elm$core$List$foldr,
+		step,
+		_Utils_Tuple2(_List_Nil, _List_Nil),
+		pairs);
+};
+var $author$project$Main$separateIntoPredicateLists = function (preds) {
+	return A2(
+		$elm$core$List$map,
+		function (p) {
+			var item = p.a.a;
+			var head = p.a.b;
+			var target = A2(
+				$elm$core$List$cons,
+				head,
+				$elm$core$List$unzip(p.b).b);
+			return _Utils_Tuple2(item, target);
+		},
+		preds);
+};
+var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
+	return A2(
+		$elm$core$List$map,
+		function (subject) {
+			var subj = subject.a.a;
+			var predobj = subject.a.b;
+			var predicateObjects = A2(
+				$elm$core$List$cons,
+				predobj,
+				$elm$core$List$unzip(subject.b).b);
+			return _Utils_Tuple2(subj, predicateObjects);
+		},
+		l);
+};
+var $elm$core$List$sortBy = _List_sortBy;
+var $author$project$Main$makeContractedForm = function (triples) {
+	return A2(
+		$elm$core$List$map,
+		function (_v2) {
+			var x = _v2.a;
+			var y = _v2.b;
+			return _Utils_Tuple2(
+				x,
+				$author$project$Main$separateIntoPredicateLists(
+					A2(
+						$elm_community$list_extra$List$Extra$groupWhile,
+						F2(
+							function (a, b) {
+								return _Utils_eq(a.a.value, b.a.value);
+							}),
+						A2(
+							$elm$core$List$sortBy,
+							function (_v3) {
+								var a = _v3.a;
+								var b = _v3.b;
+								return a.value;
+							},
+							y))));
+		},
+		$author$project$Main$separateIntoSubject_PredicateObjects(
+			A2(
+				$elm_community$list_extra$List$Extra$groupWhile,
+				F2(
+					function (a, b) {
+						return _Utils_eq(a.a.value, b.a.value);
+					}),
+				A2(
+					$elm$core$List$sortBy,
+					function (_v1) {
+						var x = _v1.a;
+						var y = _v1.b;
+						return x.value;
+					},
+					A2(
+						$elm$core$List$map,
+						function (_v0) {
+							var s = _v0.a;
+							var p = _v0.b;
+							var o = _v0.c;
+							return _Utils_Tuple2(
+								s,
+								_Utils_Tuple2(p, o));
+						},
+						triples)))));
+};
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$combine = A2(
+	$elm$core$List$foldr,
+	$elm$core$Maybe$map2($elm$core$List$cons),
+	$elm$core$Maybe$Just(_List_Nil));
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Maybe$map3 = F4(
+	function (func, ma, mb, mc) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					return $elm$core$Maybe$Just(
+						A3(func, a, b, c));
+				}
+			}
+		}
+	});
+var $author$project$Main$makeTriple = function (spo) {
+	var _v0 = $elm$core$List$length(spo);
+	if (_v0 === 3) {
+		return A4(
+			$elm$core$Maybe$map3,
+			F3(
+				function (a, b, c) {
+					return _Utils_Tuple3(a, b, c);
+				}),
+			$elm$core$List$head(spo),
+			$elm$core$List$head(
+				A2($elm$core$List$drop, 1, spo)),
+			$elm$core$List$head(
+				A2($elm$core$List$drop, 2, spo)));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$makeTripleForm = function (res) {
+	return $elm_community$maybe_extra$Maybe$Extra$combine(
+		A2(
+			$elm$core$List$map,
+			function (r) {
+				return $author$project$Main$makeTriple(r);
+			},
+			res));
+};
+var $author$project$Main$contractResult = F2(
+	function (vars, res) {
+		if ((((((vars.b && (vars.a === 's')) && vars.b.b) && (vars.b.a === 'p')) && vars.b.b.b) && (vars.b.b.a === 'o')) && (!vars.b.b.b.b)) {
+			var _v1 = vars.b;
+			var _v2 = _v1.b;
+			var maybeTriples = $author$project$Main$makeTripleForm(res);
+			if (maybeTriples.$ === 'Just') {
+				var a = maybeTriples.a;
+				return $elm$core$Maybe$Just(
+					$author$project$Main$makeContractedForm(a));
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -7062,6 +7322,101 @@ var $author$project$Main$mainDecoder = A8(
 		'result',
 		$elm$json$Json$Decode$list(
 			$elm$json$Json$Decode$list($author$project$Main$selectAtomDecoder))));
+var $author$project$Main$makeRdfKey = function (n) {
+	switch (n.$) {
+		case 'Uri':
+			var a = n.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'BlankNode':
+			var a = n.a;
+			return $elm$core$Maybe$Just(a.value);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$BlankNode = function (a) {
+	return {$: 'BlankNode', a: a};
+};
+var $author$project$Main$LiteralOnlyValue = function (a) {
+	return {$: 'LiteralOnlyValue', a: a};
+};
+var $author$project$Main$LiteralValueAndDataType = function (a) {
+	return {$: 'LiteralValueAndDataType', a: a};
+};
+var $author$project$Main$LiteralValueAndLanguageString = function (a) {
+	return {$: 'LiteralValueAndLanguageString', a: a};
+};
+var $author$project$Main$Unknown = {$: 'Unknown'};
+var $author$project$Main$Uri = function (a) {
+	return {$: 'Uri', a: a};
+};
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Main$selectAtom2RdfNode = function (atom) {
+	var _v0 = atom.aType;
+	switch (_v0) {
+		case 'uri':
+			return $author$project$Main$Uri(
+				{value: atom.value});
+		case 'bnode':
+			return $author$project$Main$BlankNode(
+				{value: atom.value});
+		case 'literal':
+			return (atom.language !== '') ? $author$project$Main$LiteralValueAndLanguageString(
+				{language: atom.language, value: atom.value}) : ((atom.datatype !== '') ? $author$project$Main$LiteralValueAndDataType(
+				{dataType: atom.datatype, value: atom.value}) : $author$project$Main$LiteralOnlyValue(
+				{value: atom.value}));
+		default:
+			return $author$project$Main$Unknown;
+	}
+};
+var $author$project$Main$subjectMoleculeMap = F2(
+	function (fn, _v0) {
+		var subj = _v0.a;
+		var po = _v0.b;
+		return _Utils_Tuple2(
+			fn(subj),
+			A2(
+				$elm$core$List$map,
+				function (_v1) {
+					var p = _v1.a;
+					var lo = _v1.b;
+					return _Utils_Tuple2(
+						fn(p),
+						A2(
+							$elm$core$List$map,
+							function (o) {
+								return fn(o);
+							},
+							lo));
+				},
+				po));
+	});
+var $author$project$Main$makeRdfDict = function (cf) {
+	return $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			function (subjM) {
+				var key = A2(
+					$elm$core$Maybe$withDefault,
+					'unidentifiable',
+					$author$project$Main$makeRdfKey(
+						$author$project$Main$selectAtom2RdfNode(subjM.a)));
+				return _Utils_Tuple2(
+					key,
+					A2($author$project$Main$subjectMoleculeMap, $author$project$Main$selectAtom2RdfNode, subjM));
+			},
+			cf));
+};
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $author$project$Main$Pinged = function (a) {
 	return {$: 'Pinged', a: a};
 };
@@ -7580,6 +7935,10 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
+									currentRdfDict: A2(
+										$elm$core$Maybe$map,
+										$author$project$Main$makeRdfDict,
+										A2($author$project$Main$contractResult, okData.vars, okData.result)),
 									state: A2($author$project$Main$DisplayingSelectResult, okData.vars, okData.result)
 								}),
 							$elm$core$Platform$Cmd$none);
@@ -7739,249 +8098,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm_community$list_extra$List$Extra$groupWhile = F2(
-	function (isSameGroup, items) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					if (!acc.b) {
-						return _List_fromArray(
-							[
-								_Utils_Tuple2(x, _List_Nil)
-							]);
-					} else {
-						var _v1 = acc.a;
-						var y = _v1.a;
-						var restOfGroup = _v1.b;
-						var groups = acc.b;
-						return A2(isSameGroup, x, y) ? A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(
-								x,
-								A2($elm$core$List$cons, y, restOfGroup)),
-							groups) : A2(
-							$elm$core$List$cons,
-							_Utils_Tuple2(x, _List_Nil),
-							acc);
-					}
-				}),
-			_List_Nil,
-			items);
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $elm$core$List$unzip = function (pairs) {
-	var step = F2(
-		function (_v0, _v1) {
-			var x = _v0.a;
-			var y = _v0.b;
-			var xs = _v1.a;
-			var ys = _v1.b;
-			return _Utils_Tuple2(
-				A2($elm$core$List$cons, x, xs),
-				A2($elm$core$List$cons, y, ys));
-		});
-	return A3(
-		$elm$core$List$foldr,
-		step,
-		_Utils_Tuple2(_List_Nil, _List_Nil),
-		pairs);
-};
-var $author$project$Main$separateIntoPredicateLists = function (preds) {
-	return A2(
-		$elm$core$List$map,
-		function (p) {
-			var item = p.a.a;
-			var head = p.a.b;
-			var target = A2(
-				$elm$core$List$cons,
-				head,
-				$elm$core$List$unzip(p.b).b);
-			return _Utils_Tuple2(item, target);
-		},
-		preds);
-};
-var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
-	return A2(
-		$elm$core$List$map,
-		function (subject) {
-			var subj = subject.a.a;
-			var predobj = subject.a.b;
-			var predicateObjects = A2(
-				$elm$core$List$cons,
-				predobj,
-				$elm$core$List$unzip(subject.b).b);
-			return _Utils_Tuple2(subj, predicateObjects);
-		},
-		l);
-};
-var $elm$core$List$sortBy = _List_sortBy;
-var $author$project$Main$makeContractedForm = function (triples) {
-	return A2(
-		$elm$core$List$map,
-		function (_v2) {
-			var x = _v2.a;
-			var y = _v2.b;
-			return _Utils_Tuple2(
-				x,
-				$author$project$Main$separateIntoPredicateLists(
-					A2(
-						$elm_community$list_extra$List$Extra$groupWhile,
-						F2(
-							function (a, b) {
-								return _Utils_eq(a.a.value, b.a.value);
-							}),
-						A2(
-							$elm$core$List$sortBy,
-							function (_v3) {
-								var a = _v3.a;
-								var b = _v3.b;
-								return a.value;
-							},
-							y))));
-		},
-		$author$project$Main$separateIntoSubject_PredicateObjects(
-			A2(
-				$elm_community$list_extra$List$Extra$groupWhile,
-				F2(
-					function (a, b) {
-						return _Utils_eq(a.a.value, b.a.value);
-					}),
-				A2(
-					$elm$core$List$sortBy,
-					function (_v1) {
-						var x = _v1.a;
-						var y = _v1.b;
-						return x.value;
-					},
-					A2(
-						$elm$core$List$map,
-						function (_v0) {
-							var s = _v0.a;
-							var p = _v0.b;
-							var o = _v0.c;
-							return _Utils_Tuple2(
-								s,
-								_Utils_Tuple2(p, o));
-						},
-						triples)))));
-};
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
-			}
-		}
-	});
-var $elm_community$maybe_extra$Maybe$Extra$combine = A2(
-	$elm$core$List$foldr,
-	$elm$core$Maybe$map2($elm$core$List$cons),
-	$elm$core$Maybe$Just(_List_Nil));
-var $elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm$core$Maybe$map3 = F4(
-	function (func, ma, mb, mc) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				if (mc.$ === 'Nothing') {
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var c = mc.a;
-					return $elm$core$Maybe$Just(
-						A3(func, a, b, c));
-				}
-			}
-		}
-	});
-var $author$project$Main$makeTriple = function (spo) {
-	var _v0 = $elm$core$List$length(spo);
-	if (_v0 === 3) {
-		return A4(
-			$elm$core$Maybe$map3,
-			F3(
-				function (a, b, c) {
-					return _Utils_Tuple3(a, b, c);
-				}),
-			$elm$core$List$head(spo),
-			$elm$core$List$head(
-				A2($elm$core$List$drop, 1, spo)),
-			$elm$core$List$head(
-				A2($elm$core$List$drop, 2, spo)));
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Main$makeTripleForm = function (res) {
-	return $elm_community$maybe_extra$Maybe$Extra$combine(
-		A2(
-			$elm$core$List$map,
-			function (r) {
-				return $author$project$Main$makeTriple(r);
-			},
-			res));
-};
-var $author$project$Main$contractResult = F2(
-	function (vars, res) {
-		if ((((((vars.b && (vars.a === 's')) && vars.b.b) && (vars.b.a === 'p')) && vars.b.b.b) && (vars.b.b.a === 'o')) && (!vars.b.b.b.b)) {
-			var _v1 = vars.b;
-			var _v2 = _v1.b;
-			var maybeTriples = $author$project$Main$makeTripleForm(res);
-			if (maybeTriples.$ === 'Just') {
-				var a = maybeTriples.a;
-				return $elm$core$Maybe$Just(
-					$author$project$Main$makeContractedForm(a));
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $elm_community$graph$Graph$Edge = F3(
 	function (from, to, label) {
 		return {from: from, label: label, to: to};
@@ -8035,7 +8151,6 @@ var $elm_community$intdict$IntDict$inner = F3(
 		}
 	});
 var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $elm$core$Bitwise$complement = _Bitwise_complement;
 var $elm$core$Bitwise$or = _Bitwise_or;
 var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
@@ -8147,16 +8262,6 @@ var $elm_community$intdict$IntDict$insert = F3(
 			$elm$core$Basics$always(
 				$elm$core$Maybe$Just(value)),
 			dict);
-	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
 	});
 var $elm$core$Basics$not = _Basics_not;
 var $elm_community$intdict$IntDict$get = F2(
@@ -8372,90 +8477,6 @@ var $elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var $elm$html$Html$input = _VirtualDom_node('input');
-var $author$project$Main$makeRdfKey = function (n) {
-	switch (n.$) {
-		case 'Uri':
-			var a = n.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'BlankNode':
-			var a = n.a;
-			return $elm$core$Maybe$Just(a.value);
-		default:
-			return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Main$BlankNode = function (a) {
-	return {$: 'BlankNode', a: a};
-};
-var $author$project$Main$LiteralOnlyValue = function (a) {
-	return {$: 'LiteralOnlyValue', a: a};
-};
-var $author$project$Main$LiteralValueAndDataType = function (a) {
-	return {$: 'LiteralValueAndDataType', a: a};
-};
-var $author$project$Main$LiteralValueAndLanguageString = function (a) {
-	return {$: 'LiteralValueAndLanguageString', a: a};
-};
-var $author$project$Main$Unknown = {$: 'Unknown'};
-var $author$project$Main$Uri = function (a) {
-	return {$: 'Uri', a: a};
-};
-var $author$project$Main$selectAtom2RdfNode = function (atom) {
-	var _v0 = atom.aType;
-	switch (_v0) {
-		case 'uri':
-			return $author$project$Main$Uri(
-				{value: atom.value});
-		case 'bnode':
-			return $author$project$Main$BlankNode(
-				{value: atom.value});
-		case 'literal':
-			return (atom.language !== '') ? $author$project$Main$LiteralValueAndLanguageString(
-				{language: atom.language, value: atom.value}) : ((atom.datatype !== '') ? $author$project$Main$LiteralValueAndDataType(
-				{dataType: atom.datatype, value: atom.value}) : $author$project$Main$LiteralOnlyValue(
-				{value: atom.value}));
-		default:
-			return $author$project$Main$Unknown;
-	}
-};
-var $author$project$Main$subjectMoleculeMap = F2(
-	function (fn, _v0) {
-		var subj = _v0.a;
-		var po = _v0.b;
-		return _Utils_Tuple2(
-			fn(subj),
-			A2(
-				$elm$core$List$map,
-				function (_v1) {
-					var p = _v1.a;
-					var lo = _v1.b;
-					return _Utils_Tuple2(
-						fn(p),
-						A2(
-							$elm$core$List$map,
-							function (o) {
-								return fn(o);
-							},
-							lo));
-				},
-				po));
-	});
-var $author$project$Main$makeRdfDict = function (cf) {
-	return $elm$core$Dict$fromList(
-		A2(
-			$elm$core$List$map,
-			function (subjM) {
-				var key = A2(
-					$elm$core$Maybe$withDefault,
-					'unidentifiable',
-					$author$project$Main$makeRdfKey(
-						$author$project$Main$selectAtom2RdfNode(subjM.a)));
-				return _Utils_Tuple2(
-					key,
-					A2($author$project$Main$subjectMoleculeMap, $author$project$Main$selectAtom2RdfNode, subjM));
-			},
-			cf));
-};
 var $elm_community$graph$Graph$unGraph = function (graph) {
 	var rep = graph.a;
 	return rep;
@@ -8780,6 +8801,7 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$core$List$tail = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -8801,7 +8823,6 @@ var $author$project$Main$encodeUrlFragmentMarker = function (urlString) {
 };
 var $elm$html$Html$img = _VirtualDom_node('img');
 var $elm$html$Html$small = _VirtualDom_node('small');
-var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -9080,36 +9101,41 @@ var $author$project$Main$viewPredicates = F3(
 var $author$project$Main$viewSubjectMolecule = F3(
 	function (openPredicates, predicateStyle, mole) {
 		var subj = mole.a;
-		return A2(
-			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('card')
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$h2,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$a,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$href(
-									'/index.html?query=describe <' + (A2(
-										$elm$core$Maybe$withDefault,
-										'unknown',
-										$author$project$Main$makeRdfKey(subj)) + '>'))
-								]),
-							_List_fromArray(
-								[
-									$author$project$Main$viewRdfNode(subj)
-								]))
-						])),
-					A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, mole)
-				]));
+		if (subj.$ === 'BlankNode') {
+			var a = subj.a;
+			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
+		} else {
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('card')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$h2,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$a,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$href(
+										'/index.html?query=describe <' + (A2(
+											$elm$core$Maybe$withDefault,
+											'unknown',
+											$author$project$Main$makeRdfKey(subj)) + '>'))
+									]),
+								_List_fromArray(
+									[
+										$author$project$Main$viewRdfNode(subj)
+									]))
+							])),
+						A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, mole)
+					]));
+		}
 	});
 var $author$project$Main$viewSubjects = F3(
 	function (openPredicates, predicateStyle, subjs) {
