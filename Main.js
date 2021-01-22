@@ -8801,16 +8801,15 @@ var $author$project$Main$uploadQueryFromFile = A2(
 					$elm$html$Html$text('Download query')
 				]))
 		]));
-var $elm$html$Html$span = _VirtualDom_node('span');
-var $elm$core$List$tail = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(xs);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
+var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
+	return {$: 'DeregisterSubjectPredicateOpen', a: a};
 };
+var $author$project$Main$Object = {$: 'Object'};
+var $author$project$Main$Predicate = {$: 'Predicate'};
+var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
+	return {$: 'RegisterSubjectPredicateOpen', a: a};
+};
+var $author$project$Main$Subject = {$: 'Subject'};
 var $elm$core$String$replace = F3(
 	function (before, after, string) {
 		return A2(
@@ -8820,112 +8819,6 @@ var $elm$core$String$replace = F3(
 	});
 var $author$project$Main$encodeUrlFragmentMarker = function (urlString) {
 	return A3($elm$core$String$replace, '#', '%23', urlString);
-};
-var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$small = _VirtualDom_node('small');
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
-};
-var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $author$project$Main$viewRdfNode = F2(
-	function (model, node) {
-		switch (node.$) {
-			case 'Uri':
-				var a = node.a;
-				return A2(
-					$elm$html$Html$span,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$a,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$href(
-									'/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>'))
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text(a.value)
-								])),
-							A2(
-							$elm$html$Html$a,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$href(a.value),
-									$elm$html$Html$Attributes$target('_blank')
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$elm$html$Html$img,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$src('www-12px.svg')
-										]),
-									_List_Nil)
-								]))
-						]));
-			case 'BlankNode':
-				var a = node.a;
-				return $elm$html$Html$text(a.value);
-			case 'LiteralOnlyValue':
-				var a = node.a;
-				return $elm$html$Html$text(a.value);
-			case 'LiteralValueAndDataType':
-				var a = node.a;
-				return A2(
-					$elm$html$Html$span,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(a.value),
-							A2(
-							$elm$html$Html$small,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('  ('),
-									$elm$html$Html$text(a.dataType),
-									$elm$html$Html$text(')')
-								]))
-						]));
-			case 'LiteralValueAndLanguageString':
-				var a = node.a;
-				return A2(
-					$elm$html$Html$span,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(a.value),
-							A2(
-							$elm$html$Html$small,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('  ('),
-									$elm$html$Html$text(a.language),
-									$elm$html$Html$text(')')
-								]))
-						]));
-			default:
-				return A2(
-					$elm$html$Html$b,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Unrecognised Atom')
-						]));
-		}
-	});
-var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
-	return {$: 'DeregisterSubjectPredicateOpen', a: a};
-};
-var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
-	return {$: 'RegisterSubjectPredicateOpen', a: a};
 };
 var $elm_community$list_extra$List$Extra$find = F2(
 	function (predicate, list) {
@@ -8948,100 +8841,25 @@ var $elm_community$list_extra$List$Extra$find = F2(
 			}
 		}
 	});
-var $author$project$Main$viewRestOfObjectList = F4(
-	function (model, selected, obj, rest) {
-		var _v0 = A2(
-			$elm_community$list_extra$List$Extra$find,
-			function (o) {
-				return _Utils_eq(o, selected);
-			},
-			model.openPredicatesInSubject);
-		if (_v0.$ === 'Just') {
-			var a = _v0.a;
-			return A2(
-				$elm$core$List$cons,
-				A2($author$project$Main$viewRdfNode, model, obj),
-				A2(
-					$elm$core$List$cons,
-					A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick(
-								$author$project$Main$DeregisterSubjectPredicateOpen(selected))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(' less')
-							])),
-					A2(
-						$elm$core$List$map,
-						function (r) {
-							return A2(
-								$elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2($author$project$Main$viewRdfNode, model, r)
-									]));
-						},
-						rest)));
-		} else {
-			return _List_fromArray(
-				[
-					A2($author$project$Main$viewRdfNode, model, obj),
-					A2(
-					$elm$html$Html$button,
-					_List_fromArray(
-						[
-							$elm$html$Html$Events$onClick(
-							$author$project$Main$RegisterSubjectPredicateOpen(selected))
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(
-								$elm$core$List$length(rest)) + ' more')
-						]))
-				]);
-		}
-	});
-var $author$project$Main$viewObjects = F3(
-	function (model, subj, po) {
-		var _v0 = po;
-		var pred = _v0.a;
-		var objs = _v0.b;
-		var head = $elm$core$List$head(objs);
-		var rest = A2(
-			$elm$core$Maybe$withDefault,
-			_List_Nil,
-			$elm$core$List$tail(objs));
-		var restCount = $elm$core$List$length(rest);
-		if (head.$ === 'Just') {
-			var obj = head.a;
-			if (!restCount) {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2($author$project$Main$viewRdfNode, model, obj)
-						]));
-			} else {
-				return A2(
-					$elm$html$Html$div,
-					_List_Nil,
-					A4(
-						$author$project$Main$viewRestOfObjectList,
-						model,
-						_Utils_Tuple2(subj, pred),
-						obj,
-						rest));
-			}
-		} else {
-			return $elm$html$Html$text('');
-		}
-	});
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$html$Html$small = _VirtualDom_node('small');
+var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
 var $author$project$Main$aka = F2(
 	function (predicateStyle, pred) {
 		if (predicateStyle.$ === 'Verbose') {
@@ -9078,6 +8896,76 @@ var $author$project$Main$viewRdfNodeAsPredicate = F2(
 					]));
 		}
 	});
+var $author$project$Main$makeSubjectMoleculeCard = F2(
+	function (model, mole) {
+		var subj = mole.a;
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('card')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h2,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href(
+									'/index.html?query=describe <' + (A2(
+										$elm$core$Maybe$withDefault,
+										'unknown',
+										$author$project$Main$makeRdfKey(subj)) + '>'))
+								]),
+							_List_fromArray(
+								[
+									A3($author$project$Main$viewRdfNode, model, $author$project$Main$Subject, subj)
+								]))
+						])),
+					A2($author$project$Main$viewPredicates, model, mole)
+				]));
+	});
+var $author$project$Main$viewObjects = F3(
+	function (model, subj, po) {
+		var _v6 = po;
+		var pred = _v6.a;
+		var objs = _v6.b;
+		var head = $elm$core$List$head(objs);
+		var rest = A2(
+			$elm$core$Maybe$withDefault,
+			_List_Nil,
+			$elm$core$List$tail(objs));
+		var restCount = $elm$core$List$length(rest);
+		if (head.$ === 'Just') {
+			var obj = head.a;
+			if (!restCount) {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A3($author$project$Main$viewRdfNode, model, $author$project$Main$Object, obj)
+						]));
+			} else {
+				return A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					A4(
+						$author$project$Main$viewRestOfObjectList,
+						model,
+						_Utils_Tuple2(subj, pred),
+						obj,
+						rest));
+			}
+		} else {
+			return $elm$html$Html$text('');
+		}
+	});
 var $author$project$Main$viewPredicates = F2(
 	function (model, mole) {
 		var subj = mole.a;
@@ -9093,11 +8981,213 @@ var $author$project$Main$viewPredicates = F2(
 						_List_Nil,
 						_List_fromArray(
 							[
-								A2($author$project$Main$viewRdfNodeAsPredicate, model, po.a),
+								A3($author$project$Main$viewRdfNode, model, $author$project$Main$Predicate, po.a),
 								A3($author$project$Main$viewObjects, model, subj, po)
 							]));
 				},
 				preds));
+	});
+var $author$project$Main$viewRdfNode = F3(
+	function (model, nodeType, node) {
+		viewRdfNode:
+		while (true) {
+			switch (node.$) {
+				case 'Uri':
+					var a = node.a;
+					switch (nodeType.$) {
+						case 'Object':
+							return A2(
+								$elm$html$Html$span,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$a,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$href(
+												'/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>'))
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text(a.value)
+											])),
+										A2(
+										$elm$html$Html$a,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$href(a.value),
+												$elm$html$Html$Attributes$target('_blank')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$img,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$src('www-12px.svg')
+													]),
+												_List_Nil)
+											]))
+									]));
+						case 'Subject':
+							return A2(
+								$elm$html$Html$span,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(a.value)
+									]));
+						default:
+							return A2($author$project$Main$viewRdfNodeAsPredicate, model, node);
+					}
+				case 'BlankNode':
+					var a = node.a;
+					var _v3 = model.currentRdfDict;
+					if (_v3.$ === 'Nothing') {
+						return $elm$html$Html$text(a.value);
+					} else {
+						var dict = _v3.a;
+						var related = A2($elm$core$Dict$get, a.value, dict);
+						if (related.$ === 'Nothing') {
+							return A2(
+								$elm$html$Html$span,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text(a.value)
+									]));
+						} else {
+							var subjectMole = related.a;
+							switch (nodeType.$) {
+								case 'Object':
+									return A2($author$project$Main$makeSubjectMoleculeCard, model, subjectMole);
+								case 'Subject':
+									return A2(
+										$elm$html$Html$span,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$elm$html$Html$text(a.value)
+											]));
+								default:
+									var $temp$model = model,
+										$temp$nodeType = $author$project$Main$Predicate,
+										$temp$node = node;
+									model = $temp$model;
+									nodeType = $temp$nodeType;
+									node = $temp$node;
+									continue viewRdfNode;
+							}
+						}
+					}
+				case 'LiteralOnlyValue':
+					var a = node.a;
+					return $elm$html$Html$text(a.value);
+				case 'LiteralValueAndDataType':
+					var a = node.a;
+					return A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(a.value),
+								A2(
+								$elm$html$Html$small,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('  ('),
+										$elm$html$Html$text(a.dataType),
+										$elm$html$Html$text(')')
+									]))
+							]));
+				case 'LiteralValueAndLanguageString':
+					var a = node.a;
+					return A2(
+						$elm$html$Html$span,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(a.value),
+								A2(
+								$elm$html$Html$small,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$elm$html$Html$text('  ('),
+										$elm$html$Html$text(a.language),
+										$elm$html$Html$text(')')
+									]))
+							]));
+				default:
+					return A2(
+						$elm$html$Html$b,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Unrecognised Atom')
+							]));
+			}
+		}
+	});
+var $author$project$Main$viewRestOfObjectList = F4(
+	function (model, selected, obj, rest) {
+		var _v0 = A2(
+			$elm_community$list_extra$List$Extra$find,
+			function (o) {
+				return _Utils_eq(o, selected);
+			},
+			model.openPredicatesInSubject);
+		if (_v0.$ === 'Just') {
+			var a = _v0.a;
+			return A2(
+				$elm$core$List$cons,
+				A3($author$project$Main$viewRdfNode, model, $author$project$Main$Object, obj),
+				A2(
+					$elm$core$List$cons,
+					A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick(
+								$author$project$Main$DeregisterSubjectPredicateOpen(selected))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(' less')
+							])),
+					A2(
+						$elm$core$List$map,
+						function (r) {
+							return A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A3($author$project$Main$viewRdfNode, model, $author$project$Main$Object, r)
+									]));
+						},
+						rest)));
+		} else {
+			return _List_fromArray(
+				[
+					A3($author$project$Main$viewRdfNode, model, $author$project$Main$Object, obj),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick(
+							$author$project$Main$RegisterSubjectPredicateOpen(selected))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(
+								$elm$core$List$length(rest)) + ' more')
+						]))
+				]);
+		}
 	});
 var $author$project$Main$viewSubjectMolecule = F2(
 	function (model, mole) {
@@ -9106,36 +9196,7 @@ var $author$project$Main$viewSubjectMolecule = F2(
 			var a = subj.a;
 			return A2($elm$html$Html$span, _List_Nil, _List_Nil);
 		} else {
-			return A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('card')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h2,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$a,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$href(
-										'/index.html?query=describe <' + (A2(
-											$elm$core$Maybe$withDefault,
-											'unknown',
-											$author$project$Main$makeRdfKey(subj)) + '>'))
-									]),
-								_List_fromArray(
-									[
-										A2($author$project$Main$viewRdfNode, model, subj)
-									]))
-							])),
-						A2($author$project$Main$viewPredicates, model, mole)
-					]));
+			return A2($author$project$Main$makeSubjectMoleculeCard, model, mole);
 		}
 	});
 var $elm$core$Dict$values = function (dict) {
