@@ -594,20 +594,20 @@ aka predicateStyle pred =
 --         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
 --         subjects
     
-viewSubjects: OpenPredicatesInSubject -> PredicateStyle -> RdfDict -> Html Msg 
-viewSubjects openPredicates predicateStyle subjs =
-        div []
-        (List.map (\spoKey ->
-            case (Dict.get spoKey subjs) of
-                Nothing ->            div [ class "container"]
-                                [ text "Lost subject molecule"]
-                Just a ->                div [ class "container"]
-                            [ viewSubjectMolecule openPredicates predicateStyle a]
-        ) (Dict.keys subjs))
+viewSubjects: Model -> Html Msg 
+viewSubjects model =
+    case model.currentRdfDict of
+       Nothing -> div [][text "rdfdict erro"]
+       Just a ->
+            div []
+            (List.map (\spo ->
+                    div [ class "container"]
+                                [ viewSubjectMolecule model spo]
+            ) (Dict.values a))
 
-
-viewSubjectMolecule: OpenPredicatesInSubject -> PredicateStyle -> (SubjectMolecule RdfNode) -> Html Msg
-viewSubjectMolecule openPredicates predicateStyle mole =
+ 
+viewSubjectMolecule: Model -> (SubjectMolecule RdfNode) -> Html Msg
+viewSubjectMolecule model mole =
     let
         subj = Tuple.first mole
     in
@@ -617,16 +617,16 @@ viewSubjectMolecule openPredicates predicateStyle mole =
               div [class "card"]
                                 [ h2 [] [ Html.a [href ("/index.html?query=describe <"
                                     ++ (makeRdfKey subj |> Maybe.withDefault "unknown") 
-                                    ++">")][(viewRdfNode subj)]] -- make case here to clean up the view function below
-                                , viewPredicates openPredicates predicateStyle mole
+                                    ++">")][(viewRdfNode model subj)]] -- make case here to clean up the view function below
+                                , viewPredicates model mole
                                 ]
 
-expandObjectInPlace: RdfKey -> RdfDict -> Html Msg
+expandObjectInPlace: Model -> RdfKey -> Html Msg
 expandObjectInPlace k dict =
     span [] []
 
-viewPredicates: OpenPredicatesInSubject -> PredicateStyle -> SubjectMolecule RdfNode -> Html Msg
-viewPredicates openPredicates predicateStyle mole =
+viewPredicates: Model -> SubjectMolecule RdfNode -> Html Msg
+viewPredicates model mole =
     let
         subj = Tuple.first mole
         preds = Tuple.second mole
@@ -634,17 +634,17 @@ viewPredicates openPredicates predicateStyle mole =
         div []
             (List.map(\po -> 
                 div []
-                    [ viewRdfNodeAsPredicate predicateStyle (Tuple.first po)
-                    , viewObjects openPredicates subj po
+                    [ viewRdfNodeAsPredicate model (Tuple.first po)
+                    , viewObjects model subj po
                     ]
             )
             preds)
 
-viewRdfNodeAsPredicate: PredicateStyle -> RdfNode -> Html Msg
-viewRdfNodeAsPredicate predicateStyle node = 
+viewRdfNodeAsPredicate: Model -> RdfNode -> Html Msg
+viewRdfNodeAsPredicate model node = 
     case node of
         Uri a ->
-            b []    [ text (aka predicateStyle a.value)
+            b []    [ text (aka model.predicateStyle a.value)
                     , text ": "
                     ]
         _ ->
@@ -661,15 +661,15 @@ encodeUrlFragmentMarker: String -> String
 encodeUrlFragmentMarker urlString =
     String.replace "#" "%23" urlString
 
-viewRdfNode: RdfNode -> Html Msg
-viewRdfNode node = 
+viewRdfNode: Model -> RdfNode -> Html Msg
+viewRdfNode model node = 
     case node of
         Uri a ->
             span [] [ Html.a [href ("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")][text a.value]  -- remove fragment on anchor
                     , Html.a [href a.value, target "_blank"][img [src "www-12px.svg"][]]
                     ]
         BlankNode a ->
-            text a.value  -- a is now an RdfKey and can be expanded
+            text a.value  -- a is now an RdfKey and can be expanded via Model
         LiteralOnlyValue a ->
             text a.value
         LiteralValueAndDataType a ->
@@ -681,8 +681,8 @@ viewRdfNode node =
         Unknown ->
             b []    [ text "Unrecognised Atom"]
 
-viewObjects: OpenPredicatesInSubject -> RdfNode -> (RdfNode, List RdfNode) -> Html Msg
-viewObjects open subj po =
+viewObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Html Msg
+viewObjects model subj po =
     let
         (pred, objs) = po
         head = List.head objs
@@ -692,20 +692,20 @@ viewObjects open subj po =
     in
         case head of
            Just obj -> case restCount of
-                                0 -> div [] [viewRdfNode obj]
-                                _ -> div [] (viewRestOfObjectList open (subj, pred) obj rest)
+                                0 -> div [] [viewRdfNode model obj]
+                                _ -> div [] (viewRestOfObjectList model (subj, pred) obj rest)
 
            Nothing -> text ""
 
-viewRestOfObjectList: OpenPredicatesInSubject -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Html Msg)
-viewRestOfObjectList open selected obj rest =
-    case (List.Extra.find (\o -> o == selected) open) of
-        Just a -> viewRdfNode obj
+viewRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Html Msg)
+viewRestOfObjectList model selected obj rest =
+    case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
+        Just a -> viewRdfNode model obj
                   :: button [onClick (DeregisterSubjectPredicateOpen selected)] [text " less"]
                   :: (List.map (
-                        \r -> div [] [viewRdfNode r]
+                        \r -> div [] [viewRdfNode model r]
                     ) rest)
-        Nothing -> [ viewRdfNode obj
+        Nothing -> [ viewRdfNode model obj
                     , button [onClick (RegisterSubjectPredicateOpen selected)] [text ((String.fromInt <| List.length rest)++" more")]
                     ]
 -- View
@@ -857,11 +857,12 @@ view model = { title = "Sparql Query Playground"
                                                 , resultFormatToggle model.resultsDisplay
                                                 , h2 [][text "Subject orientation"]
                                                 , predicateStyleToggle model.predicateStyle
-                                                , br [] []
-                                                , viewSubjects model.openPredicatesInSubject model.predicateStyle a
+                                                , br [] [] 
+                                                -- ??? replace below by passing the whole model in
+                                                , viewSubjects model
                                                 , hr [] []
                                                 , div []
-                                                    (List.map (\n -> viewSubjectMolecule model.openPredicatesInSubject model.predicateStyle n.label) 
+                                                    (List.map (\n -> viewSubjectMolecule model n.label) 
                                                                             (Graph.nodes (convertRdfDict2CommunityGraph a)))
                                                 ]
                                         Nothing ->                             

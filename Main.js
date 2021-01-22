@@ -8830,96 +8830,97 @@ var $elm$html$Html$Attributes$src = function (url) {
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
 var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $author$project$Main$viewRdfNode = function (node) {
-	switch (node.$) {
-		case 'Uri':
-			var a = node.a;
-			return A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$a,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$href(
-								'/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>'))
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(a.value)
-							])),
-						A2(
-						$elm$html$Html$a,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$href(a.value),
-								$elm$html$Html$Attributes$target('_blank')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$img,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$src('www-12px.svg')
-									]),
-								_List_Nil)
-							]))
-					]));
-		case 'BlankNode':
-			var a = node.a;
-			return $elm$html$Html$text(a.value);
-		case 'LiteralOnlyValue':
-			var a = node.a;
-			return $elm$html$Html$text(a.value);
-		case 'LiteralValueAndDataType':
-			var a = node.a;
-			return A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(a.value),
-						A2(
-						$elm$html$Html$small,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('  ('),
-								$elm$html$Html$text(a.dataType),
-								$elm$html$Html$text(')')
-							]))
-					]));
-		case 'LiteralValueAndLanguageString':
-			var a = node.a;
-			return A2(
-				$elm$html$Html$span,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(a.value),
-						A2(
-						$elm$html$Html$small,
-						_List_Nil,
-						_List_fromArray(
-							[
-								$elm$html$Html$text('  ('),
-								$elm$html$Html$text(a.language),
-								$elm$html$Html$text(')')
-							]))
-					]));
-		default:
-			return A2(
-				$elm$html$Html$b,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Unrecognised Atom')
-					]));
-	}
-};
+var $author$project$Main$viewRdfNode = F2(
+	function (model, node) {
+		switch (node.$) {
+			case 'Uri':
+				var a = node.a;
+				return A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href(
+									'/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>'))
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text(a.value)
+								])),
+							A2(
+							$elm$html$Html$a,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$href(a.value),
+									$elm$html$Html$Attributes$target('_blank')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$img,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$src('www-12px.svg')
+										]),
+									_List_Nil)
+								]))
+						]));
+			case 'BlankNode':
+				var a = node.a;
+				return $elm$html$Html$text(a.value);
+			case 'LiteralOnlyValue':
+				var a = node.a;
+				return $elm$html$Html$text(a.value);
+			case 'LiteralValueAndDataType':
+				var a = node.a;
+				return A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(a.value),
+							A2(
+							$elm$html$Html$small,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('  ('),
+									$elm$html$Html$text(a.dataType),
+									$elm$html$Html$text(')')
+								]))
+						]));
+			case 'LiteralValueAndLanguageString':
+				var a = node.a;
+				return A2(
+					$elm$html$Html$span,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(a.value),
+							A2(
+							$elm$html$Html$small,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text('  ('),
+									$elm$html$Html$text(a.language),
+									$elm$html$Html$text(')')
+								]))
+						]));
+			default:
+				return A2(
+					$elm$html$Html$b,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Unrecognised Atom')
+						]));
+		}
+	});
 var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
 	return {$: 'DeregisterSubjectPredicateOpen', a: a};
 };
@@ -8948,18 +8949,18 @@ var $elm_community$list_extra$List$Extra$find = F2(
 		}
 	});
 var $author$project$Main$viewRestOfObjectList = F4(
-	function (open, selected, obj, rest) {
+	function (model, selected, obj, rest) {
 		var _v0 = A2(
 			$elm_community$list_extra$List$Extra$find,
 			function (o) {
 				return _Utils_eq(o, selected);
 			},
-			open);
+			model.openPredicatesInSubject);
 		if (_v0.$ === 'Just') {
 			var a = _v0.a;
 			return A2(
 				$elm$core$List$cons,
-				$author$project$Main$viewRdfNode(obj),
+				A2($author$project$Main$viewRdfNode, model, obj),
 				A2(
 					$elm$core$List$cons,
 					A2(
@@ -8981,14 +8982,14 @@ var $author$project$Main$viewRestOfObjectList = F4(
 								_List_Nil,
 								_List_fromArray(
 									[
-										$author$project$Main$viewRdfNode(r)
+										A2($author$project$Main$viewRdfNode, model, r)
 									]));
 						},
 						rest)));
 		} else {
 			return _List_fromArray(
 				[
-					$author$project$Main$viewRdfNode(obj),
+					A2($author$project$Main$viewRdfNode, model, obj),
 					A2(
 					$elm$html$Html$button,
 					_List_fromArray(
@@ -9006,7 +9007,7 @@ var $author$project$Main$viewRestOfObjectList = F4(
 		}
 	});
 var $author$project$Main$viewObjects = F3(
-	function (open, subj, po) {
+	function (model, subj, po) {
 		var _v0 = po;
 		var pred = _v0.a;
 		var objs = _v0.b;
@@ -9024,7 +9025,7 @@ var $author$project$Main$viewObjects = F3(
 					_List_Nil,
 					_List_fromArray(
 						[
-							$author$project$Main$viewRdfNode(obj)
+							A2($author$project$Main$viewRdfNode, model, obj)
 						]));
 			} else {
 				return A2(
@@ -9032,7 +9033,7 @@ var $author$project$Main$viewObjects = F3(
 					_List_Nil,
 					A4(
 						$author$project$Main$viewRestOfObjectList,
-						open,
+						model,
 						_Utils_Tuple2(subj, pred),
 						obj,
 						rest));
@@ -9055,7 +9056,7 @@ var $author$project$Main$aka = F2(
 		}
 	});
 var $author$project$Main$viewRdfNodeAsPredicate = F2(
-	function (predicateStyle, node) {
+	function (model, node) {
 		if (node.$ === 'Uri') {
 			var a = node.a;
 			return A2(
@@ -9064,7 +9065,7 @@ var $author$project$Main$viewRdfNodeAsPredicate = F2(
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						A2($author$project$Main$aka, predicateStyle, a.value)),
+						A2($author$project$Main$aka, model.predicateStyle, a.value)),
 						$elm$html$Html$text(': ')
 					]));
 		} else {
@@ -9077,8 +9078,8 @@ var $author$project$Main$viewRdfNodeAsPredicate = F2(
 					]));
 		}
 	});
-var $author$project$Main$viewPredicates = F3(
-	function (openPredicates, predicateStyle, mole) {
+var $author$project$Main$viewPredicates = F2(
+	function (model, mole) {
 		var subj = mole.a;
 		var preds = mole.b;
 		return A2(
@@ -9092,14 +9093,14 @@ var $author$project$Main$viewPredicates = F3(
 						_List_Nil,
 						_List_fromArray(
 							[
-								A2($author$project$Main$viewRdfNodeAsPredicate, predicateStyle, po.a),
-								A3($author$project$Main$viewObjects, openPredicates, subj, po)
+								A2($author$project$Main$viewRdfNodeAsPredicate, model, po.a),
+								A3($author$project$Main$viewObjects, model, subj, po)
 							]));
 				},
 				preds));
 	});
-var $author$project$Main$viewSubjectMolecule = F3(
-	function (openPredicates, predicateStyle, mole) {
+var $author$project$Main$viewSubjectMolecule = F2(
+	function (model, mole) {
 		var subj = mole.a;
 		if (subj.$ === 'BlankNode') {
 			var a = subj.a;
@@ -9130,49 +9131,55 @@ var $author$project$Main$viewSubjectMolecule = F3(
 									]),
 								_List_fromArray(
 									[
-										$author$project$Main$viewRdfNode(subj)
+										A2($author$project$Main$viewRdfNode, model, subj)
 									]))
 							])),
-						A3($author$project$Main$viewPredicates, openPredicates, predicateStyle, mole)
+						A2($author$project$Main$viewPredicates, model, mole)
 					]));
 		}
 	});
-var $author$project$Main$viewSubjects = F3(
-	function (openPredicates, predicateStyle, subjs) {
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $author$project$Main$viewSubjects = function (model) {
+	var _v0 = model.currentRdfDict;
+	if (_v0.$ === 'Nothing') {
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$elm$html$Html$text('rdfdict erro')
+				]));
+	} else {
+		var a = _v0.a;
 		return A2(
 			$elm$html$Html$div,
 			_List_Nil,
 			A2(
 				$elm$core$List$map,
-				function (spoKey) {
-					var _v0 = A2($elm$core$Dict$get, spoKey, subjs);
-					if (_v0.$ === 'Nothing') {
-						return A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('container')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Lost subject molecule')
-								]));
-					} else {
-						var a = _v0.a;
-						return A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('container')
-								]),
-							_List_fromArray(
-								[
-									A3($author$project$Main$viewSubjectMolecule, openPredicates, predicateStyle, a)
-								]));
-					}
+				function (spo) {
+					return A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('container')
+							]),
+						_List_fromArray(
+							[
+								A2($author$project$Main$viewSubjectMolecule, model, spo)
+							]));
 				},
-				$elm$core$Dict$keys(subjs)));
-	});
+				$elm$core$Dict$values(a)));
+	}
+};
 var $author$project$Main$view = function (model) {
 	return {
 		body: $elm$core$List$singleton(
@@ -9396,7 +9403,7 @@ var $author$project$Main$view = function (model) {
 												])),
 											$author$project$Main$predicateStyleToggle(model.predicateStyle),
 											A2($elm$html$Html$br, _List_Nil, _List_Nil),
-											A3($author$project$Main$viewSubjects, model.openPredicatesInSubject, model.predicateStyle, a),
+											$author$project$Main$viewSubjects(model),
 											A2($elm$html$Html$hr, _List_Nil, _List_Nil),
 											A2(
 											$elm$html$Html$div,
@@ -9404,7 +9411,7 @@ var $author$project$Main$view = function (model) {
 											A2(
 												$elm$core$List$map,
 												function (n) {
-													return A3($author$project$Main$viewSubjectMolecule, model.openPredicatesInSubject, model.predicateStyle, n.label);
+													return A2($author$project$Main$viewSubjectMolecule, model, n.label);
 												},
 												$elm_community$graph$Graph$nodes(
 													$author$project$Main$convertRdfDict2CommunityGraph(a))))
