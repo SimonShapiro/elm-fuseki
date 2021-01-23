@@ -34,6 +34,9 @@ def hello():
     return "Hello"
 
 def buildAtom(v, bound):
+    # standardise shape format of bnode to _:
+    if bound[v]["type"] == 'bnode':
+        bound[v]["value"] = "_:"+bound[v]["value"]
     atom = Atom(key=v, 
                 value=bound[v]["value"] if bound.get(v) else "",
                 aType=bound[v]["type"]
@@ -190,6 +193,7 @@ def processConstructQuery(qType, queryString, res):
                         resultArray.append([subjectAtom, predicateAtom, objectAtom])
     else:
         pass
+    print(serializeResults(resultArray))
     return {
         "status": 200,
         "response": json.dumps({
