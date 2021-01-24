@@ -890,9 +890,10 @@ view model = { title = "Sparql Query Playground"
                                                 -- ??? replace below by passing the whole model in
                                                 , viewSubjects model
                                                 , hr [] []
-                                                , div []
-                                                    (List.map (\n -> viewSubjectMolecule model n.label) 
-                                                                            (Graph.nodes (convertRdfDict2CommunityGraph a)))
+                                                , div [][text "Graph nav hiding in comments"]
+--                                                , div []
+ --                                                   (List.map (\n -> viewSubjectMolecule model n.label) 
+  --                                                                          (Graph.nodes (convertRdfDict2CommunityGraph a)))
                                                 ]
                                         Nothing ->                             
                                             div []                
