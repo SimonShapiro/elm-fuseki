@@ -8,6 +8,7 @@ from dataclasses_json import dataclass_json
 import pprint
 from optparse import OptionParser
 import re
+from functools import lru_cache
 
 @dataclass_json
 @dataclass
@@ -223,12 +224,8 @@ def establishQueryType(queryString):
     else:
         return "select"  #  might need something else here
 
-@app.route("/sparql", methods=['POST'])
-def sparql():
-    queryString = request.data.decode()
-    print(queryString)
-    print(request.headers)
-    clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"
+@lru_cache(maxsize=None)
+def forwardSparqlToKnowledgeGraph(clientAcceptHeader, queryString):
     res = requests.request("POST", SERVER+"/sparql",
             data = queryString, 
             headers = {
@@ -255,6 +252,18 @@ def sparql():
             status = result["status"],
             response = result["response"]
         )
+    else:
+        return None
+
+
+@app.route("/sparql", methods=['POST'])
+def sparql():
+    queryString = request.data.decode()
+    print(queryString)
+    print(request.headers)
+    clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"
+    response = forwardSparqlToKnowledgeGraph(clientAcceptHeader, queryString)
+    return response
 
 if __name__ == "__main__":
     parser = OptionParser()

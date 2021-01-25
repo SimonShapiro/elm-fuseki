@@ -12,6 +12,7 @@
 - ~~Links over single url views~~
 - ~~Icon for fully external url lookup~~
 - ~~Link on subject as well~~
+- Updates ???
 - Add settings - api url; allow implied external links to model
 - check for accessability of object uri
 - Simple styling
@@ -23,7 +24,6 @@
 - Add limit and offset semantics in table and subject oriented list
 - csv download - filename to be input
 - Improve table (a more fully featured table)
-- Updates ???
 
 # Known Bugs
 
@@ -35,4 +35,17 @@
 - ~~Improve methods of recognising query type in api to fine tune headers~~
 - ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
 - ~~Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.~~
+- Add lru cahcing to improve query performance
+- Fine tune chache maxsize
 - Back reloads page and loses reference position 
+
+# Pending Re-factors
+
+*Sparql Processing*
+- ~~Separate `Sparql` - confirm you have sparql in compatible shape - submit to end-point~~
+- ~~Merge `submitParametrisedQuery` and `submitQuery`~~
+
+*KG Response Processing*
+
+Tranform the response into internal form(s).  Main logic is driven by things around RdfDict.
+- Separate all functions from KGresponse to ContractedForm.
