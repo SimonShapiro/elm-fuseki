@@ -42,7 +42,7 @@
 
 # Pending Re-factors
 
-- Make `type alias X = String` more expressive
+- Make DisplaySelectResults flow from RdfNode rather than SelectAtom
 
 *Sparql Processing*
 - ~~Separate `Sparql` - confirm you have sparql in compatible shape - submit to end-point~~

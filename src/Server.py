@@ -133,6 +133,44 @@ def processAskQuery(qType, queryString, res):
             "result": serializeResults(rows)
         })}
 
+def processInsertQuery(qType, queryString, res):
+    print("Inserting (processing)")
+    print(res.status_code)
+    print(res.text)
+    status = res.status_code
+    error = res.reason
+    if res.status_code == 204:
+        print("Insert ok", res.text)
+        vars = ["insert"]
+        rows = [[Atom(key="insert", 
+                        value=str(True), 
+                        aType="literal", 
+                        datatype="http://www.w3.org/2001/XMLSchema#boolean"
+                    )
+                ]]
+        status = 200
+    else:
+        vars = ["insert"]
+        rows = [[Atom(key="insert", 
+                        value=str(False), 
+                        aType="literal", 
+                        datatype="http://www.w3.org/2001/XMLSchema#boolean"
+                    )
+                ]]
+        status = 200
+    print(status, error, vars, rows)    
+    return {
+        "status": 200,
+        "response": json.dumps({
+            "server": request.url_root[:-1],
+            "status": status,
+            "reason": error,
+            "queryType": qType,
+            "query": queryString,
+            "vars": vars,
+            "result": serializeResults(rows)
+        })}
+
 def processConstructQuery(qType, queryString, res):
     print("Going for construct query", queryString)
     print(res.status_code)
@@ -214,6 +252,7 @@ def establishQueryType(queryString):
     askRe = r"^ask"
     constructRe = r"^construct"
     describeRe = r"^describe"
+    insertRe = r"^insert"
     if re.search(selectRe, q, re.M):
         return "select"
     elif re.search(askRe, q, re.M):
@@ -222,11 +261,33 @@ def establishQueryType(queryString):
         return "construct"
     elif re.search(describeRe, q, re.M):
         return "describe"
+    elif re.search(insertRe, q, re.M):
+        return "insert"
     else:
         return "select"  #  might need something else here
 
+@lru_cache(maxsize=None)        
+def forwardSparqlToKnowledgeGraphUpdate(clientAcceptHeader, qType, queryString):
+    print(f"Uncached server request for {queryString} at {datetime.datetime.now()}")
+    forwardSparqlToKnowledgeGraph.cache_clear()
+    res = requests.request("POST", SERVER+"/update",
+            data = queryString, 
+            headers = {
+                'Content-Type': 'application/sparql-update',
+                'Accept': clientAcceptHeader
+                })
+    if (qType == "insert"):
+        print("Inserting")
+        result = processInsertQuery(qType, queryString, res)
+        return Response(
+            status = result["status"],
+            response = result["response"]
+        )
+    else:
+        return None
+
 @lru_cache(maxsize=None)
-def forwardSparqlToKnowledgeGraph(clientAcceptHeader, queryString):
+def forwardSparqlToKnowledgeGraph(clientAcceptHeader, qType, queryString):
     print(f"Uncached server request for {queryString} at {datetime.datetime.now()}")
     res = requests.request("POST", SERVER+"/sparql",
             data = queryString, 
@@ -234,7 +295,6 @@ def forwardSparqlToKnowledgeGraph(clientAcceptHeader, queryString):
                 'Content-Type': 'application/sparql-query',
                 'Accept': clientAcceptHeader
                 })
-    qType = establishQueryType(queryString)  # request.headers.get("X-Qtype")  # replace with python function to remove reliaze on headers
     if  qType == "select":
         result = processSelectQuery(qType, queryString, res)
         return Response(
@@ -263,8 +323,12 @@ def sparql():
     queryString = request.data.decode()
     print(queryString)
     print(request.headers)
-    clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"
-    response = forwardSparqlToKnowledgeGraph(clientAcceptHeader, queryString)
+    clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"  # test qType here
+    qType = establishQueryType(queryString)  # request.headers.get("X-Qtype")  # replace with python function to remove reliaze on headers
+    if qType == "insert":
+         response = forwardSparqlToKnowledgeGraphUpdate(clientAcceptHeader, qType, queryString)
+    else:
+         response = forwardSparqlToKnowledgeGraph(clientAcceptHeader, qType, queryString)
     return response
 
 if __name__ == "__main__":

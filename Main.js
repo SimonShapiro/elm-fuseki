@@ -5629,10 +5629,15 @@ var $author$project$Sparql$Construct = function (a) {
 var $author$project$Sparql$Describe = function (a) {
 	return {$: 'Describe', a: a};
 };
+var $author$project$Sparql$Insert = function (a) {
+	return {$: 'Insert', a: a};
+};
 var $author$project$Sparql$Select = function (a) {
 	return {$: 'Select', a: a};
 };
-var $author$project$Sparql$Unrecognised = {$: 'Unrecognised'};
+var $author$project$Sparql$Unrecognised = function (a) {
+	return {$: 'Unrecognised', a: a};
+};
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
 		return {index: index, match: match, number: number, submatches: submatches};
@@ -5657,6 +5662,13 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^select'));
+	var insertRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^insert'));
 	var describeRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
@@ -5678,7 +5690,7 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^ask'));
-	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : $author$project$Sparql$Unrecognised)));
+	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : $author$project$Sparql$Unrecognised(query)))));
 };
 var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
 	if (mx.$ === 'Just') {
@@ -7623,15 +7635,16 @@ var $elm$http$Http$Header = F2(
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $author$project$Sparql$prepareHttpRequest = F5(
-	function (newServer, header, qtype, query, expect) {
+var $author$project$Sparql$prepareHttpRequest = F6(
+	function (newServer, contentType, header, qtype, query, expect) {
+		var _v0 = A2($elm$core$Debug$log, 'Posting to server', query);
 		return $elm$http$Http$request(
 			{
 				body: A2($elm$http$Http$stringBody, 'text', query),
 				expect: expect,
 				headers: _List_fromArray(
 					[
-						A2($elm$http$Http$header, 'Content-Type', 'application/sparql-request'),
+						A2($elm$http$Http$header, 'Content-Type', contentType),
 						A2($elm$http$Http$header, 'Accept', header),
 						A2($elm$http$Http$header, 'x-Qtype', qtype)
 					]),
@@ -7646,17 +7659,21 @@ var $author$project$Sparql$submitQuery = F3(
 		switch (sparql.$) {
 			case 'Select':
 				var query = sparql.a;
-				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/json', 'select', query, expect);
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-request', 'application/json', 'select', query, expect);
 			case 'Ask':
 				var query = sparql.a;
-				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/json', 'ask', query, expect);
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-request', 'application/json', 'ask', query, expect);
 			case 'Construct':
 				var query = sparql.a;
-				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/ld+json', 'construct', query, expect);
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-request', 'application/ld+json', 'construct', query, expect);
 			case 'Describe':
 				var query = sparql.a;
-				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/ld+json', 'describe', query, expect);
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-request', 'application/ld+json', 'describe', query, expect);
+			case 'Insert':
+				var query = sparql.a;
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'insert', query, expect);
 			default:
+				var query = sparql.a;
 				return $elm$core$Platform$Cmd$none;
 		}
 	});
@@ -7664,7 +7681,8 @@ var $elm$file$File$toString = _File_toString;
 var $author$project$Sparql$toString = function (sparql) {
 	switch (sparql.$) {
 		case 'Unrecognised':
-			return '';
+			var s = sparql.a;
+			return s;
 		case 'Select':
 			var s = sparql.a;
 			return s;
@@ -7672,6 +7690,9 @@ var $author$project$Sparql$toString = function (sparql) {
 			var s = sparql.a;
 			return s;
 		case 'Construct':
+			var s = sparql.a;
+			return s;
+		case 'Describe':
 			var s = sparql.a;
 			return s;
 		default:
@@ -7853,6 +7874,7 @@ var $author$project$Main$update = F2(
 				var query = msg.a;
 				var _v12 = model.query;
 				if (_v12.$ === 'Unrecognised') {
+					var newQuery = _v12.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,

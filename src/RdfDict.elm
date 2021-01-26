@@ -1,4 +1,6 @@
-module RdfDict exposing (..)
+module RdfDict exposing (..) 
+
+--(RdfDict, makeRdfDict, RdfNode, ServerVars, ServerForm, SelectAtom, SubjectMolecule, rdfNodeToMaybeString)
 
 import Dict exposing(Dict)
 import List.Extra exposing (uncons, groupWhile)

@@ -271,7 +271,7 @@ update msg model =
                     (model, Cmd.none) 
         SubmitQuery query -> 
             case model.query of
-               Unrecognised -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString model.query)))}, Cmd.none)
+               Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString model.query)))}, Cmd.none)
                _ ->
                 --    Debug.log ("Submitting Query " model.query
                     ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString query)])) -- submitQuery model.server query)
@@ -382,17 +382,6 @@ aka predicateStyle pred =
                 |> List.head
                 |> Maybe.withDefault pred
 
--- pivotToSubject: ServerForm -> List (List (SelectAtom, (List SelectAtom)))   --   (subject, [pred, obj])
--- pivotToSubject results =
---     let
---         subjects = List.filterMap (\triple -> uncons triple) results -- List (SelectAtom, List SelectAtom) ie ?s of [?s ?p ?o])
---             |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
--- --            |> List.map (\group -> (Tuple.first group)::(Tuple.second group))
--- --            |> List.map (\subject -> List.map (\group -> makeTriple group) subject) 
---     in
---         -- Debug.log (String.join ";" (List.map (\s -> s.value) subjects))
---         subjects
-    
 viewSubjects: Model -> Html Msg 
 viewSubjects model =
     case model.currentRdfDict of
