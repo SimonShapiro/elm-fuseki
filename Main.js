@@ -4357,6 +4357,107 @@ function _Browser_load(url)
 }
 
 
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
 function _Url_percentEncode(string)
 {
 	return encodeURIComponent(string);
@@ -4550,107 +4651,6 @@ function _File_toUrl(blob)
 	});
 }
 
-
-
-// CREATE
-
-var _Regex_never = /.^/;
-
-var _Regex_fromStringWith = F2(function(options, string)
-{
-	var flags = 'g';
-	if (options.multiline) { flags += 'm'; }
-	if (options.caseInsensitive) { flags += 'i'; }
-
-	try
-	{
-		return $elm$core$Maybe$Just(new RegExp(string, flags));
-	}
-	catch(error)
-	{
-		return $elm$core$Maybe$Nothing;
-	}
-});
-
-
-// USE
-
-var _Regex_contains = F2(function(re, string)
-{
-	return string.match(re) !== null;
-});
-
-
-var _Regex_findAtMost = F3(function(n, re, str)
-{
-	var out = [];
-	var number = 0;
-	var string = str;
-	var lastIndex = re.lastIndex;
-	var prevLastIndex = -1;
-	var result;
-	while (number++ < n && (result = re.exec(string)))
-	{
-		if (prevLastIndex == re.lastIndex) break;
-		var i = result.length - 1;
-		var subs = new Array(i);
-		while (i > 0)
-		{
-			var submatch = result[i];
-			subs[--i] = submatch
-				? $elm$core$Maybe$Just(submatch)
-				: $elm$core$Maybe$Nothing;
-		}
-		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
-		prevLastIndex = re.lastIndex;
-	}
-	re.lastIndex = lastIndex;
-	return _List_fromArray(out);
-});
-
-
-var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
-{
-	var count = 0;
-	function jsReplacer(match)
-	{
-		if (count++ >= n)
-		{
-			return match;
-		}
-		var i = arguments.length - 3;
-		var submatches = new Array(i);
-		while (i > 0)
-		{
-			var submatch = arguments[i];
-			submatches[--i] = submatch
-				? $elm$core$Maybe$Just(submatch)
-				: $elm$core$Maybe$Nothing;
-		}
-		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
-	}
-	return string.replace(re, jsReplacer);
-});
-
-var _Regex_splitAtMost = F3(function(n, re, str)
-{
-	var string = str;
-	var out = [];
-	var start = re.lastIndex;
-	var restoreLastIndex = re.lastIndex;
-	while (n--)
-	{
-		var result = re.exec(string);
-		if (!result) break;
-		out.push(string.slice(start, result.index));
-		start = re.lastIndex;
-	}
-	out.push(string.slice(start));
-	re.lastIndex = restoreLastIndex;
-	return _List_fromArray(out);
-});
-
-var _Regex_infinity = Infinity;
 
 
 
@@ -5620,6 +5620,66 @@ var $author$project$Main$SubmitQueryWhileNavigating = function (a) {
 	return {$: 'SubmitQueryWhileNavigating', a: a};
 };
 var $elm$core$Debug$log = _Debug_log;
+var $author$project$Sparql$Ask = function (a) {
+	return {$: 'Ask', a: a};
+};
+var $author$project$Sparql$Construct = function (a) {
+	return {$: 'Construct', a: a};
+};
+var $author$project$Sparql$Describe = function (a) {
+	return {$: 'Describe', a: a};
+};
+var $author$project$Sparql$Select = function (a) {
+	return {$: 'Select', a: a};
+};
+var $author$project$Sparql$Unrecognised = {$: 'Unrecognised'};
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$contains = _Regex_contains;
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$never = _Regex_never;
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $author$project$Sparql$establishQueryType = function (query) {
+	var selectRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^select'));
+	var describeRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^describe'));
+	var constructRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^construct'));
+	var askRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^ask'));
+	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : $author$project$Sparql$Unrecognised)));
+};
 var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
 	if (mx.$ === 'Just') {
 		var x = mx.a;
@@ -5628,6 +5688,16 @@ var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -6351,15 +6421,6 @@ var $elm$url$Url$Parser$s = function (str) {
 var $elm$url$Url$Parser$Internal$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $elm$url$Url$Parser$Query$custom = F2(
 	function (key, func) {
 		return $elm$url$Url$Parser$Internal$Parser(
@@ -6390,8 +6451,11 @@ var $author$project$Main$parseUrlForIndexQuery = function (url) {
 		$elm$url$Url$Parser$questionMark,
 		$elm$url$Url$Parser$s('index.html'),
 		subject);
-	return $elm_community$maybe_extra$Maybe$Extra$join(
-		A2($elm$url$Url$Parser$parse, parseQuery, url));
+	return A2(
+		$elm$core$Maybe$map,
+		$author$project$Sparql$establishQueryType,
+		$elm_community$maybe_extra$Maybe$Extra$join(
+			A2($elm$url$Url$Parser$parse, parseQuery, url)));
 };
 var $author$project$Main$handleUrlChange = function (url) {
 	var _v0 = $author$project$Main$parseUrlForIndexQuery(url);
@@ -6399,7 +6463,8 @@ var $author$project$Main$handleUrlChange = function (url) {
 		return A2($elm$core$Debug$log, 'fwd/bck update running on NOTHING', $author$project$Main$NoOp);
 	} else {
 		var a = _v0.a;
-		return A3($elm$core$Debug$log, 'fwd/bck update running ' + a, $author$project$Main$SubmitQueryWhileNavigating, a);
+		var _v1 = A2($elm$core$Debug$log, 'fwd/bck update running ', a);
+		return $author$project$Main$SubmitQueryWhileNavigating(a);
 	}
 };
 var $author$project$Main$ClickedLink = function (a) {
@@ -6494,7 +6559,8 @@ var $author$project$Main$initialFn = F3(
 	function (_v0, url, key) {
 		var initialQuery = $author$project$Main$parseUrlForIndexQuery(url);
 		return _Utils_Tuple2(
-			$author$project$Main$Model($author$project$Main$Initialising)($author$project$Main$server)(initialQuery)('')($elm$core$Maybe$Nothing)($author$project$Main$Normal)($author$project$Main$Table)($author$project$Main$Terse)(_List_Nil)(key),
+			$author$project$Main$Model($author$project$Main$Initialising)($author$project$Main$server)(initialQuery)(
+				$author$project$Sparql$Ask('ask {?s ?p ?o}'))($elm$core$Maybe$Nothing)($author$project$Main$Normal)($author$project$Main$Table)($author$project$Main$Terse)(_List_Nil)(key),
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Main$PressedKey = function (a) {
@@ -6879,7 +6945,7 @@ var $elm$core$List$unzip = function (pairs) {
 		_Utils_Tuple2(_List_Nil, _List_Nil),
 		pairs);
 };
-var $author$project$Main$separateIntoPredicateLists = function (preds) {
+var $author$project$RdfDict$separateIntoPredicateLists = function (preds) {
 	return A2(
 		$elm$core$List$map,
 		function (p) {
@@ -6893,7 +6959,7 @@ var $author$project$Main$separateIntoPredicateLists = function (preds) {
 		},
 		preds);
 };
-var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
+var $author$project$RdfDict$separateIntoSubject_PredicateObjects = function (l) {
 	return A2(
 		$elm$core$List$map,
 		function (subject) {
@@ -6908,7 +6974,7 @@ var $author$project$Main$separateIntoSubject_PredicateObjects = function (l) {
 		l);
 };
 var $elm$core$List$sortBy = _List_sortBy;
-var $author$project$Main$makeContractedForm = function (triples) {
+var $author$project$RdfDict$makeContractedForm = function (triples) {
 	return A2(
 		$elm$core$List$map,
 		function (_v2) {
@@ -6916,7 +6982,7 @@ var $author$project$Main$makeContractedForm = function (triples) {
 			var y = _v2.b;
 			return _Utils_Tuple2(
 				x,
-				$author$project$Main$separateIntoPredicateLists(
+				$author$project$RdfDict$separateIntoPredicateLists(
 					A2(
 						$elm_community$list_extra$List$Extra$groupWhile,
 						F2(
@@ -6932,7 +6998,7 @@ var $author$project$Main$makeContractedForm = function (triples) {
 							},
 							y))));
 		},
-		$author$project$Main$separateIntoSubject_PredicateObjects(
+		$author$project$RdfDict$separateIntoSubject_PredicateObjects(
 			A2(
 				$elm_community$list_extra$List$Extra$groupWhile,
 				F2(
@@ -7027,7 +7093,7 @@ var $elm$core$Maybe$map3 = F4(
 			}
 		}
 	});
-var $author$project$Main$makeTriple = function (spo) {
+var $author$project$RdfDict$makeTriple = function (spo) {
 	var _v0 = $elm$core$List$length(spo);
 	if (_v0 === 3) {
 		return A4(
@@ -7045,25 +7111,25 @@ var $author$project$Main$makeTriple = function (spo) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Main$makeTripleForm = function (res) {
+var $author$project$RdfDict$makeTripleForm = function (res) {
 	return $elm_community$maybe_extra$Maybe$Extra$combine(
 		A2(
 			$elm$core$List$map,
 			function (r) {
-				return $author$project$Main$makeTriple(r);
+				return $author$project$RdfDict$makeTriple(r);
 			},
 			res));
 };
-var $author$project$Main$contractResult = F2(
+var $author$project$RdfDict$contractResult = F2(
 	function (vars, res) {
 		if ((((((vars.b && (vars.a === 's')) && vars.b.b) && (vars.b.a === 'p')) && vars.b.b.b) && (vars.b.b.a === 'o')) && (!vars.b.b.b.b)) {
 			var _v1 = vars.b;
 			var _v2 = _v1.b;
-			var maybeTriples = $author$project$Main$makeTripleForm(res);
+			var maybeTriples = $author$project$RdfDict$makeTripleForm(res);
 			if (maybeTriples.$ === 'Just') {
 				var a = maybeTriples.a;
 				return $elm$core$Maybe$Just(
-					$author$project$Main$makeContractedForm(a));
+					$author$project$RdfDict$makeContractedForm(a));
 			} else {
 				return $elm$core$Maybe$Nothing;
 			}
@@ -7086,57 +7152,6 @@ var $author$project$Main$downloadFile = F2(
 	function (fileName, query) {
 		return A3($elm$file$File$Download$string, fileName, 'text', query);
 	});
-var $author$project$Main$Ask = function (a) {
-	return {$: 'Ask', a: a};
-};
-var $author$project$Main$Construct = function (a) {
-	return {$: 'Construct', a: a};
-};
-var $author$project$Main$Describe = function (a) {
-	return {$: 'Describe', a: a};
-};
-var $author$project$Main$Select = function (a) {
-	return {$: 'Select', a: a};
-};
-var $author$project$Main$Unrecognised = {$: 'Unrecognised'};
-var $elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {index: index, match: match, number: number, submatches: submatches};
-	});
-var $elm$regex$Regex$contains = _Regex_contains;
-var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-var $elm$regex$Regex$never = _Regex_never;
-var $author$project$Main$establishQueryType = function (query) {
-	var selectRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^select'));
-	var describeRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^describe'));
-	var constructRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^construct'));
-	var askRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^ask'));
-	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Main$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Main$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Main$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Main$Describe(query) : $author$project$Main$Unrecognised)));
-};
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -7232,7 +7247,7 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
-var $author$project$Main$extractValues = function (rows) {
+var $author$project$RdfDict$extractValues = function (rows) {
 	return A2(
 		$elm$core$List$map,
 		function (r) {
@@ -7255,14 +7270,14 @@ var $author$project$Main$KGResponse = F7(
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$map7 = _Json_map7;
-var $author$project$Main$SelectAtom = F5(
+var $author$project$RdfDict$SelectAtom = F5(
 	function (key, value, aType, language, datatype) {
 		return {aType: aType, datatype: datatype, key: key, language: language, value: value};
 	});
 var $elm$json$Json$Decode$map5 = _Json_map5;
 var $author$project$Main$selectAtomDecoder = A6(
 	$elm$json$Json$Decode$map5,
-	$author$project$Main$SelectAtom,
+	$author$project$RdfDict$SelectAtom,
 	A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'aType', $elm$json$Json$Decode$string),
@@ -7285,7 +7300,7 @@ var $author$project$Main$mainDecoder = A8(
 		'result',
 		$elm$json$Json$Decode$list(
 			$elm$json$Json$Decode$list($author$project$Main$selectAtomDecoder))));
-var $author$project$Main$makeRdfKey = function (n) {
+var $author$project$RdfDict$makeRdfKey = function (n) {
 	switch (n.$) {
 		case 'Uri':
 			var a = n.a;
@@ -7297,42 +7312,42 @@ var $author$project$Main$makeRdfKey = function (n) {
 			return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Main$BlankNode = function (a) {
+var $author$project$RdfDict$BlankNode = function (a) {
 	return {$: 'BlankNode', a: a};
 };
-var $author$project$Main$LiteralOnlyValue = function (a) {
+var $author$project$RdfDict$LiteralOnlyValue = function (a) {
 	return {$: 'LiteralOnlyValue', a: a};
 };
-var $author$project$Main$LiteralValueAndDataType = function (a) {
+var $author$project$RdfDict$LiteralValueAndDataType = function (a) {
 	return {$: 'LiteralValueAndDataType', a: a};
 };
-var $author$project$Main$LiteralValueAndLanguageString = function (a) {
+var $author$project$RdfDict$LiteralValueAndLanguageString = function (a) {
 	return {$: 'LiteralValueAndLanguageString', a: a};
 };
-var $author$project$Main$Unknown = {$: 'Unknown'};
-var $author$project$Main$Uri = function (a) {
+var $author$project$RdfDict$Unknown = {$: 'Unknown'};
+var $author$project$RdfDict$Uri = function (a) {
 	return {$: 'Uri', a: a};
 };
 var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Main$selectAtom2RdfNode = function (atom) {
+var $author$project$RdfDict$selectAtom2RdfNode = function (atom) {
 	var _v0 = atom.aType;
 	switch (_v0) {
 		case 'uri':
-			return $author$project$Main$Uri(
+			return $author$project$RdfDict$Uri(
 				{value: atom.value});
 		case 'bnode':
-			return $author$project$Main$BlankNode(
+			return $author$project$RdfDict$BlankNode(
 				{value: atom.value});
 		case 'literal':
-			return (atom.language !== '') ? $author$project$Main$LiteralValueAndLanguageString(
-				{language: atom.language, value: atom.value}) : ((atom.datatype !== '') ? $author$project$Main$LiteralValueAndDataType(
-				{dataType: atom.datatype, value: atom.value}) : $author$project$Main$LiteralOnlyValue(
+			return (atom.language !== '') ? $author$project$RdfDict$LiteralValueAndLanguageString(
+				{language: atom.language, value: atom.value}) : ((atom.datatype !== '') ? $author$project$RdfDict$LiteralValueAndDataType(
+				{dataType: atom.datatype, value: atom.value}) : $author$project$RdfDict$LiteralOnlyValue(
 				{value: atom.value}));
 		default:
-			return $author$project$Main$Unknown;
+			return $author$project$RdfDict$Unknown;
 	}
 };
-var $author$project$Main$subjectMoleculeMap = F2(
+var $author$project$RdfDict$subjectMoleculeMap = F2(
 	function (fn, _v0) {
 		var subj = _v0.a;
 		var po = _v0.b;
@@ -7354,7 +7369,7 @@ var $author$project$Main$subjectMoleculeMap = F2(
 				},
 				po));
 	});
-var $author$project$Main$makeRdfDict = function (cf) {
+var $author$project$RdfDict$makeRdfDict = function (cf) {
 	return $elm$core$Dict$fromList(
 		A2(
 			$elm$core$List$map,
@@ -7362,24 +7377,14 @@ var $author$project$Main$makeRdfDict = function (cf) {
 				var key = A2(
 					$elm$core$Maybe$withDefault,
 					'unidentifiable',
-					$author$project$Main$makeRdfKey(
-						$author$project$Main$selectAtom2RdfNode(subjM.a)));
+					$author$project$RdfDict$makeRdfKey(
+						$author$project$RdfDict$selectAtom2RdfNode(subjM.a)));
 				return _Utils_Tuple2(
 					key,
-					A2($author$project$Main$subjectMoleculeMap, $author$project$Main$selectAtom2RdfNode, subjM));
+					A2($author$project$RdfDict$subjectMoleculeMap, $author$project$RdfDict$selectAtom2RdfNode, subjM));
 			},
 			cf));
 };
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $author$project$Main$Pinged = function (a) {
 	return {$: 'Pinged', a: a};
 };
@@ -7618,12 +7623,12 @@ var $elm$http$Http$Header = F2(
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $author$project$Main$prepareHttpRequest = F4(
-	function (newServer, header, qtype, query) {
+var $author$project$Sparql$prepareHttpRequest = F5(
+	function (newServer, header, qtype, query, expect) {
 		return $elm$http$Http$request(
 			{
 				body: A2($elm$http$Http$stringBody, 'text', query),
-				expect: A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder),
+				expect: expect,
 				headers: _List_fromArray(
 					[
 						A2($elm$http$Http$header, 'Content-Type', 'application/sparql-request'),
@@ -7636,37 +7641,44 @@ var $author$project$Main$prepareHttpRequest = F4(
 				url: newServer + '/sparql'
 			});
 	});
-var $author$project$Main$submitParametrisedQuery = F3(
-	function (newServer, query, returnTo) {
-		return A6($elm$core$Debug$log, 'using ' + newServer, $author$project$Main$prepareHttpRequest, newServer, 'application/json', 'select', query);
-	});
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
-var $author$project$Main$submitQuery = F2(
-	function (newServer, sparql) {
+var $author$project$Sparql$submitQuery = F3(
+	function (newServer, sparql, expect) {
 		switch (sparql.$) {
 			case 'Select':
 				var query = sparql.a;
-				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/json', 'select', query);
+				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/json', 'select', query, expect);
 			case 'Ask':
 				var query = sparql.a;
-				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/json', 'ask', query);
+				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/json', 'ask', query, expect);
 			case 'Construct':
 				var query = sparql.a;
-				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/ld+json', 'construct', query);
+				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/ld+json', 'construct', query, expect);
 			case 'Describe':
 				var query = sparql.a;
-				return A4($author$project$Main$prepareHttpRequest, newServer, 'application/ld+json', 'describe', query);
+				return A5($author$project$Sparql$prepareHttpRequest, newServer, 'application/ld+json', 'describe', query, expect);
 			default:
-				return A2(
-					$elm$core$Task$perform,
-					$elm$core$Basics$always($author$project$Main$NoOp),
-					$elm$core$Task$succeed(_Utils_Tuple0));
+				return $elm$core$Platform$Cmd$none;
 		}
 	});
 var $elm$file$File$toString = _File_toString;
+var $author$project$Sparql$toString = function (sparql) {
+	switch (sparql.$) {
+		case 'Unrecognised':
+			return '';
+		case 'Select':
+			var s = sparql.a;
+			return s;
+		case 'Ask':
+			var s = sparql.a;
+			return s;
+		case 'Construct':
+			var s = sparql.a;
+			return s;
+		default:
+			var s = sparql.a;
+			return s;
+	}
+};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -7689,23 +7701,24 @@ var $author$project$Main$update = F2(
 									$elm$url$Url$toString(url))));
 					} else {
 						var a = _v2.a;
-						return A2(
-							$elm$core$Debug$log,
-							'Internal update running ' + a,
-							_Utils_Tuple2(
-								_Utils_update(
-									model,
-									{query: a}),
+						var _v3 = A2($elm$core$Debug$log, 'Internal update running ', a);
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{query: a}),
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.key,
 								A2(
-									$elm$browser$Browser$Navigation$pushUrl,
-									model.key,
-									A2(
-										$elm$url$Url$Builder$relative,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2($elm$url$Url$Builder$string, 'query', a)
-											])))));
+									$elm$url$Url$Builder$relative,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$url$Url$Builder$string,
+											'query',
+											$author$project$Sparql$toString(a))
+										]))));
 					}
 				} else {
 					var url = urlRequest.a;
@@ -7721,45 +7734,35 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'PressedKey':
 				var s = msg.a;
-				var _v3 = model.keyboard;
-				switch (_v3.$) {
+				var _v4 = model.keyboard;
+				switch (_v4.$) {
 					case 'ReadyToAcceptControl':
-						switch (s) {
-							case 'Control':
-								return A2(
-									$elm$core$Debug$log,
-									'Entering Ctrl mode',
-									_Utils_Tuple2(
-										_Utils_update(
-											model,
-											{keyboard: $author$project$Main$Ctrl}),
-										$elm$core$Platform$Cmd$none));
-							case '{':
-								return A2(
-									$elm$core$Debug$log,
-									'Opening brace',
-									_Utils_Tuple2(
-										_Utils_update(
-											model,
-											{query: model.query + '}'}),
-										$elm$core$Platform$Cmd$none));
-							default:
-								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-					case 'Ctrl':
-						if (s === 'Shift') {
+						if (s === 'Control') {
 							return A2(
 								$elm$core$Debug$log,
-								'In Ctrl+F2 mode ' + s,
+								'Entering Ctrl mode',
 								_Utils_Tuple2(
 									_Utils_update(
 										model,
-										{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Waiting}),
-									A3(
-										$author$project$Main$submitParametrisedQuery,
-										model.server,
-										'select distinct ?domain ?predicate {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } order by ?domain ?predicate\n                                ',
-										A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder))));
+										{keyboard: $author$project$Main$Ctrl}),
+									$elm$core$Platform$Cmd$none));
+						} else {
+							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						}
+					case 'Ctrl':
+						if (s === 'Shift') {
+							var queryString = 'select distinct ?domain ?predicate {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } order by ?domain ?predicate\n                                        ';
+							var command = A3(
+								$author$project$Sparql$submitQuery,
+								model.server,
+								$author$project$Sparql$Select(queryString),
+								A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder));
+							var _v7 = $elm$core$Debug$log('In Ctrl+F2 mode ' + s);
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Waiting}),
+								command);
 						} else {
 							return A2(
 								$elm$core$Debug$log,
@@ -7793,8 +7796,8 @@ var $author$project$Main$update = F2(
 			case 'Pinged':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
-					var _v7 = model.urlQuery;
-					if (_v7.$ === 'Nothing') {
+					var _v9 = model.urlQuery;
+					if (_v9.$ === 'Nothing') {
 						return A2(
 							$elm$core$Debug$log,
 							'Pinged OK - no initial query',
@@ -7804,18 +7807,18 @@ var $author$project$Main$update = F2(
 									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
 								$elm$core$Platform$Cmd$none));
 					} else {
-						var query = _v7.a;
-						return A2(
-							$elm$core$Debug$log,
-							'Pinged OK with' + query,
-							_Utils_Tuple2(
-								_Utils_update(
-									model,
-									{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
-								A2(
-									$author$project$Main$submitQuery,
-									model.server,
-									$author$project$Main$establishQueryType(query))));
+						var query = _v9.a;
+						var command = A3(
+							$author$project$Sparql$submitQuery,
+							model.server,
+							query,
+							A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder));
+						var _v10 = A2($elm$core$Debug$log, 'Pinged OK with', query);
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
+							$elm$core$Platform$Cmd$none);
 					}
 				} else {
 					var e = result.a;
@@ -7830,78 +7833,81 @@ var $author$project$Main$update = F2(
 				}
 			case 'ChangeQuery':
 				var newQuery = msg.a;
-				var _v8 = model.keyboard;
-				if (_v8.$ === 'ReadyToAcceptControl') {
+				var _v11 = model.keyboard;
+				if (_v11.$ === 'ReadyToAcceptControl') {
 					return A2(
 						$elm$core$Debug$log,
 						'Query ' + newQuery,
 						_Utils_Tuple2(
 							_Utils_update(
 								model,
-								{query: newQuery, state: $author$project$Main$Querying}),
+								{
+									query: $author$project$Sparql$establishQueryType(newQuery),
+									state: $author$project$Main$Querying
+								}),
 							$elm$core$Platform$Cmd$none));
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
 			case 'SubmitQuery':
 				var query = msg.a;
-				var _v9 = $author$project$Main$establishQueryType(model.query);
-				if (_v9.$ === 'Unrecognised') {
+				var _v12 = model.query;
+				if (_v12.$ === 'Unrecognised') {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
 								state: $author$project$Main$ApiError(
-									$elm$http$Http$BadBody('I don\'t recognise this query type ' + model.query))
+									$elm$http$Http$BadBody(
+										'I don\'t recognise this query type ' + $author$project$Sparql$toString(model.query)))
 							}),
 						$elm$core$Platform$Cmd$none);
 				} else {
-					return A2(
-						$elm$core$Debug$log,
-						'Submitting Query ' + model.query,
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{state: $author$project$Main$Waiting}),
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{state: $author$project$Main$Waiting}),
+						A2(
+							$elm$browser$Browser$Navigation$pushUrl,
+							model.key,
 							A2(
-								$elm$browser$Browser$Navigation$pushUrl,
-								model.key,
-								A2(
-									$elm$url$Url$Builder$relative,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2($elm$url$Url$Builder$string, 'query', query)
-										])))));
+								$elm$url$Url$Builder$relative,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$url$Url$Builder$string,
+										'query',
+										$author$project$Sparql$toString(query))
+									]))));
 				}
 			case 'SubmitQueryWhileNavigating':
 				var query = msg.a;
 				var newModel = _Utils_update(
 					model,
 					{query: query, state: $author$project$Main$Waiting});
-				return A2(
-					$elm$core$Debug$log,
-					newModel.query,
-					_Utils_Tuple2(
-						newModel,
-						A2(
-							$author$project$Main$submitQuery,
-							newModel.server,
-							$author$project$Main$establishQueryType(newModel.query))));
+				var _v13 = A2($elm$core$Debug$log, 'query=', newModel.query);
+				return _Utils_Tuple2(
+					newModel,
+					A3(
+						$author$project$Sparql$submitQuery,
+						newModel.server,
+						newModel.query,
+						A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder)));
 			case 'GotSparqlResponse':
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v11 = okData.status;
-					if (_v11 === 200) {
+					var _v15 = okData.status;
+					if (_v15 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
 									currentRdfDict: A2(
 										$elm$core$Maybe$map,
-										$author$project$Main$makeRdfDict,
-										A2($author$project$Main$contractResult, okData.vars, okData.result)),
+										$author$project$RdfDict$makeRdfDict,
+										A2($author$project$RdfDict$contractResult, okData.vars, okData.result)),
 									state: A2($author$project$Main$DisplayingSelectResult, okData.vars, okData.result)
 								}),
 							$elm$core$Platform$Cmd$none);
@@ -7948,12 +7954,17 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{query: content}),
+						{
+							query: $author$project$Sparql$establishQueryType(content)
+						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DownloadFile':
 				return _Utils_Tuple2(
 					model,
-					A2($author$project$Main$downloadFile, 'query.txt', model.query));
+					A2(
+						$author$project$Main$downloadFile,
+						'query.txt',
+						$author$project$Sparql$toString(model.query)));
 			case 'DownloadResultsAsCSV':
 				var vars = msg.a;
 				var results = msg.b;
@@ -7966,7 +7977,7 @@ var $author$project$Main$update = F2(
 							return A2(
 								$elm$core$String$join,
 								'|',
-								$author$project$Main$extractValues(r));
+								$author$project$RdfDict$extractValues(r));
 						},
 						results));
 				return _Utils_Tuple2(
@@ -8210,7 +8221,8 @@ var $author$project$Main$queryInput = F2(
 							$elm$html$Html$Attributes$wrap('soft'),
 							$elm$html$Html$Attributes$placeholder('Sparql Query'),
 							$elm$html$Html$Events$onInput($author$project$Main$ChangeQuery),
-							$elm$html$Html$Attributes$value(query)
+							$elm$html$Html$Attributes$value(
+							$author$project$Sparql$toString(query))
 						]),
 					_List_Nil),
 					A2(
@@ -8318,7 +8330,7 @@ var $author$project$Main$tableView = F2(
 														$elm$html$Html$text(_var)
 													]));
 										},
-										$author$project$Main$extractValues(row)));
+										$author$project$RdfDict$extractValues(row)));
 							},
 							result)))
 				]));
@@ -8480,7 +8492,7 @@ var $author$project$Main$makeSubjectMoleculeCard = F2(
 									'/index.html?query=describe <' + (A2(
 										$elm$core$Maybe$withDefault,
 										'unknown',
-										$author$project$Main$makeRdfKey(subj)) + '>'))
+										$author$project$RdfDict$makeRdfKey(subj)) + '>'))
 								]),
 							_List_fromArray(
 								[
@@ -8990,8 +9002,8 @@ var $author$project$Main$view = function (model) {
 						} else {
 							var contracted = A2(
 								$elm$core$Maybe$map,
-								$author$project$Main$makeRdfDict,
-								A2($author$project$Main$contractResult, vars, result));
+								$author$project$RdfDict$makeRdfDict,
+								A2($author$project$RdfDict$contractResult, vars, result));
 							if (contracted.$ === 'Just') {
 								var a = contracted.a;
 								return A2(
@@ -9021,7 +9033,7 @@ var $author$project$Main$view = function (model) {
 											_List_Nil,
 											_List_fromArray(
 												[
-													$elm$html$Html$text('Graph nav hiding in comments')
+													$elm$html$Html$text('Graph nav (off)')
 												]))
 										]));
 							} else {

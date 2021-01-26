@@ -9,6 +9,7 @@ import pprint
 from optparse import OptionParser
 import re
 from functools import lru_cache
+import datetime
 
 @dataclass_json
 @dataclass
@@ -226,6 +227,7 @@ def establishQueryType(queryString):
 
 @lru_cache(maxsize=None)
 def forwardSparqlToKnowledgeGraph(clientAcceptHeader, queryString):
+    print(f"Uncached server request for {queryString} at {datetime.datetime.now()}")
     res = requests.request("POST", SERVER+"/sparql",
             data = queryString, 
             headers = {

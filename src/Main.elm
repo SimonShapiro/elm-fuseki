@@ -14,11 +14,10 @@ import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, 
 import File exposing (File)
 import File.Select as Select
 import File.Download as Download
-import Task
-import List.Extra exposing (uncons, groupWhile)
-import Maybe.Extra exposing (combine, join)
+--import Task
 import List
 import Dict exposing(Dict)
+import Maybe.Extra exposing (combine, join)
 import Url exposing (..)
 import Url.Builder exposing (relative)
 import Url.Parser.Query as Query
@@ -32,14 +31,9 @@ import Graph
 import Json.Decode exposing (index)
 import String
 
-graph1 = Graph.fromNodesAndEdges[Graph.Node 1 (Select "")][Graph.Edge 1 1 ""]
-
-type SparqlQuery 
-    = Select Sparql
-    | Ask Sparql
-    | Construct Sparql
-    | Describe Sparql
-    | Unrecognised
+import Sparql exposing (..)
+import RdfDict exposing (..)
+import List.Extra exposing (uncons, groupWhile)
 
 type alias Document msg =
     { title : String
@@ -51,45 +45,6 @@ type Cardinality
     | ZeroToMany 
     | OneToMany 
 
-type alias ServerForm a = (List (List a))
-
-type alias ServerVars = (List String)
-
-type alias TripleForm a = (List (a, a, a))
-
-type alias ContractedForm a = (List (SubjectMolecule a)) 
-
-makeTripleForm: ServerForm a -> Maybe (TripleForm  a)
-makeTripleForm res = res 
--- ensure that serverForm consists of triples (not necessarily spo)
-                    |> List.map (\r -> makeTriple r)
-                    |> combine
-makeContractedForm: TripleForm SelectAtom -> ContractedForm SelectAtom
-makeContractedForm triples = triples
-                            |> List.map (\(s, p, o) -> (s, (p, o)))
-                            |> List.sortBy (\(x, y) -> x.value)
-                            |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
-                            |> separateIntoSubject_PredicateObjects
-                            |> List.map (\(x, y) -> (x, List.sortBy (\(a, b) -> a.value) y 
-                                                        |> groupWhile (\a b -> (Tuple.first a).value == (Tuple.first b).value)
-                                                        |> separateIntoPredicateLists
-                                ))
-
--- List.indexedMap Tuple.pair a |>                            -- Dict.fromList  will make an Dict
--- List.map (\x -> (Tuple.second x, Tuple.first x)) c
-
-contractResult: ServerVars -> ServerForm SelectAtom -> Maybe (ContractedForm SelectAtom)
-contractResult vars res =
--- ContractedForm is only valid when ServerVars in the shape of spo
-    case vars of
-        ["s", "p", "o"] -> 
-            let
-                maybeTriples = makeTripleForm res
-            in
-                case maybeTriples of
-                   Just a -> makeContractedForm a |> Just
-                   _ -> Nothing
-        _ -> Nothing
 
 type UIState 
     = Initialising 
@@ -103,8 +58,8 @@ type UIState
 type alias Model = 
     { state: UIState
     , server: Server
-    , urlQuery: Maybe Sparql
-    , query: Sparql 
+    , urlQuery: Maybe SparqlQuery
+    , query: SparqlQuery
     , currentRdfDict: Maybe RdfDict
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
@@ -114,7 +69,6 @@ type alias Model =
     }
 
 type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
-type alias SubjectMolecule a = (a, (List (a, List a)))  -- s, List (pred, obj)
 
 type KeyboardMode
     = Normal
@@ -140,13 +94,13 @@ type Msg
     | ChangeServer Server
     | PingServer 
     | Pinged (Result Http.Error ())
-    | ChangeQuery Sparql
-    | SubmitQuery Sparql
-    | SubmitQueryWhileNavigating Sparql
+    | ChangeQuery String
+    | SubmitQuery SparqlQuery
+    | SubmitQueryWhileNavigating SparqlQuery
     | GotSparqlResponse (Result Http.Error KGResponse)
     | FileRequested 
     | FileSelected File
-    | FileLoaded Sparql
+    | FileLoaded String
     | DownloadFile
     | DownloadResultsAsCSV ServerVars (ServerForm SelectAtom)
     | ChangeOutputFormat String
@@ -156,101 +110,15 @@ type Msg
     | DeregisterSubjectPredicateOpen (RdfNode, RdfNode)
     | ClickedLink UrlRequest
 
-type alias Server = String
-
-type alias Sparql = String
-
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
     , status: Int
     , message: String
     , queryType: String
-    , query: Sparql
+    , query: String
     , vars: ServerVars
     , result: ServerForm SelectAtom
     }
-
-type alias SelectAtom =
-    { key: String
-    , value: String
-    , aType: String
-    , language: String
-    , datatype: String
-    }
-
-type RdfNode 
-    = Uri {value: String}
-    | BlankNode {value: String}
-    | LiteralOnlyValue {value: String}
-    | LiteralValueAndDataType {value: String, dataType: String}
-    | LiteralValueAndLanguageString {value: String, language: String}
-    | Unknown
-establishQueryType: Sparql -> SparqlQuery
-establishQueryType query = 
-    let
-        selectRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^select"
-        askRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^ask"
-        constructRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^construct"
-        describeRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^describe"
-    in
-        if Regex.contains selectRe query then Select query
-        else if Regex.contains askRe query then Ask query
-        else if Regex.contains constructRe query then Construct query
-        else if Regex.contains describeRe query then Describe query
-        else Unrecognised  
-
-selectAtom2RdfNode: SelectAtom -> RdfNode
-selectAtom2RdfNode atom =
-    case atom.aType of
-        "uri" -> Uri {value=atom.value}
-        "bnode" -> BlankNode {value=atom.value}
-        "literal" -> 
-            if atom.language /= ""
-            then
-                LiteralValueAndLanguageString {value=atom.value, language=atom.language}
-            else if atom.datatype /= ""
-                then LiteralValueAndDataType {value=atom.value, dataType=atom.datatype}
-                else LiteralOnlyValue {value=atom.value}
-        _ -> Unknown
-
-type alias RdfKey = String
-
-makeRdfKey: RdfNode -> Maybe RdfKey
-makeRdfKey n =
-    case n of
-        Uri a -> 
-            Just a.value
-        BlankNode a ->
-            Just a.value
-        _ -> Nothing       
-
-type alias RdfDict = Dict RdfKey (SubjectMolecule RdfNode)  -- the main form of the graph -- consider replacing with elm-community/graph
-
-subjectMoleculeMap: (SelectAtom -> RdfNode) -> SubjectMolecule SelectAtom -> SubjectMolecule RdfNode
-subjectMoleculeMap fn (subj, po) =
-    (fn subj, (List.map (\(p, lo) ->
-                            (fn p, List.map(\o -> fn o) lo)
-                        ) po)
-    )
-
-makeRdfDict: ContractedForm SelectAtom -> RdfDict
-makeRdfDict cf = List.map (\subjM ->
-                                let
-                                    key = subjM |> Tuple.first |> selectAtom2RdfNode |> makeRdfKey |> Maybe.withDefault "unidentifiable"
-                                in
-                                    (key, subjectMoleculeMap selectAtom2RdfNode subjM)
-                            ) cf
-                |> Dict.fromList
-rdfNodeToMaybeString: RdfNode -> Maybe String
-rdfNodeToMaybeString node =
-    case node of
-        Uri a -> Just a.value
-        BlankNode a -> Just a.value
-        LiteralOnlyValue a -> Just a.value
-        LiteralValueAndDataType a -> Just a.value
-        LiteralValueAndLanguageString a -> Just a.value
-        Unknown -> Nothing
-
 convertRdfDict2CommunityGraph: RdfDict -> Graph.Graph (SubjectMolecule RdfNode) String 
 convertRdfDict2CommunityGraph d = 
 --(List (Graph.Node (SubjectMolecule RdfNode)), Dict String Int) 
@@ -284,19 +152,6 @@ convertRdfDict2CommunityGraph d =
         Debug.log ("Building graph of "++(List.length nodes |> String.fromInt)++":"++(List.length edges |> String.fromInt))
         Graph.fromNodesAndEdges nodes edges
 
-extractValues: List SelectAtom -> List String
-extractValues rows =
-    List.map (\r -> r.value) rows
-
-selectAtomDecoder: Decoder SelectAtom
-selectAtomDecoder = 
-    map5 SelectAtom
-        (field "key" string)
-        (field "value" string )
-        (field "aType" string )
-        (field "language" string )
-        (field "datatype" string )
-
 server: Server
 server = "http://localhost:port"
 
@@ -308,7 +163,7 @@ initialFn _ url key =
     let
         initialQuery = parseUrlForIndexQuery url
     in
-        (Model Initialising server initialQuery "" Nothing Normal Table Terse [] key, Cmd.none)
+        (Model Initialising server initialQuery (Ask "ask {?s ?p ?o}") Nothing Normal Table Terse [] key, Cmd.none)
 
 parseUrlForDetailsSubject : Url -> Maybe String
 parseUrlForDetailsSubject url =
@@ -321,7 +176,7 @@ parseUrlForDetailsSubject url =
     in
         Url.Parser.parse parseQuery url |> join
 
-parseUrlForIndexQuery : Url -> Maybe String
+parseUrlForIndexQuery : Url -> Maybe SparqlQuery
 parseUrlForIndexQuery url =
     let
         subject: Query.Parser (Maybe String)
@@ -330,7 +185,7 @@ parseUrlForIndexQuery url =
         parseQuery =
             (s "index.html" <?> subject)
     in
-        Url.Parser.parse parseQuery url |> join
+        Url.Parser.parse parseQuery url |> join |> Maybe.map establishQueryType
 
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -346,10 +201,12 @@ update msg model =
                             , replaceUrl model.key (Url.toString url) 
                             )
                         Just a -> 
-                            Debug.log ("Internal update running "++ a)    --(Url.toString url)) 
-                            ( {model | query = a}
-                            , pushUrl model.key (relative [][Url.Builder.string "query" a]) 
-                            )
+                            let
+                                _ = Debug.log "Internal update running " a    --(Url.toString url)) 
+                            in
+                                ( {model | query = a}
+                                , pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString a)]) 
+                                )
                 External url ->
                     ( model
                     , load url
@@ -364,21 +221,22 @@ update msg model =
                         "Control" ->
                             Debug.log "Entering Ctrl mode" 
                             ({model | keyboard = Ctrl}, Cmd.none)
-                        "{" -> 
-                            Debug.log "Opening brace" 
-                            ({model | query = model.query++"}"}, Cmd.none)
                         _ -> (model, Cmd.none)
                 Ctrl ->
                     case s of 
                         "Shift" -> 
-                            Debug.log ("In Ctrl+F2 mode "++s)
-                            ({model | keyboard = ReadyToAcceptControl, state = Waiting}
-                            , submitParametrisedQuery model.server 
-                               """select distinct ?domain ?predicate {
+                            let
+                                queryString = """select distinct ?domain ?predicate {
                                     ?s ?predicate ?o.
                                     ?s a ?domain .
                                     } order by ?domain ?predicate
-                                """ (Http.expectJson GotSparqlResponse mainDecoder))
+                                        """
+                                command = submitQuery model.server (Sparql.Select queryString) (Http.expectJson GotSparqlResponse mainDecoder)
+                                _ = Debug.log ("In Ctrl+F2 mode "++s)
+                            in
+                                ({model | keyboard = ReadyToAcceptControl, state = Waiting}, command)
+--                            , 
+--                            )
                         _ ->
                             Debug.log ("Leaving Ctrl mode "++s)
                             ({model | keyboard = ReadyToAcceptControl}, Cmd.none)
@@ -395,12 +253,12 @@ update msg model =
                             Debug.log "Pinged OK - no initial query"
                             ({model | state = Querying, keyboard = ReadyToAcceptControl}, Cmd.none)
                         Just query -> 
-                            Debug.log ("Pinged OK with"++query)
-                            (   { model | state = Querying 
-                                , keyboard = ReadyToAcceptControl
-                                , query = query
-                                }
-                            , submitQuery model.server (establishQueryType query))
+                            let
+                                command = submitQuery model.server query (Http.expectJson GotSparqlResponse mainDecoder)
+                                _ = Debug.log "Pinged OK with" query
+
+                            in
+                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = query}, Cmd.none)
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
@@ -408,21 +266,21 @@ update msg model =
             case model.keyboard of
                 ReadyToAcceptControl ->
                     Debug.log ("Query "++newQuery)
-                    ({model | query = newQuery, state = Querying}, Cmd.none)
+                    ({model | query = (establishQueryType newQuery), state = Querying}, Cmd.none)
                 _ ->
                     (model, Cmd.none) 
         SubmitQuery query -> 
-            case establishQueryType model.query of
-               Unrecognised -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++model.query))}, Cmd.none)
+            case model.query of
+               Unrecognised -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString model.query)))}, Cmd.none)
                _ ->
-                    Debug.log ("Submitting Query "++model.query)
-                    ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" query])) -- submitQuery model.server query)
+                --    Debug.log ("Submitting Query " model.query
+                    ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString query)])) -- submitQuery model.server query)
         SubmitQueryWhileNavigating query ->
             let
                 newModel = {model | query = query, state = Waiting}
+                _ = Debug.log "query=" newModel.query
             in
-                Debug.log newModel.query
-                (newModel, submitQuery newModel.server (establishQueryType newModel.query))
+                (newModel, submitQuery newModel.server newModel.query (Http.expectJson GotSparqlResponse mainDecoder))
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
@@ -447,9 +305,9 @@ update msg model =
                 , Task.perform FileLoaded (File.toString file)
                 )
         FileLoaded content ->
-            ({model | query = content}, Cmd.none)
+            ({model | query = establishQueryType content}, Cmd.none)
         DownloadFile -> 
-            (model, downloadFile "query.txt" model.query)
+            (model, downloadFile "query.txt" (Sparql.toString model.query))
         DownloadResultsAsCSV vars results -> 
             let
                 headedResults = (String.join "|" vars) :: List.map (\r -> extractValues r
@@ -490,13 +348,10 @@ handleUrlChange url =
             Debug.log ("fwd/bck update running on NOTHING")    --(Url.toString url)) 
             NoOp
         Just a -> 
-            Debug.log ("fwd/bck update running "++ a)    --(Url.toString url)) 
-            SubmitQueryWhileNavigating  a
-
-msgDecoder : Decoder Msg
-msgDecoder =
-    field "key" string
-        |> map PressedKey
+            let
+                _ = Debug.log "fwd/bck update running " a    --(Url.toString url)) 
+            in
+                SubmitQueryWhileNavigating  a
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
@@ -517,67 +372,6 @@ pingServer newServer =
                     , timeout = Nothing
                     , tracker = Nothing
                     }
-
-prepareHttpRequest: Server -> String -> String -> String -> (Cmd Msg)
-prepareHttpRequest newServer header qtype query =
-    Http.request
-                { method = "POST"
-                , headers = [ Http.header "Content-Type" "application/sparql-request"
-                            , Http.header "Accept" header
-                            , Http.header "x-Qtype" qtype
-                            ]
-                , url = newServer++"/sparql"
-                , body = Http.stringBody "text" query
-                , expect = Http.expectJson GotSparqlResponse mainDecoder -- this could be parameterised
-                , timeout = Nothing
-                , tracker = Nothing
-                }
-
-
-submitQuery: Server -> SparqlQuery -> (Cmd  Msg)
-submitQuery newServer sparql = 
-    case sparql of
-        Select query -> prepareHttpRequest newServer "application/json" "select" query
-        Ask query -> prepareHttpRequest newServer "application/json" "ask" query
-        Construct query -> prepareHttpRequest newServer "application/ld+json" "construct" query
-        Describe query -> prepareHttpRequest newServer "application/ld+json" "describe" query
-        Unrecognised -> Task.perform (always NoOp) (Task.succeed ()) 
-
-submitParametrisedQuery: Server -> Sparql -> (Http.Expect msg) -> (Cmd Msg)
-submitParametrisedQuery newServer query returnTo = 
-        Debug.log ("using "++newServer)
-        prepareHttpRequest newServer "application/json" "select" query
-
-makeTriple: List a -> Maybe (a, a, a)
-makeTriple spo =
-    case (List.length spo) of
-       3 -> Maybe.map3 (\a b c -> (a, b, c)) (List.head spo) (List.head (List.drop 1 spo)) (List.head (List.drop 2 spo))
-       _ -> Nothing
-
-separateIntoSubject_PredicateObjects: List (( a, (a, a) )
-                                            , List ( a, (a, a) )) 
-                                            -> List (a, List(a, a))
-separateIntoSubject_PredicateObjects l = 
-    l |> List.map (\subject ->
-                        let
-                            subj = Tuple.first (Tuple.first subject)
-                            predobj = Tuple.second (Tuple.first subject)
-                            predicateObjects = predobj :: Tuple.second (List.unzip (Tuple.second subject))
-
-                        in
-                            (subj, predicateObjects)
-                    )
-
-separateIntoPredicateLists: List ( ( a, a ), List ( a, a ) ) -> List (a, List(a))
-separateIntoPredicateLists preds = 
-                                preds |> List.map(\p ->
-                                    let
-                                        item = Tuple.first (Tuple.first p)
-                                        head = Tuple.second (Tuple.first p)
-                                        target = head :: Tuple.second (List.unzip (Tuple.second p))
-                                    in
-                                        (item, target)
-                                ) 
 
 aka: PredicateStyle -> String -> String
 aka predicateStyle pred = 
@@ -756,7 +550,7 @@ tableView vars result =
                     ) result ))
             ]
 
-queryInput: Server -> Sparql -> Html Msg
+queryInput: Server -> SparqlQuery -> Html Msg
 queryInput newServer query =
             div [] 
                 [ textarea 
@@ -765,10 +559,11 @@ queryInput newServer query =
                     , wrap "soft"
                     , placeholder "Sparql Query"
                     , onInput ChangeQuery
-                    , value query
+                    , value (Sparql.toString query)
                     ][]
                 , button [onClick (SubmitQuery query)][text "Submit"]
                 ]
+
 resultFormatToggle: ResultsDisplay -> Html Msg
 resultFormatToggle selected = 
     div []
@@ -890,7 +685,7 @@ view model = { title = "Sparql Query Playground"
                                                 -- ??? replace below by passing the whole model in
                                                 , viewSubjects model
                                                 , hr [] []
-                                                , div [][text "Graph nav hiding in comments"]
+                                                , div [][text "Graph nav (off)"]
 --                                                , div []
  --                                                   (List.map (\n -> viewSubjectMolecule model n.label) 
   --                                                                          (Graph.nodes (convertRdfDict2CommunityGraph a)))
@@ -909,6 +704,20 @@ view model = { title = "Sparql Query Playground"
 --      viewSubjectMolecule n
 
 -- Decoders
+
+msgDecoder : Decoder Msg
+msgDecoder =
+    field "key" string
+        |> map PressedKey
+
+selectAtomDecoder: Decoder SelectAtom
+selectAtomDecoder = 
+    map5 SelectAtom
+        (field "key" string)
+        (field "value" string )
+        (field "aType" string )
+        (field "language" string )
+        (field "datatype" string )
 
 mainDecoder: Decoder KGResponse
 mainDecoder =

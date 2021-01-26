@@ -13,6 +13,7 @@
 - ~~Icon for fully external url lookup~~
 - ~~Link on subject as well~~
 - Updates ???
+- Improve url routing
 - Add settings - api url; allow implied external links to model
 - check for accessability of object uri
 - Simple styling
@@ -41,11 +42,13 @@
 
 # Pending Re-factors
 
+- Make `type alias X = String` more expressive
+
 *Sparql Processing*
 - ~~Separate `Sparql` - confirm you have sparql in compatible shape - submit to end-point~~
 - ~~Merge `submitParametrisedQuery` and `submitQuery`~~
 
 *KG Response Processing*
 
-Tranform the response into internal form(s).  Main logic is driven by things around RdfDict.
-- Separate all functions from KGresponse to ContractedForm.
+Tranform the response into internal form(s).  Main logic is driven by functions leading to RdfDict.
+- ~~Separate all functions from KGresponse to ContractedForm.~~
