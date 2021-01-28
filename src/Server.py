@@ -133,16 +133,16 @@ def processAskQuery(qType, queryString, res):
             "result": serializeResults(rows)
         })}
 
-def processInsertQuery(qType, queryString, res):
-    print("Inserting (processing)")
+def processUpdateQuery(qType, queryString, res):
+    print(f"{qType} (processing)")
     print(res.status_code)
     print(res.text)
     status = res.status_code
     error = res.reason
-    if res.status_code == 204:
-        print("Insert ok", res.text)
-        vars = ["insert"]
-        rows = [[Atom(key="insert", 
+    if res.status_code in [204, 200]:
+        print(f"{qType} ok", res.text)
+        vars = [qType]
+        rows = [[Atom(key=qType, 
                         value=str(True), 
                         aType="literal", 
                         datatype="http://www.w3.org/2001/XMLSchema#boolean"
@@ -150,8 +150,8 @@ def processInsertQuery(qType, queryString, res):
                 ]]
         status = 200
     else:
-        vars = ["insert"]
-        rows = [[Atom(key="insert", 
+        vars = [qType]
+        rows = [[Atom(key=qType, 
                         value=str(False), 
                         aType="literal", 
                         datatype="http://www.w3.org/2001/XMLSchema#boolean"
@@ -253,6 +253,11 @@ def establishQueryType(queryString):
     constructRe = r"^construct"
     describeRe = r"^describe"
     insertRe = r"^insert"
+    deleteRe = r"^delete"
+    loadRe = r"^load"
+    dropRe = r"^drop"
+    clearRe = r"^clear"
+    createRe = r"^create"
     if re.search(selectRe, q, re.M):
         return "select"
     elif re.search(askRe, q, re.M):
@@ -263,6 +268,16 @@ def establishQueryType(queryString):
         return "describe"
     elif re.search(insertRe, q, re.M):
         return "insert"
+    elif re.search(deleteRe, q, re.M):
+        return "delete"
+    elif re.search(loadRe, q, re.M):
+        return "load"
+    elif re.search(dropRe, q, re.M):
+        return "drop"
+    elif re.search(clearRe, q, re.M):
+        return "clear"
+    elif re.search(createRe, q, re.M):
+        return "create"
     else:
         return "select"  #  might need something else here
 
@@ -270,15 +285,16 @@ def establishQueryType(queryString):
 def forwardSparqlToKnowledgeGraphUpdate(clientAcceptHeader, qType, queryString):
     print(f"Uncached server request for {queryString} at {datetime.datetime.now()}")
     forwardSparqlToKnowledgeGraph.cache_clear()
+    forwardSparqlToKnowledgeGraphUpdate.cache_clear()
     res = requests.request("POST", SERVER+"/update",
-            data = queryString, 
+            data = queryString.encode('utf-8'), 
             headers = {
                 'Content-Type': 'application/sparql-update',
                 'Accept': clientAcceptHeader
                 })
-    if (qType == "insert"):
-        print("Inserting")
-        result = processInsertQuery(qType, queryString, res)
+    if (qType in ["insert", "delete", "load", "drop", "clear", "create"]):
+        print(qType)
+        result = processUpdateQuery(qType, queryString, res)
         return Response(
             status = result["status"],
             response = result["response"]
@@ -325,7 +341,7 @@ def sparql():
     print(request.headers)
     clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"  # test qType here
     qType = establishQueryType(queryString)  # request.headers.get("X-Qtype")  # replace with python function to remove reliaze on headers
-    if qType == "insert":
+    if qType in ["insert", "delete", "load", "drop", "clear", "create"]:
          response = forwardSparqlToKnowledgeGraphUpdate(clientAcceptHeader, qType, queryString)
     else:
          response = forwardSparqlToKnowledgeGraph(clientAcceptHeader, qType, queryString)
@@ -341,4 +357,4 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
     print(options, args)
     SERVER = options.server
-    app.run()
+    app.run(host="0.0.0.0")

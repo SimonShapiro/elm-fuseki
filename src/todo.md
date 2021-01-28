@@ -1,3 +1,19 @@
+# Known Bugs
+
+- ~~Scan jsonld for `null` value~~
+- ~~Make error pages return to query screen~~ Untested because it relates to APIError
+- ~~Push url on submit~~
+- ~~Remove hard coding of localhost 127.0.0.1 and port~~
+- ~~Resolve apparent differences between safari and chrome on back from history after eternal url click~~
+- ~~Improve methods of recognising query type in api to fine tune headers~~
+- ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
+- ~~Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.~~
+- Add port as commandline paramter for Server.py 
+- A bug on `select distinct ?g {?s ?p ?o.}`
+- Add lru caching to improve query performance
+- Fine tune chache maxsize
+- Back reloads page and loses reference position 
+
 # To Do
 
 - ~~Cursor on wait~~
@@ -12,6 +28,7 @@
 - ~~Links over single url views~~
 - ~~Icon for fully external url lookup~~
 - ~~Link on subject as well~~
+- Implement `load` in update
 - Updates ???
 - Improve url routing
 - Add settings - api url; allow implied external links to model
@@ -25,20 +42,6 @@
 - Add limit and offset semantics in table and subject oriented list
 - csv download - filename to be input
 - Improve table (a more fully featured table)
-
-# Known Bugs
-
-- ~~Scan jsonld for `null` value~~
-- ~~Make error pages return to query screen~~ Untested because it relates to APIError
-- ~~Push url on submit~~
-- ~~Remove hard coding of localhost 127.0.0.1 and port~~
-- ~~Resolve apparent differences between safari and chrome on back from history after eternal url click~~
-- ~~Improve methods of recognising query type in api to fine tune headers~~
-- ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
-- ~~Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.~~
-- Add lru cahcing to improve query performance
-- Fine tune chache maxsize
-- Back reloads page and loses reference position 
 
 # Pending Re-factors
 

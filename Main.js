@@ -5623,14 +5623,29 @@ var $elm$core$Debug$log = _Debug_log;
 var $author$project$Sparql$Ask = function (a) {
 	return {$: 'Ask', a: a};
 };
+var $author$project$Sparql$Clear = function (a) {
+	return {$: 'Clear', a: a};
+};
 var $author$project$Sparql$Construct = function (a) {
 	return {$: 'Construct', a: a};
+};
+var $author$project$Sparql$Create = function (a) {
+	return {$: 'Create', a: a};
+};
+var $author$project$Sparql$Delete = function (a) {
+	return {$: 'Delete', a: a};
 };
 var $author$project$Sparql$Describe = function (a) {
 	return {$: 'Describe', a: a};
 };
+var $author$project$Sparql$Drop = function (a) {
+	return {$: 'Drop', a: a};
+};
 var $author$project$Sparql$Insert = function (a) {
 	return {$: 'Insert', a: a};
+};
+var $author$project$Sparql$Load = function (a) {
+	return {$: 'Load', a: a};
 };
 var $author$project$Sparql$Select = function (a) {
 	return {$: 'Select', a: a};
@@ -5662,6 +5677,13 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^select'));
+	var loadRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^load'));
 	var insertRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
@@ -5669,6 +5691,13 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^insert'));
+	var dropRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^drop'));
 	var describeRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
@@ -5676,6 +5705,20 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^describe'));
+	var deleteRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^delete'));
+	var createRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^create'));
 	var constructRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
@@ -5683,6 +5726,13 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^construct'));
+	var clearRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^clear'));
 	var askRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
@@ -5690,7 +5740,7 @@ var $author$project$Sparql$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^ask'));
-	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : $author$project$Sparql$Unrecognised(query)))));
+	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : (A2($elm$regex$Regex$contains, deleteRe, query) ? $author$project$Sparql$Delete(query) : (A2($elm$regex$Regex$contains, loadRe, query) ? $author$project$Sparql$Load(query) : (A2($elm$regex$Regex$contains, dropRe, query) ? $author$project$Sparql$Drop(query) : (A2($elm$regex$Regex$contains, clearRe, query) ? $author$project$Sparql$Clear(query) : (A2($elm$regex$Regex$contains, createRe, query) ? $author$project$Sparql$Create(query) : $author$project$Sparql$Unrecognised(query))))))))));
 };
 var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
 	if (mx.$ === 'Just') {
@@ -7672,6 +7722,21 @@ var $author$project$Sparql$submitQuery = F3(
 			case 'Insert':
 				var query = sparql.a;
 				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'insert', query, expect);
+			case 'Delete':
+				var query = sparql.a;
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'delete', query, expect);
+			case 'Load':
+				var query = sparql.a;
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'load', query, expect);
+			case 'Drop':
+				var query = sparql.a;
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'drop', query, expect);
+			case 'Create':
+				var query = sparql.a;
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'create', query, expect);
+			case 'Clear':
+				var query = sparql.a;
+				return A6($author$project$Sparql$prepareHttpRequest, newServer, 'application/sparql-update', 'application/text', 'clear', query, expect);
 			default:
 				var query = sparql.a;
 				return $elm$core$Platform$Cmd$none;
@@ -7693,6 +7758,21 @@ var $author$project$Sparql$toString = function (sparql) {
 			var s = sparql.a;
 			return s;
 		case 'Describe':
+			var s = sparql.a;
+			return s;
+		case 'Insert':
+			var s = sparql.a;
+			return s;
+		case 'Delete':
+			var s = sparql.a;
+			return s;
+		case 'Load':
+			var s = sparql.a;
+			return s;
+		case 'Drop':
+			var s = sparql.a;
+			return s;
+		case 'Clear':
 			var s = sparql.a;
 			return s;
 		default:
