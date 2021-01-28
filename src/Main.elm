@@ -400,7 +400,7 @@ makeSubjectMoleculeCard model mole =
     in
               div [class "card"]
                                 [ h2 [] [ Html.a [href ("/index.html?query=describe <"
-                                    ++ (makeRdfKey subj |> Maybe.withDefault "unknown") 
+                                    ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
                                     ++">")][(viewRdfNode model Subject subj)]] -- make case here to clean up the view function below
                                 , viewPredicates model mole
                                 ]

@@ -8591,10 +8591,11 @@ var $author$project$Main$makeSubjectMoleculeCard = F2(
 							_List_fromArray(
 								[
 									$elm$html$Html$Attributes$href(
-									'/index.html?query=describe <' + (A2(
-										$elm$core$Maybe$withDefault,
-										'unknown',
-										$author$project$RdfDict$makeRdfKey(subj)) + '>'))
+									'/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(
+										A2(
+											$elm$core$Maybe$withDefault,
+											'unknown',
+											$author$project$RdfDict$makeRdfKey(subj))) + '>'))
 								]),
 							_List_fromArray(
 								[

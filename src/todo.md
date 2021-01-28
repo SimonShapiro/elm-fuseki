@@ -28,8 +28,8 @@
 - ~~Links over single url views~~
 - ~~Icon for fully external url lookup~~
 - ~~Link on subject as well~~
-- Implement `load` in update
-- Updates ???
+- ~~Implement `load` in update~~
+- ~~Updates according to~~ [sparql cheat sheet](https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf)
 - Improve url routing
 - Add settings - api url; allow implied external links to model
 - check for accessability of object uri
