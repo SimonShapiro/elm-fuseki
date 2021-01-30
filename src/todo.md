@@ -8,9 +8,11 @@
 - ~~Improve methods of recognising query type in api to fine tune headers~~
 - ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
 - ~~Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.~~
+- ~~Add lru caching to improve query performance~~
+- Command line query should not be submitted
+- Add message to `load' response
 - Add port as commandline paramter for Server.py 
 - A bug on `select distinct ?g {?s ?p ?o.}`
-- Add lru caching to improve query performance
 - Fine tune chache maxsize
 - Back reloads page and loses reference position 
 
@@ -30,6 +32,8 @@
 - ~~Link on subject as well~~
 - ~~Implement `load` in update~~
 - ~~Updates according to~~ [sparql cheat sheet](https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf)
+- Maintain scrolling query list
+- Investigate elm-ui
 - Improve url routing
 - Add settings - api url; allow implied external links to model
 - check for accessability of object uri

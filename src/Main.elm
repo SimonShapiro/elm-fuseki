@@ -35,6 +35,11 @@ import Sparql exposing (..)
 import RdfDict exposing (..)
 import List.Extra exposing (uncons, groupWhile)
 
+import Element exposing (..)
+import Element.Border exposing (..)
+import Element.Background exposing (..)
+import Element.Input exposing (..)
+
 type alias Document msg =
     { title : String
     , body : List (Html msg)
@@ -60,6 +65,7 @@ type alias Model =
     , server: Server
     , urlQuery: Maybe SparqlQuery
     , query: SparqlQuery
+    , queryHistory: List SparqlQuery
     , currentRdfDict: Maybe RdfDict
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
@@ -119,6 +125,33 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , vars: ServerVars
     , result: ServerForm SelectAtom
     }
+
+--Element Experiment
+myElement : Element msg
+myElement =
+    Element.textColumn [ spacing 10, padding 10 ]
+        [ paragraph [] [ Element.text "lots of text ...." ]
+        , el [ alignLeft ] none
+        , paragraph [] [ Element.text "lots of text ...." ]
+        ]
+
+elOfQueryHistory: List SparqlQuery -> Element Msg
+elOfQueryHistory history =
+    Element.textColumn [ spacing 10, padding 10, Element.height (Element.px 120), scrollbarY ]
+        ( List.map (\query ->
+                Debug.log (Sparql.toString query)
+                Element.row [spacing 10][ Element.Input.button
+                                                [ Element.Background.color (Element.rgb 0.85 0.85 0.85)
+                                                , Element.focused
+                                                    [ Element.Background.color (Element.rgb 0.85 0.85 0.05) ]
+                                                ]
+                                                { onPress = Just (SubmitQueryWhileNavigating query)
+                                                , label = Element.text ">"
+                                                }
+                                        , paragraph [] [ Element.text <| Sparql.toString query]
+                                        ]
+            ) history)
+
 convertRdfDict2CommunityGraph: RdfDict -> Graph.Graph (SubjectMolecule RdfNode) String 
 convertRdfDict2CommunityGraph d = 
 --(List (Graph.Node (SubjectMolecule RdfNode)), Dict String Int) 
@@ -163,7 +196,7 @@ initialFn _ url key =
     let
         initialQuery = parseUrlForIndexQuery url
     in
-        (Model Initialising server initialQuery (Ask "ask {?s ?p ?o}") Nothing Normal Table Terse [] key, Cmd.none)
+        (Model Initialising server initialQuery (Ask "ask {?s ?p ?o}") [] Nothing Normal Table Terse [] key, Cmd.none)
 
 parseUrlForDetailsSubject : Url -> Maybe String
 parseUrlForDetailsSubject url =
@@ -213,7 +246,7 @@ update msg model =
                     )
         BackToQuery -> ({model | state = Querying}, Cmd.none)
         PressedKey s -> 
-            case model.keyboard of
+           case model.keyboard of
                 ReadyToAcceptControl -> 
 --                    Debug.log ("Key = "++s)
 --                    (model, Cmd.none)
@@ -277,10 +310,10 @@ update msg model =
                     ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString query)])) -- submitQuery model.server query)
         SubmitQueryWhileNavigating query ->
             let
-                newModel = {model | query = query, state = Waiting}
+                newModel = {model | query = query, state = Waiting, queryHistory = query::model.queryHistory}
                 _ = Debug.log "query=" newModel.query
             in
-                (newModel, submitQuery newModel.server newModel.query (Http.expectJson GotSparqlResponse mainDecoder))
+                (newModel, submitQuery newModel.server newModel.query (Http.expectJson GotSparqlResponse mainDecoder))         
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
@@ -385,7 +418,7 @@ aka predicateStyle pred =
 viewSubjects: Model -> Html Msg 
 viewSubjects model =
     case model.currentRdfDict of
-       Nothing -> div [][text "rdfdict erro"]
+       Nothing -> div [][Html.text "rdfdict erro"]
        Just a ->
             div []
             (List.map (\spo ->
@@ -437,11 +470,11 @@ viewRdfNodeAsPredicate: Model -> RdfNode -> Html Msg
 viewRdfNodeAsPredicate model node = 
     case node of
         Uri a ->
-            b []    [ text (aka model.predicateStyle a.value)
-                    , text ": "
+            b []    [ Html.text (aka model.predicateStyle a.value)
+                    , Html.text ": "
                     ]
         _ ->
-            b []    [ text "All predicates should be Uri"]
+            b []    [ Html.text "All predicates should be Uri"]
 
 removeUrlFragment: String -> String
 removeUrlFragment urlString =
@@ -460,38 +493,38 @@ viewRdfNode model nodeType node =
         Uri a ->
             case nodeType of
                 Object ->
-                    span [] [ Html.a [href ("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")][text a.value]  -- remove fragment on anchor
+                    span [] [ Html.a [href ("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")][Html.text a.value]  -- remove fragment on anchor
                             , Html.a [href a.value, target "_blank"][img [src "www-12px.svg"][]]
                             ]
-                Subject -> span [][text a.value]
+                Subject -> span [][Html.text a.value]
                 Predicate -> 
                     viewRdfNodeAsPredicate model node --text a.value -- makeSubjectMoleculeCard model node --text a.value  -- a is now an RdfKey and can be expanded via Model
         BlankNode a ->
             case model.currentRdfDict of
-               Nothing -> text a.value
+               Nothing -> Html.text a.value
                Just dict ->
                     let
                         related = Dict.get a.value dict
                     in
                      case related of
-                        Nothing -> span [][text a.value]
+                        Nothing -> span [][Html.text a.value]
                         Just subjectMole -> 
 --                            Debug.log ("Going after "++a.value)
                             case nodeType of
                                 Object ->
                                     makeSubjectMoleculeCard model subjectMole --text a.value  -- a is now an RdfKey and can be expanded via Model
-                                Subject -> span [][text a.value]
+                                Subject -> span [][Html.text a.value]
                                 Predicate -> viewRdfNode model Predicate node
         LiteralOnlyValue a ->
-            text a.value
+            Html.text a.value
         LiteralValueAndDataType a ->
-            span [] [ text a.value
-                    , small [] [text "  (", text a.dataType, text ")"]]
+            span [] [ Html.text a.value
+                    , small [] [Html.text "  (", Html.text a.dataType, Html.text ")"]]
         LiteralValueAndLanguageString a ->
-            span [] [ text a.value
-                    , small [] [text "  (", text a.language, text ")"]]
+            span [] [ Html.text a.value
+                    , small [] [Html.text "  (", Html.text a.language, Html.text ")"]]
         Unknown ->
-            b []    [ text "Unrecognised Atom"]
+            b []    [ Html.text "Unrecognised Atom"]
 
 viewObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Html Msg
 viewObjects model subj po =
@@ -507,18 +540,18 @@ viewObjects model subj po =
                                 0 -> div [] [viewRdfNode model Object obj]
                                 _ -> div [] (viewRestOfObjectList model (subj, pred) obj rest)
 
-           Nothing -> text ""
+           Nothing -> Html.text ""
 
 viewRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Html Msg)
 viewRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
         Just a -> viewRdfNode model Object obj
-                  :: button [onClick (DeregisterSubjectPredicateOpen selected)] [text " less"]
+                  :: Html.button [onClick (DeregisterSubjectPredicateOpen selected)] [Html.text " less"]
                   :: (List.map (
                         \r -> div [] [viewRdfNode model Object r]
                     ) rest)
         Nothing -> [ viewRdfNode model Object obj
-                    , button [onClick (RegisterSubjectPredicateOpen selected)] [text ((String.fromInt <| List.length rest)++" more")]
+                    , Html.button [onClick (RegisterSubjectPredicateOpen selected)] [Html.text ((String.fromInt <| List.length rest)++" more")]
                     ]
 -- View
 
@@ -527,14 +560,14 @@ viewRestOfObjectList model selected obj rest =
 tableView: ServerVars -> ServerForm SelectAtom -> Html Msg
 tableView vars result =
         div [] 
-            [ table []
-                ((tr [] (List.map (\v -> th[][text v]) vars))
+            [ Html.table []
+                ((tr [] (List.map (\v -> th[][Html.text v]) vars))
                 ::(List.map (
                         \row ->
                         tr []
                             (List.map (
                                 \var -> 
-                                    td [][ text var]
+                                    td [][ Html.text var]
                             ) (extractValues row))
                     ) result ))
             ]
@@ -546,59 +579,59 @@ queryInput newServer query =
                     [ cols 120
                     , rows 15
                     , wrap "soft"
-                    , placeholder "Sparql Query"
+                    , Html.Attributes.placeholder "Sparql Query"
                     , onInput ChangeQuery
                     , value (Sparql.toString query)
                     ][]
-                , button [onClick (SubmitQuery query)][text "Submit"]
+                , Html.button [onClick (SubmitQuery query)][Html.text "Submit"]
                 ]
 
 resultFormatToggle: ResultsDisplay -> Html Msg
 resultFormatToggle selected = 
     div []
-        [ text "Output format"
+        [ Html.text "Output format"
         , input [ type_ "radio"
                 , name "resultFormat"
                 , value "table"
                 , checked (selected == Table)
                 , onInput ChangeOutputFormat
                 ][]
-        , text "Table"
+        , Html.text "Table"
         , input [ type_ "radio"
                 , name "resultFormat"
                 , value "subject"
                 , checked (selected == SubjectOrientation)
                 , onInput ChangeOutputFormat
                 ][]
-        , text "Subjects"
+        , Html.text "Subjects"
         ]
 
 predicateStyleToggle: PredicateStyle -> Html Msg
 predicateStyleToggle selected =
     div []
-        [ text "Output format"
+        [ Html.text "Output format"
         , input [ type_ "radio"
                 , name "predicateStyle"
                 , value "verbose"
                 , checked (selected == Verbose)
                 , onInput ChangePredicateStyle
                 ][]
-        , text "Verbose"
+        , Html.text "Verbose"
         , input [ type_ "radio"
                 , name "predicateStyle"
                 , value "terse"
                 , checked (selected == Terse)
                 , onInput ChangePredicateStyle
                 ][]
-        , text "Terse"
+        , Html.text "Terse"
         ]
 
 
 uploadQueryFromFile:  Html Msg
 uploadQueryFromFile = 
     div []
-    [ button [onClick FileRequested][text "Load query"]
-    , button [onClick DownloadFile][text "Download query"]]
+    [ Html.button [onClick FileRequested][Html.text "Load query"]
+    , Html.button [onClick DownloadFile][Html.text "Download query"]]
 
 downloadFile: String -> String -> Cmd msg
 downloadFile fileName query =
@@ -610,42 +643,44 @@ view model = { title = "Sparql Query Playground"
                     case model.state of
                         Initialising ->
                             div [] 
-                                [ h1 [][a [href "http://www.cnn.com"][text "hello world"]]
+                                [ h1 [][a [href "http://www.cnn.com"][Html.text "hello world"]]
                                 , div [] 
-                                    [ input [placeholder "Server", onInput ChangeServer, value model.server][]
-                                    , button [onClick PingServer][text "Connect"]
+                                    [ input [Html.Attributes.placeholder "Server", onInput ChangeServer, value model.server][]
+                                    , Html.button [onClick PingServer][Html.text "Connect"]
                                     ]
+                                , Element.layout [] myElement
                                 ]
                         Pinging -> 
-                            div [][text <| "Pinging"++model.server]
+                            div [][Html.text <| "Pinging"++model.server]
                         Querying -> div []
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
+                                , Element.layout [] (elOfQueryHistory model.queryHistory)
                                 , resultFormatToggle model.resultsDisplay
                                 ]
                         Waiting -> div [style "cursor" "progress"]
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
-                                , b [] [text "Wating for server response..."]
+                                , b [] [Html.text "Wating for server response..."]
                                 ]
                         ApiError error -> 
                             case error of
                                 Http.BadBody err ->
                                     div []
-                                        [ h1 [][text "ApiError: I can't interpret the response"]
-                                        , div [][text err]
-                                        , button [onClick BackToQuery][text "Back"]
+                                        [ h1 [][Html.text "ApiError: I can't interpret the response"]
+                                        , div [][Html.text err]
+                                        , Html.button [onClick BackToQuery][Html.text "Back"]
                                         ]
                                 _ ->
                                     div [][
-                                        h1 [][text "ApiError: Oops - something went wrong! :-("]
-                                        , button [onClick BackToQuery][text "Back"]
+                                        h1 [][Html.text "ApiError: Oops - something went wrong! :-("]
+                                        , Html.button [onClick BackToQuery][Html.text "Back"]
                                     ]
                         DisplayingSelectError message ->
                             div []                
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
-                                , div [][text message]
+                                , div [][Html.text message]
                                 ]
                         DisplayingSelectResult vars result ->
                             case model.resultsDisplay of
@@ -653,8 +688,9 @@ view model = { title = "Sparql Query Playground"
                                     div [class "main"]                
                                         [ uploadQueryFromFile
                                         , queryInput model.server model.query
+                                        , Element.layout [] (elOfQueryHistory model.queryHistory)
                                         , resultFormatToggle model.resultsDisplay
-                                        , button [onClick <| DownloadResultsAsCSV vars result][text "Download csv"]
+                                        , Html.button [onClick <| DownloadResultsAsCSV vars result][Html.text "Download csv"]
                                         , tableView vars result
                                         ]
                                 SubjectOrientation ->
@@ -667,14 +703,15 @@ view model = { title = "Sparql Query Playground"
                                             div [class "main"]                
                                                 [ uploadQueryFromFile
                                                 , queryInput model.server model.query
+                                                , Element.layout [] (elOfQueryHistory model.queryHistory)
                                                 , resultFormatToggle model.resultsDisplay
-                                                , h2 [][text "Subject orientation"]
+                                                , h2 [][Html.text "Subject orientation"]
                                                 , predicateStyleToggle model.predicateStyle
                                                 , br [] [] 
                                                 -- ??? replace below by passing the whole model in
                                                 , viewSubjects model
                                                 , hr [] []
-                                                , div [][text "Graph nav (off)"]
+                                                , div [][Html.text "Graph nav (off)"]
 --                                                , div []
  --                                                   (List.map (\n -> viewSubjectMolecule model n.label) 
   --                                                                          (Graph.nodes (convertRdfDict2CommunityGraph a)))
@@ -684,7 +721,7 @@ view model = { title = "Sparql Query Playground"
                                                 [ uploadQueryFromFile
                                                 , queryInput model.server model.query
                                                 , resultFormatToggle model.resultsDisplay
-                                                , h4 [][text "Subject orientation only where results are in the shape of ?s ?p ?o"]
+                                                , h4 [][Html.text "Subject orientation only where results are in the shape of ?s ?p ?o"]
                                                 ]
             )}
 
@@ -697,7 +734,7 @@ view model = { title = "Sparql Query Playground"
 msgDecoder : Decoder Msg
 msgDecoder =
     field "key" string
-        |> map PressedKey
+        |> Json.Decode.map PressedKey
 
 selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 
