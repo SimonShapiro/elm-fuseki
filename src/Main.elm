@@ -39,6 +39,7 @@ import Element exposing (..)
 import Element.Border exposing (..)
 import Element.Background exposing (..)
 import Element.Input exposing (..)
+import Element.Font exposing (..)
 
 type alias Document msg =
     { title : String
@@ -131,7 +132,7 @@ myElement : Element msg
 myElement =
     Element.textColumn [ spacing 10, padding 10 ]
         [ paragraph [] [ Element.text "lots of text ...." ]
-        , el [ alignLeft ] none
+        , el [ Element.alignLeft ] none
         , paragraph [] [ Element.text "lots of text ...." ]
         ]
 
@@ -637,18 +638,30 @@ downloadFile: String -> String -> Cmd msg
 downloadFile fileName query =
   Download.string fileName "text" query
 
+colorPallette = 
+    {
+        header = Element.rgb255 77 195 230
+    }
+
+elOfHeading: Element Msg
+elOfHeading =
+    Element.el  [ Element.Background.color colorPallette.header
+                , Element.height (Element.px 25)
+                , Element.width Element.fill
+                , Element.Font.size 12
+                ] (Element.el [Element.centerY] (Element.text "Execute"))
+
 view: Model -> Document Msg
 view model = { title = "Sparql Query Playground"
             , body = (List.singleton <|
                     case model.state of
                         Initialising ->
                             div [] 
-                                [ h1 [][a [href "http://www.cnn.com"][Html.text "hello world"]]
+                                [ Element.layout [ Element.centerY ] elOfHeading -- h1 [][Html.text "Sparql Query Playground v0.1"]
                                 , div [] 
                                     [ input [Html.Attributes.placeholder "Server", onInput ChangeServer, value model.server][]
                                     , Html.button [onClick PingServer][Html.text "Connect"]
                                     ]
-                                , Element.layout [] myElement
                                 ]
                         Pinging -> 
                             div [][Html.text <| "Pinging"++model.server]
