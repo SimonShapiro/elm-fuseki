@@ -110,7 +110,7 @@ type Msg
     | FileLoaded String
     | DownloadFile
     | DownloadResultsAsCSV ServerVars (ServerForm SelectAtom)
-    | ChangeOutputFormat String
+    | ChangeOutputFormat ResultsDisplay
     | ChangePredicateStyle String
     | BackToQuery
     | RegisterSubjectPredicateOpen (RdfNode, RdfNode)
@@ -126,32 +126,6 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , vars: ServerVars
     , result: ServerForm SelectAtom
     }
-
---Element Experiment
-myElement : Element msg
-myElement =
-    Element.textColumn [ spacing 10, padding 10 ]
-        [ paragraph [] [ Element.text "lots of text ...." ]
-        , el [ Element.alignLeft ] none
-        , paragraph [] [ Element.text "lots of text ...." ]
-        ]
-
-elOfQueryHistory: List SparqlQuery -> Element Msg
-elOfQueryHistory history =
-    Element.textColumn [ spacing 10, padding 10, Element.height (Element.px 120), scrollbarY ]
-        ( List.map (\query ->
-                Debug.log (Sparql.toString query)
-                Element.row [spacing 10][ Element.Input.button
-                                                [ Element.Background.color (Element.rgb 0.85 0.85 0.85)
-                                                , Element.focused
-                                                    [ Element.Background.color (Element.rgb 0.85 0.85 0.05) ]
-                                                ]
-                                                { onPress = Just (SubmitQueryWhileNavigating query)
-                                                , label = Element.text ">"
-                                                }
-                                        , paragraph [] [ Element.text <| Sparql.toString query]
-                                        ]
-            ) history)
 
 convertRdfDict2CommunityGraph: RdfDict -> Graph.Graph (SubjectMolecule RdfNode) String 
 convertRdfDict2CommunityGraph d = 
@@ -351,9 +325,8 @@ update msg model =
                 (model, downloadFile "result.csv" <| String.join "\n" headedResults)
         ChangeOutputFormat outputFormat ->
             case outputFormat of
-                "table" -> ({model | resultsDisplay = Table}, Cmd.none)
-                "subject" -> ({model | resultsDisplay = SubjectOrientation}, Cmd.none)
-                _ -> ({model | resultsDisplay = Table}, Cmd.none)
+               Table -> ({model | resultsDisplay = Table}, Cmd.none)
+               SubjectOrientation -> ({model | resultsDisplay = SubjectOrientation}, Cmd.none)
         ChangePredicateStyle predicateStyle ->
             case predicateStyle of
                "verbose" -> ({model | predicateStyle = Verbose}, Cmd.none)
@@ -586,26 +559,25 @@ queryInput newServer query =
                     ][]
                 , Html.button [onClick (SubmitQuery query)][Html.text "Submit"]
                 ]
-
-resultFormatToggle: ResultsDisplay -> Html Msg
-resultFormatToggle selected = 
-    div []
-        [ Html.text "Output format"
-        , input [ type_ "radio"
-                , name "resultFormat"
-                , value "table"
-                , checked (selected == Table)
-                , onInput ChangeOutputFormat
-                ][]
-        , Html.text "Table"
-        , input [ type_ "radio"
-                , name "resultFormat"
-                , value "subject"
-                , checked (selected == SubjectOrientation)
-                , onInput ChangeOutputFormat
-                ][]
-        , Html.text "Subjects"
-        ]
+-- resultFormatToggle: ResultsDisplay -> Html Msg
+-- resultFormatToggle selected = 
+--     div []
+--         [ Html.text "Output format"
+--         , input [ type_ "radio"
+--                 , name "resultFormat"
+--                 , value Table
+--                 , checked (selected == Table)
+--                 , onInput ChangeOutputFormat
+--                 ][]
+--         , Html.text "Table"
+--         , input [ type_ "radio"
+--                 , name "resultFormat"
+--                 , value "subject"
+--                 , checked (selected == SubjectOrientation)
+--                 , onInput ChangeOutputFormat
+--                 ][]
+--         , Html.text "Subjects"
+--         ]
 
 predicateStyleToggle: PredicateStyle -> Html Msg
 predicateStyleToggle selected =
@@ -638,39 +610,160 @@ downloadFile: String -> String -> Cmd msg
 downloadFile fileName query =
   Download.string fileName "text" query
 
-colorPallette = 
-    {
-        header = Element.rgb255 77 195 230
+--Element Based UI
+
+colorPalette = 
+    { header = Element.rgb255 77 195 230
+    , background = Element.rgb255 255 247 250 
+    , button = Element.rgb255 217 246 255
+    , highlight = Element.rgb255 68 242 187
     }
 
-elOfHeading: Element Msg
-elOfHeading =
-    Element.el  [ Element.Background.color colorPallette.header
-                , Element.height (Element.px 25)
+sizePalette = 
+    { smallPrint = 8
+    , command = 12
+    , normal = 14
+    , highlight = 20
+    }
+
+elOfQueryHistory: List SparqlQuery -> Element Msg
+elOfQueryHistory history =
+    Element.textColumn [ spacing 10, padding 10, Element.height (Element.px 120), scrollbarY ]
+        ( List.map (\query ->
+                Debug.log (Sparql.toString query)
+                Element.row [spacing 10][ Element.Input.button
+                                                [ Element.Background.color colorPalette.highlight 
+                                                , Element.focused
+                                                    [ Element.Background.color colorPalette.highlight ]
+                                                ]
+                                                { onPress = Just (SubmitQueryWhileNavigating query)
+                                                , label = Element.text ">"
+                                                }
+                                        , paragraph [] [ Element.text <| Sparql.toString query]
+                                        ]
+            ) history)
+
+
+elOfUploadQueryFromFile: Element Msg
+elOfUploadQueryFromFile =
+    Element.row [ Element.spacing 5
+                , Element.Font.size sizePalette.command
+                , Element.padding 10
+                , Element.height (Element.px 30)
+                , Element.width Element.fill
+                , Element.Background.color colorPalette.header
+                ]   [ Element.Input.button  [ Element.Background.color colorPalette.button
+                                            , Element.height (Element.px 20)
+                                            , Element.width (Element.px 100)
+                                            ]   { onPress = Just FileRequested
+                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Load Query"
+                                                }
+                    , Element.Input.button  [ Element.Background.color colorPalette.button
+                                            , Element.height (Element.px 20)
+                                            , Element.width (Element.px 100)
+                                            ]   { onPress = Just DownloadFile
+                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Download Query"
+                                                }
+                    ]
+
+elOfResultFormatToggle: Model -> Element Msg
+elOfResultFormatToggle model =
+    Element.Input.radioRow  [ Element.padding 0
+                            , Element.spacing 10
+                            , Element.Font.size sizePalette.command
+                            ]   { onChange = ChangeOutputFormat
+                                , selected = Just model.resultsDisplay
+                                , label = Element.Input.labelLeft [Element.Font.size sizePalette.command] (Element.text "Output Format")
+                                , options = [ Element.Input.option Table (Element.text "Table")
+                                            , Element.Input.option SubjectOrientation (Element.text "Subjects")
+                                            ]
+                                }
+
+elOfQueryPanel: Model -> Element Msg
+elOfQueryPanel model =
+    Element.column  [ Element.width Element.fill
+                    , Element.spacingXY 0 5
+                    ]   [ Element.Input.multiline []
+                                { onChange = ChangeQuery
+                                , text = (Sparql.toString model.query)
+                                , placeholder = Nothing
+                                , label = Element.Input.labelLeft [Element.centerY] (Element.none)
+                                , spellcheck = False
+                                }
+                        , Element.row   [Element.paddingXY 8 0]  [ Element.none 
+                                                , Element.Input.button  [ Element.width (Element.px 60)
+                                                , Element.height (Element.px 30)
+                                                , Element.spacingXY 50 0 
+                                                , Element.Background.color colorPalette.highlight
+                                                ] { onPress = Just (SubmitQuery model.query)
+                                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go!"
+                                                                }
+                                            ]
+                        ]
+
+elOfMainPage: Model -> Element Msg
+elOfMainPage model =
+    Element.column  [ Element.width Element.fill
+                    , Element.Background.color colorPalette.background
+                    ]   
+                        [ (elOfHeading model)
+                        , elOfUploadQueryFromFile
+                        , (elOfQueryPanel model)
+                        , (elOfResultFormatToggle model)
+                        , elOfQueryHistory model.queryHistory
+                        ]
+
+elOfHeading: Model -> Element Msg
+elOfHeading model =
+    Element.el  [ Element.Background.color colorPalette.header
+                , Element.height (Element.px 40)
                 , Element.width Element.fill
                 , Element.Font.size 12
-                ] (Element.el [Element.centerY] (Element.text "Execute"))
+                ] (Element.row  [ Element.centerY
+                                , Element.width Element.fill
+                                ]   
+                                    [ elOfServerInput model
+                                    , Element.el [Element.centerY, Element.alignRight, Element.paddingXY 5 0] (Element.text "Sparql Playground - v0.0")
+                                    ])
+
+elOfServerInput: Model -> Element Msg
+elOfServerInput model = 
+    Element.el [] (Element.row  [Element.centerY
+                                , Element.spacingXY 5 0
+                                ][ Element.Input.text[ Element.width (Element.px 200)
+                                                                        , Element.height (Element.px 20)
+                                                                        , Element.paddingXY 3 2
+                                                                        ]{ onChange = ChangeServer
+                                                                            , text = model.server
+                                                                            , placeholder = Just (Element.Input.placeholder [Element.centerY] (Element.text "http://your.api.server:port"))
+                                                                            , label = Element.Input.labelLeft [Element.centerY] (Element.text "API")
+                                                                        }
+                                                , Element.Input.button  [ Element.alignLeft
+                                                                        , Element.paddingXY 5 0
+                                                                        , Element.height (Element.px 20)
+                                                                        , Element.Background.color colorPalette.button]   
+                                                                            { onPress = Just PingServer
+                                                                            , label= (Element.text "Connect")
+                                                                            }
+                                                ])
+
 
 view: Model -> Document Msg
-view model = { title = "Sparql Query Playground"
+view model = { title = "Sparql Query Playground - 0.0"
             , body = (List.singleton <|
                     case model.state of
                         Initialising ->
-                            div [] 
-                                [ Element.layout [ Element.centerY ] elOfHeading -- h1 [][Html.text "Sparql Query Playground v0.1"]
-                                , div [] 
-                                    [ input [Html.Attributes.placeholder "Server", onInput ChangeServer, value model.server][]
-                                    , Html.button [onClick PingServer][Html.text "Connect"]
-                                    ]
-                                ]
+                                Element.layout []  (elOfHeading model)-- h1 [][Html.text "Sparql Query Playground v0.1"]
+                                -- , div [] 
+                                --     [ input [Html.Attributes.placeholder "Server", onInput ChangeServer, value model.server][]
+                                --     , Html.button [onClick PingServer][Html.text "Connect"]
+                                --     ]
                         Pinging -> 
                             div [][Html.text <| "Pinging"++model.server]
-                        Querying -> div []
-                                [ uploadQueryFromFile
-                                , queryInput model.server model.query
-                                , Element.layout [] (elOfQueryHistory model.queryHistory)
-                                , resultFormatToggle model.resultsDisplay
-                                ]
+                        Querying -> 
+                                Element.layout [] (elOfMainPage model)
+--                                , Element.layout [] (elOfQueryHistory model.queryHistory)
+--                                , resultFormatToggle model.resultsDisplay
                         Waiting -> div [style "cursor" "progress"]
                                 [ uploadQueryFromFile
                                 , queryInput model.server model.query
@@ -698,14 +791,18 @@ view model = { title = "Sparql Query Playground"
                         DisplayingSelectResult vars result ->
                             case model.resultsDisplay of
                                 Table ->
-                                    div [class "main"]                
-                                        [ uploadQueryFromFile
-                                        , queryInput model.server model.query
-                                        , Element.layout [] (elOfQueryHistory model.queryHistory)
-                                        , resultFormatToggle model.resultsDisplay
-                                        , Html.button [onClick <| DownloadResultsAsCSV vars result][Html.text "Download csv"]
-                                        , tableView vars result
-                                        ]
+                                        Element.column [Element.width Element.fill] [ elOfMainPage model
+                                                        ]
+                                        |> Element.layout []
+
+--                                     div [class "main"]                
+--                                         [ uploadQueryFromFile
+--                                         , queryInput model.server model.query
+--                                         , Element.layout [] (elOfQueryHistory model.queryHistory)
+-- --                                        , resultFormatToggle model.resultsDisplay
+--                                         , Html.button [onClick <| DownloadResultsAsCSV vars result][Html.text "Download csv"]
+--                                         , tableView vars result
+--                                         ]
                                 SubjectOrientation ->
                                     let
                                         contracted = contractResult vars result  -- Maybe (ContractedForm SelectAtom)
@@ -717,7 +814,7 @@ view model = { title = "Sparql Query Playground"
                                                 [ uploadQueryFromFile
                                                 , queryInput model.server model.query
                                                 , Element.layout [] (elOfQueryHistory model.queryHistory)
-                                                , resultFormatToggle model.resultsDisplay
+--                                                , resultFormatToggle model.resultsDisplay
                                                 , h2 [][Html.text "Subject orientation"]
                                                 , predicateStyleToggle model.predicateStyle
                                                 , br [] [] 
@@ -733,7 +830,7 @@ view model = { title = "Sparql Query Playground"
                                             div []                
                                                 [ uploadQueryFromFile
                                                 , queryInput model.server model.query
-                                                , resultFormatToggle model.resultsDisplay
+--                                                , resultFormatToggle model.resultsDisplay
                                                 , h4 [][Html.text "Subject orientation only where results are in the shape of ?s ?p ?o"]
                                                 ]
             )}
