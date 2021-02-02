@@ -40,6 +40,9 @@ import Element.Border exposing (..)
 import Element.Background exposing (..)
 import Element.Input exposing (..)
 import Element.Font exposing (..)
+import Dict
+import List.Extra
+import Element
 
 type alias Document msg =
     { title : String
@@ -546,6 +549,23 @@ tableView vars result =
                     ) result ))
             ]
 
+makeDict: ServerVars -> List SelectAtom -> Dict String String
+makeDict vars atom =
+    List.map (\a -> a.value) atom
+    |> List.Extra.zip vars
+    |> Dict.fromList
+
+elOfTabularResults: ServerVars -> ServerForm SelectAtom -> Element msgDecoder
+elOfTabularResults vars result = 
+    let
+        data = List.map (\r -> makeDict vars r) result  -- List dict
+        columns = List.map (\v ->   { header = Element.text v
+                                    , width = Element.fill
+                                    , view = (\x -> Dict.get v x |> Maybe.withDefault "" |> Element.text) 
+                                    }) vars
+    in
+        Element.table [Element.Font.size sizePalette.normal] {data = data, columns = columns}
+
 queryInput: Server -> SparqlQuery -> Html Msg
 queryInput newServer query =
             div [] 
@@ -791,7 +811,8 @@ view model = { title = "Sparql Query Playground - 0.0"
                         DisplayingSelectResult vars result ->
                             case model.resultsDisplay of
                                 Table ->
-                                        Element.column [Element.width Element.fill] [ elOfMainPage model
+                                        Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                        , elOfTabularResults vars result
                                                         ]
                                         |> Element.layout []
 
