@@ -43,6 +43,11 @@ import Element.Font exposing (..)
 import Dict
 import List.Extra
 import Element
+import Element
+import Element
+import Element
+import Element
+import Element
 
 type alias Document msg =
     { title : String
@@ -400,33 +405,70 @@ viewSubjects model =
             div []
             (List.map (\spo ->
                     div [ class "container"]
-                                [ viewSubjectMolecule model spo]
+                                [ Element.layout [] (viewSubjectMolecule model spo)]
             ) (Dict.values a))
 
-makeSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Html Msg
+elOfCardAttributes =
+    [ Element.Border.rounded 5
+    , Element.Border.shadow {offset=(0.0, 4.0), size=8, blur=0, color=Element.rgba 0 0 0 0.2}
+    , Element.Background.color colorPalette.material
+    , Element.width (Element.px 900)
+    ]
+
+elOfSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
+elOfSubjectMoleculeCard model mole =
+    let
+        subj = Tuple.first mole
+    in
+        Element.column elOfCardAttributes
+            [ Element.el [Element.Font.size sizePalette.highlight] 
+                (Element.link [] {url=("/index.html?query=describe <"
+                ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
+                ++">"), label=elOfRdfNode model Subject subj}) -- make case here to clean up the view function below
+            , elOfPredicates model mole
+            ]
+ 
+
+makeSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
 makeSubjectMoleculeCard model mole =    
     let
         subj = Tuple.first mole
     in
-              div [class "card"]
-                                [ h2 [] [ Html.a [href ("/index.html?query=describe <"
-                                    ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
-                                    ++">")][(viewRdfNode model Subject subj)]] -- make case here to clean up the view function below
-                                , viewPredicates model mole
-                                ]
+        Element.column []
+                    [ Element.el [Element.Font.size sizePalette.highlight] 
+                        (Element.link [] {url=("/index.html?query=describe <"
+                        ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
+                        ++">"), label=elOfRdfNode model Subject subj}) -- make case here to clean up the view function below
+                    , elOfPredicates model mole
+                    ]
  
-viewSubjectMolecule: Model -> (SubjectMolecule RdfNode) -> Html Msg
+viewSubjectMolecule: Model -> (SubjectMolecule RdfNode) -> Element Msg
 viewSubjectMolecule model mole =
     let
         subj = Tuple.first mole
     in
         case subj of
-           BlankNode a -> span [] [] -- "blank node detected"
-           _ -> makeSubjectMoleculeCard model mole
+           BlankNode a -> Element.none -- "blank node detected"
+           _ -> elOfSubjectMoleculeCard model mole
 
 expandObjectInPlace: Model -> RdfKey -> Html Msg
 expandObjectInPlace k dict =
     span [] []
+
+elOfPredicates: Model -> SubjectMolecule RdfNode -> Element Msg
+elOfPredicates model mole =
+    let
+        subj = Tuple.first mole
+        preds = Tuple.second mole
+    in
+        Element.column []
+            (List.map(\po -> 
+                Element.column []
+                    [ elOfRdfNode model Predicate (Tuple.first po)
+                    , elOfObjects model subj po
+                    ]
+            )
+            preds)
 
 viewPredicates: Model -> SubjectMolecule RdfNode -> Html Msg
 viewPredicates model mole =
@@ -442,6 +484,16 @@ viewPredicates model mole =
                     ]
             )
             preds)
+elOfRdfNodeAsPredicate: Model -> RdfNode -> Element Msg
+elOfRdfNodeAsPredicate model node =
+    case node of
+        Uri a ->
+            (Element.row [Element.Font.bold][ Element.text (aka model.predicateStyle a.value)
+                    , Element.text ": "
+                    ])
+        _ ->
+            Element.el [Element.Font.bold] (Element.text "All predicates should be Uri")
+
 
 viewRdfNodeAsPredicate: Model -> RdfNode -> Html Msg
 viewRdfNodeAsPredicate model node = 
@@ -467,8 +519,48 @@ encodeUrlFragmentMarker urlString =
 elOfRdfNode: Model -> ViewRdfNodeAs -> RdfNode -> Element Msg
 elOfRdfNode model nodeType node =
     case node of
-        Object ->
-            Element.el [] 
+        Uri a ->
+            case nodeType of
+                Object ->
+                    Element.el []   (Element.row [][ Element.link [] { url=("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")
+                                                        , label=Element.text a.value
+                                                        }
+                                    , Element.newTabLink [] {url=a.value, label = Element.image [] { src = "www-12px.svg", description = "" }}])
+                Subject -> Element.text a.value
+                Predicate -> 
+                    elOfRdfNodeAsPredicate model node --text a.value -- makeSubjectMoleculeCard model node --text a.value  -- a is now an RdfKey and can be expanded via Model
+        BlankNode a ->
+            case model.currentRdfDict of
+               Nothing -> Element.text a.value
+               Just dict ->
+                    let
+                        related = Dict.get a.value dict
+                    in
+                     case related of
+                        Nothing -> Element.text a.value
+                        Just subjectMole -> 
+--                            Debug.log ("Going after "++a.value)
+                            case nodeType of
+                                Object ->
+                                    (elOfSubjectMoleculeCard model subjectMole) --text a.value  -- a is now an RdfKey and can be expanded via Model
+                                Subject -> Element.text a.value
+                                Predicate -> elOfRdfNode model Predicate node
+        LiteralOnlyValue a ->
+            Element.text a.value
+        LiteralValueAndDataType a ->
+            Element.row [] [ Element.text a.value
+                    , Element.row [Element.Font.size sizePalette.smallPrint][ Element.text "  ("
+                                                                            , Element.text a.dataType
+                                                                            , Element.text ")"]
+                                                                            ]
+        LiteralValueAndLanguageString a ->
+            Element.row [] [ Element.text a.value
+                    , Element.row [Element.Font.size sizePalette.smallPrint]
+                            [ Element.text "  ("
+                            , Element.text a.language
+                            , Element.text ")"]]
+        Unknown ->
+            Element.el [Element.Font.bold] (Element.text "Unrecognised Atom")
 
 viewRdfNode: Model -> ViewRdfNodeAs -> RdfNode -> Html Msg
 viewRdfNode model nodeType node = 
@@ -495,7 +587,7 @@ viewRdfNode model nodeType node =
 --                            Debug.log ("Going after "++a.value)
                             case nodeType of
                                 Object ->
-                                    makeSubjectMoleculeCard model subjectMole --text a.value  -- a is now an RdfKey and can be expanded via Model
+                                    Element.layout [] (elOfSubjectMoleculeCard model subjectMole) --text a.value  -- a is now an RdfKey and can be expanded via Model
                                 Subject -> span [][Html.text a.value]
                                 Predicate -> viewRdfNode model Predicate node
         LiteralOnlyValue a ->
@@ -508,6 +600,22 @@ viewRdfNode model nodeType node =
                     , small [] [Html.text "  (", Html.text a.language, Html.text ")"]]
         Unknown ->
             b []    [ Html.text "Unrecognised Atom"]
+
+elOfObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Element Msg
+elOfObjects model subj po =
+    let
+        (pred, objs) = po
+        head = List.head objs
+        rest = List.tail objs
+                |> Maybe.withDefault []
+        restCount = List.length rest
+    in
+        case head of
+           Just obj -> case restCount of
+                                0 -> elOfRdfNode model Object obj
+                                _ -> Element.column [] (elOfRestOfObjectList model (subj, pred) obj rest)
+
+           Nothing -> Element.text ""
 
 viewObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Html Msg
 viewObjects model subj po =
@@ -524,6 +632,22 @@ viewObjects model subj po =
                                 _ -> div [] (viewRestOfObjectList model (subj, pred) obj rest)
 
            Nothing -> Html.text ""
+
+elOfRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Element Msg)
+elOfRestOfObjectList model selected obj rest =
+    case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
+        Just a -> elOfRdfNode model Object obj
+                  :: Element.Input.button []{ onPress=Just (DeregisterSubjectPredicateOpen selected)
+                                            , label=Element.text " less"
+                                            }
+                  :: (List.map (
+                        \r -> elOfRdfNode model Object r
+                    ) rest)
+        Nothing -> [ elOfRdfNode model Object obj
+                    , Element.Input.button [] { onPress=Just (RegisterSubjectPredicateOpen selected)
+                                        , label=Element.text ((String.fromInt <| List.length rest)++" more")
+                                        }
+                    ]
 
 viewRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Html Msg)
 viewRestOfObjectList model selected obj rest =
@@ -615,6 +739,7 @@ colorPalette =
     , background = Element.rgb255 255 247 250 
     , button = Element.rgb255 217 246 255
     , highlight = Element.rgb255 68 242 187
+    , material = Element.rgb255 147 214 234
     }
 
 sizePalette = 
@@ -633,7 +758,9 @@ elOfTabularResults vars result =
                                     , view = (\x -> Dict.get v x |> Maybe.withDefault "" |> Element.text) 
                                     }) vars
     in
-        Element.table [Element.Font.size sizePalette.normal] {data = data, columns = columns}
+        Element.table   [ Element.Font.size sizePalette.normal
+                        , Element.Border.width 2
+                        ] {data = data, columns = columns}
 
 elOfQueryHistory: List SparqlQuery -> Element Msg
 elOfQueryHistory history =
