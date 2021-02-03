@@ -464,6 +464,12 @@ encodeUrlFragmentMarker: String -> String
 encodeUrlFragmentMarker urlString =
     String.replace "#" "%23" urlString
 
+elOfRdfNode: Model -> ViewRdfNodeAs -> RdfNode -> Element Msg
+elOfRdfNode model nodeType node =
+    case node of
+        Object ->
+            Element.el [] 
+
 viewRdfNode: Model -> ViewRdfNodeAs -> RdfNode -> Html Msg
 viewRdfNode model nodeType node = 
     case node of
@@ -532,39 +538,11 @@ viewRestOfObjectList model selected obj rest =
                     ]
 -- View
 
-
--- could refactor below into two steps - shape and show
-tableView: ServerVars -> ServerForm SelectAtom -> Html Msg
-tableView vars result =
-        div [] 
-            [ Html.table []
-                ((tr [] (List.map (\v -> th[][Html.text v]) vars))
-                ::(List.map (
-                        \row ->
-                        tr []
-                            (List.map (
-                                \var -> 
-                                    td [][ Html.text var]
-                            ) (extractValues row))
-                    ) result ))
-            ]
-
 makeDict: ServerVars -> List SelectAtom -> Dict String String
 makeDict vars atom =
     List.map (\a -> a.value) atom
     |> List.Extra.zip vars
     |> Dict.fromList
-
-elOfTabularResults: ServerVars -> ServerForm SelectAtom -> Element msgDecoder
-elOfTabularResults vars result = 
-    let
-        data = List.map (\r -> makeDict vars r) result  -- List dict
-        columns = List.map (\v ->   { header = Element.text v
-                                    , width = Element.fill
-                                    , view = (\x -> Dict.get v x |> Maybe.withDefault "" |> Element.text) 
-                                    }) vars
-    in
-        Element.table [Element.Font.size sizePalette.normal] {data = data, columns = columns}
 
 queryInput: Server -> SparqlQuery -> Html Msg
 queryInput newServer query =
@@ -645,6 +623,17 @@ sizePalette =
     , normal = 14
     , highlight = 20
     }
+
+elOfTabularResults: ServerVars -> ServerForm SelectAtom -> Element msgDecoder
+elOfTabularResults vars result = 
+    let
+        data = List.map (\r -> makeDict vars r) result  -- List dict
+        columns = List.map (\v ->   { header = Element.text v
+                                    , width = Element.fill
+                                    , view = (\x -> Dict.get v x |> Maybe.withDefault "" |> Element.text) 
+                                    }) vars
+    in
+        Element.table [Element.Font.size sizePalette.normal] {data = data, columns = columns}
 
 elOfQueryHistory: List SparqlQuery -> Element Msg
 elOfQueryHistory history =
@@ -815,15 +804,6 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                         , elOfTabularResults vars result
                                                         ]
                                         |> Element.layout []
-
---                                     div [class "main"]                
---                                         [ uploadQueryFromFile
---                                         , queryInput model.server model.query
---                                         , Element.layout [] (elOfQueryHistory model.queryHistory)
--- --                                        , resultFormatToggle model.resultsDisplay
---                                         , Html.button [onClick <| DownloadResultsAsCSV vars result][Html.text "Download csv"]
---                                         , tableView vars result
---                                         ]
                                 SubjectOrientation ->
                                     let
                                         contracted = contractResult vars result  -- Maybe (ContractedForm SelectAtom)
@@ -843,9 +823,6 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                 , viewSubjects model
                                                 , hr [] []
                                                 , div [][Html.text "Graph nav (off)"]
---                                                , div []
- --                                                   (List.map (\n -> viewSubjectMolecule model n.label) 
-  --                                                                          (Graph.nodes (convertRdfDict2CommunityGraph a)))
                                                 ]
                                         Nothing ->                             
                                             div []                
@@ -855,10 +832,6 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                 , h4 [][Html.text "Subject orientation only where results are in the shape of ?s ?p ?o"]
                                                 ]
             )}
-
--- viewGraphNode: Graph.Node (SubjectMolecule RdfNode) -> Html Msg
--- viewGraphNode n =
---      viewSubjectMolecule n
 
 -- Decoders
 
