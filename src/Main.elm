@@ -48,6 +48,10 @@ import Element
 import Element
 import Element
 import Element
+import Element
+import Element
+import Element
+import Element
 
 type alias Document msg =
     { title : String
@@ -397,6 +401,18 @@ aka predicateStyle pred =
                 |> List.head
                 |> Maybe.withDefault pred
 
+elOfSubjects: Model -> Element Msg 
+elOfSubjects model =
+    case model.currentRdfDict of
+       Nothing -> Element.text "rdfdict error"
+       Just a ->
+            Element.column [ Element.spacingXY 0 25
+                            , Element.padding 15
+                            ]
+                        ((List.map (\spo ->
+                            viewSubjectMolecule model spo)
+                        ) (Dict.values a))
+
 viewSubjects: Model -> Html Msg 
 viewSubjects model =
     case model.currentRdfDict of
@@ -637,14 +653,20 @@ elOfRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> 
 elOfRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
         Just a -> elOfRdfNode model Object obj
-                  :: Element.Input.button []{ onPress=Just (DeregisterSubjectPredicateOpen selected)
+                  :: Element.Input.button   [ Element.alignLeft
+                                            , Element.Background.color colorPalette.button
+                                            ]
+                                            { onPress=Just (DeregisterSubjectPredicateOpen selected)
                                             , label=Element.text " less"
                                             }
                   :: (List.map (
                         \r -> elOfRdfNode model Object r
                     ) rest)
         Nothing -> [ elOfRdfNode model Object obj
-                    , Element.Input.button [] { onPress=Just (RegisterSubjectPredicateOpen selected)
+                    , Element.Input.button [ Element.alignLeft
+                                            , Element.Background.color colorPalette.button
+                                            ] 
+                                            { onPress=Just (RegisterSubjectPredicateOpen selected)
                                         , label=Element.text ((String.fromInt <| List.length rest)++" more")
                                         }
                     ]
@@ -938,19 +960,10 @@ view model = { title = "Sparql Query Playground - 0.0"
                                     in
                                     case contracted of
                                         Just a ->
-                                            div [class "main"]                
-                                                [ uploadQueryFromFile
-                                                , queryInput model.server model.query
-                                                , Element.layout [] (elOfQueryHistory model.queryHistory)
---                                                , resultFormatToggle model.resultsDisplay
-                                                , h2 [][Html.text "Subject orientation"]
-                                                , predicateStyleToggle model.predicateStyle
-                                                , br [] [] 
-                                                -- ??? replace below by passing the whole model in
-                                                , viewSubjects model
-                                                , hr [] []
-                                                , div [][Html.text "Graph nav (off)"]
-                                                ]
+                                            Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                            , elOfSubjects model
+                                                            ]
+                                            |> Element.layout []
                                         Nothing ->                             
                                             div []                
                                                 [ uploadQueryFromFile
