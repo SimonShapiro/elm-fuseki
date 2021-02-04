@@ -615,20 +615,6 @@ makeDict vars atom =
     |> List.Extra.zip vars
     |> Dict.fromList
 
-queryInput: Server -> SparqlQuery -> Html Msg
-queryInput newServer query =
-            div [] 
-                [ textarea 
-                    [ cols 120
-                    , rows 15
-                    , wrap "soft"
-                    , Html.Attributes.placeholder "Sparql Query"
-                    , onInput ChangeQuery
-                    , value (Sparql.toString query)
-                    ][]
-                , Html.button [onClick (SubmitQuery query)][Html.text "Submit"]
-                ]
-
 predicateStyleToggle: PredicateStyle -> Element Msg
 predicateStyleToggle selected =
     Element.Input.radioRow  [ Element.padding 0
@@ -641,12 +627,6 @@ predicateStyleToggle selected =
                                             , Element.Input.option Terse (Element.text "Terse")
                                             ]
                                 }
-
-uploadQueryFromFile:  Html Msg
-uploadQueryFromFile = 
-    div []
-    [ Html.button [onClick FileRequested][Html.text "Load query"]
-    , Html.button [onClick DownloadFile][Html.text "Download query"]]
 
 downloadFile: String -> String -> Cmd msg
 downloadFile fileName query =
@@ -856,11 +836,10 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                                 }
                                         ])
                         DisplayingSelectError message ->
-                            div []                
-                                [ uploadQueryFromFile
-                                , queryInput model.server model.query
-                                , div [][Html.text message]
-                                ]
+                                            Element.column  [ Element.width Element.fill]   [ elOfMainPage model
+                                                                                            , (Element.text message)
+                                                            ]
+                                            |> Element.layout []
                         DisplayingSelectResult vars result ->
                             case model.resultsDisplay of
                                 Table ->
@@ -880,13 +859,11 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                             , elOfSubjects model
                                                             ]
                                             |> Element.layout []
-                                        Nothing ->                             
-                                            div []                
-                                                [ uploadQueryFromFile
-                                                , queryInput model.server model.query
---                                                , resultFormatToggle model.resultsDisplay
-                                                , h4 [][Html.text "Subject orientation only where results are in the shape of ?s ?p ?o"]
-                                                ]
+                                        Nothing ->
+                                            Element.column  [ Element.width Element.fill]   [ elOfMainPage model
+                                                                                            , (Element.text "Subject orientation only where results are in the shape of ?s ?p ?o")
+                                                            ]
+                                            |> Element.layout []
             )}
 
 -- Decoders
