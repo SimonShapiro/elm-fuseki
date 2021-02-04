@@ -54,6 +54,7 @@ import Element
 import Element
 import Element
 import Element
+import Element
 
 type alias Document msg =
     { title : String
@@ -414,17 +415,7 @@ elOfSubjects model =
                             viewSubjectMolecule model spo)
                         ) (Dict.values a))
 
-viewSubjects: Model -> Html Msg 
-viewSubjects model =
-    case model.currentRdfDict of
-       Nothing -> div [][Html.text "rdfdict erro"]
-       Just a ->
-            div []
-            (List.map (\spo ->
-                    div [ class "container"]
-                                [ Element.layout [] (viewSubjectMolecule model spo)]
-            ) (Dict.values a))
-
+elOfCardAttributes: List (Element.Attribute msg)
 elOfCardAttributes =
     [ Element.Border.rounded 5
     , Element.Border.width 1    
@@ -477,10 +468,6 @@ viewSubjectMolecule model mole =
            BlankNode a -> Element.none -- "blank node detected"
            _ -> elOfSubjectMoleculeCard model mole
 
-expandObjectInPlace: Model -> RdfKey -> Html Msg
-expandObjectInPlace k dict =
-    span [] []
-
 elOfPredicates: Model -> SubjectMolecule RdfNode -> Element Msg
 elOfPredicates model mole =
     let
@@ -496,20 +483,6 @@ elOfPredicates model mole =
             )
             preds)
 
-viewPredicates: Model -> SubjectMolecule RdfNode -> Html Msg
-viewPredicates model mole =
-    let
-        subj = Tuple.first mole
-        preds = Tuple.second mole
-    in
-        div []
-            (List.map(\po -> 
-                div []
-                    [ viewRdfNode model Predicate (Tuple.first po)
-                    , viewObjects model subj po
-                    ]
-            )
-            preds)
 elOfRdfNodeAsPredicate: Model -> RdfNode -> Element Msg
 elOfRdfNodeAsPredicate model node =
     case node of
@@ -597,45 +570,6 @@ elOfRdfNode model nodeType node =
         Unknown ->
             Element.el [Element.Font.bold] (Element.text "Unrecognised Atom")
 
-viewRdfNode: Model -> ViewRdfNodeAs -> RdfNode -> Html Msg
-viewRdfNode model nodeType node = 
-    case node of
-        Uri a ->
-            case nodeType of
-                Object ->
-                    span [] [ Html.a [href ("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")][Html.text a.value]  -- remove fragment on anchor
-                            , Html.a [href a.value, target "_blank"][img [src "www-12px.svg"][]]
-                            ]
-                Subject -> span [][Html.text a.value]
-                Predicate -> 
-                    viewRdfNodeAsPredicate model node --text a.value -- makeSubjectMoleculeCard model node --text a.value  -- a is now an RdfKey and can be expanded via Model
-        BlankNode a ->
-            case model.currentRdfDict of
-               Nothing -> Html.text a.value
-               Just dict ->
-                    let
-                        related = Dict.get a.value dict
-                    in
-                     case related of
-                        Nothing -> span [][Html.text a.value]
-                        Just subjectMole -> 
---                            Debug.log ("Going after "++a.value)
-                            case nodeType of
-                                Object ->
-                                    Element.layout [] (elOfSubjectMoleculeCard model subjectMole) --text a.value  -- a is now an RdfKey and can be expanded via Model
-                                Subject -> span [][Html.text a.value]
-                                Predicate -> viewRdfNode model Predicate node
-        LiteralOnlyValue a ->
-            Html.text a.value
-        LiteralValueAndDataType a ->
-            span [] [ Html.text a.value
-                    , small [] [Html.text "  (", Html.text a.dataType, Html.text ")"]]
-        LiteralValueAndLanguageString a ->
-            span [] [ Html.text a.value
-                    , small [] [Html.text "  (", Html.text a.language, Html.text ")"]]
-        Unknown ->
-            b []    [ Html.text "Unrecognised Atom"]
-
 elOfObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Element Msg
 elOfObjects model subj po =
     let
@@ -651,22 +585,6 @@ elOfObjects model subj po =
                                 _ -> Element.column [] (elOfRestOfObjectList model (subj, pred) obj rest)
 
            Nothing -> Element.text ""
-
-viewObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Html Msg
-viewObjects model subj po =
-    let
-        (pred, objs) = po
-        head = List.head objs
-        rest = List.tail objs
-                |> Maybe.withDefault []
-        restCount = List.length rest
-    in
-        case head of
-           Just obj -> case restCount of
-                                0 -> div [] [viewRdfNode model Object obj]
-                                _ -> div [] (viewRestOfObjectList model (subj, pred) obj rest)
-
-           Nothing -> Html.text ""
 
 elOfRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Element Msg)
 elOfRestOfObjectList model selected obj rest =
@@ -689,18 +607,6 @@ elOfRestOfObjectList model selected obj rest =
                                         , label=Element.text ((String.fromInt <| List.length rest)++" more")
                                         }
                     ]
-
-viewRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Html Msg)
-viewRestOfObjectList model selected obj rest =
-    case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
-        Just a -> viewRdfNode model Object obj
-                  :: Html.button [onClick (DeregisterSubjectPredicateOpen selected)] [Html.text " less"]
-                  :: (List.map (
-                        \r -> div [] [viewRdfNode model Object r]
-                    ) rest)
-        Nothing -> [ viewRdfNode model Object obj
-                    , Html.button [onClick (RegisterSubjectPredicateOpen selected)] [Html.text ((String.fromInt <| List.length rest)++" more")]
-                    ]
 -- View
 
 makeDict: ServerVars -> List SelectAtom -> Dict String String
@@ -722,25 +628,6 @@ queryInput newServer query =
                     ][]
                 , Html.button [onClick (SubmitQuery query)][Html.text "Submit"]
                 ]
--- resultFormatToggle: ResultsDisplay -> Html Msg
--- resultFormatToggle selected = 
---     div []
---         [ Html.text "Output format"
---         , input [ type_ "radio"
---                 , name "resultFormat"
---                 , value Table
---                 , checked (selected == Table)
---                 , onInput ChangeOutputFormat
---                 ][]
---         , Html.text "Table"
---         , input [ type_ "radio"
---                 , name "resultFormat"
---                 , value "subject"
---                 , checked (selected == SubjectOrientation)
---                 , onInput ChangeOutputFormat
---                 ][]
---         , Html.text "Subjects"
---         ]
 
 predicateStyleToggle: PredicateStyle -> Element Msg
 predicateStyleToggle selected =
@@ -754,25 +641,6 @@ predicateStyleToggle selected =
                                             , Element.Input.option Terse (Element.text "Terse")
                                             ]
                                 }
-
-    -- div []
-    --     [ Html.text "Output format"
-    --     , input [ type_ "radio"
-    --             , name "predicateStyle"
-    --             , value "verbose"
-    --             , checked (selected == Verbose)
-    --             , onInput ChangePredicateStyle
-    --             ][]
-    --     , Html.text "Verbose"
-    --     , input [ type_ "radio"
-    --             , name "predicateStyle"
-    --             , value "terse"
-    --             , checked (selected == Terse)
-    --             , onInput ChangePredicateStyle
-    --             ][]
-    --     , Html.text "Terse"
-    --     ]
-
 
 uploadQueryFromFile:  Html Msg
 uploadQueryFromFile = 
@@ -943,41 +811,50 @@ elOfServerInput model =
                                                                             }
                                                 ])
 
-
 view: Model -> Document Msg
 view model = { title = "Sparql Query Playground - 0.0"
             , body = (List.singleton <|
                     case model.state of
                         Initialising ->
                                 Element.layout []  (elOfHeading model)-- h1 [][Html.text "Sparql Query Playground v0.1"]
-                                -- , div [] 
-                                --     [ input [Html.Attributes.placeholder "Server", onInput ChangeServer, value model.server][]
-                                --     , Html.button [onClick PingServer][Html.text "Connect"]
-                                --     ]
                         Pinging -> 
-                            div [][Html.text <| "Pinging"++model.server]
+                            Element.layout [] (Element.text <| "Pinging"++model.server)
                         Querying -> 
                                 Element.layout [] (elOfMainPage model)
 --                                , Element.layout [] (elOfQueryHistory model.queryHistory)
 --                                , resultFormatToggle model.resultsDisplay
-                        Waiting -> div [style "cursor" "progress"]
-                                [ uploadQueryFromFile
-                                , queryInput model.server model.query
-                                , b [] [Html.text "Wating for server response..."]
-                                ]
+                        Waiting -> 
+                                Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                , Element.text  "Wating for server response..."
+                                                ]
+                                |> Element.layout []
                         ApiError error -> 
                             case error of
                                 Http.BadBody err ->
-                                    div []
-                                        [ h1 [][Html.text "ApiError: I can't interpret the response"]
-                                        , div [][Html.text err]
-                                        , Html.button [onClick BackToQuery][Html.text "Back"]
-                                        ]
+                                    Element.layout [] (Element.column []
+                                        [ Element.text "ApiError: I can't interpret the response"
+                                        , Element.text err
+                                        , Element.Input.button  [ Element.Background.color colorPalette.button
+                                                                , Element.Border.rounded 5
+                                                                , Element.height (Element.px 20)
+                                                                , Element.width (Element.px 100)
+                                                                ]   
+                                                                { onPress = Just BackToQuery
+                                                                , label = Element.text "Back"
+                                                                }
+                                        ])
                                 _ ->
-                                    div [][
-                                        h1 [][Html.text "ApiError: Oops - something went wrong! :-("]
-                                        , Html.button [onClick BackToQuery][Html.text "Back"]
-                                    ]
+                                    Element.layout [] (Element.column []
+                                        [ Element.text "ApiError: Oops - something went wrong! :-("
+                                        , Element.Input.button  [ Element.Background.color colorPalette.button
+                                                                , Element.Border.rounded 5
+                                                                , Element.height (Element.px 20)
+                                                                , Element.width (Element.px 100)
+                                                                ]   
+                                                                { onPress = Just BackToQuery
+                                                                , label = Element.text "Back"
+                                                                }
+                                        ])
                         DisplayingSelectError message ->
                             div []                
                                 [ uploadQueryFromFile

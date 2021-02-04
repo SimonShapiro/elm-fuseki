@@ -8182,7 +8182,6 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Main$BackToQuery = {$: 'BackToQuery'};
-var $elm$html$Html$b = _VirtualDom_node('b');
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $mdgriffith$elm_ui$Internal$Model$Unkeyed = function (a) {
 	return {$: 'Unkeyed', a: a};
@@ -17050,12 +17049,9 @@ var $author$project$Main$view = function (model) {
 							$author$project$Main$elOfHeading(model));
 					case 'Pinging':
 						return A2(
-							$elm$html$Html$div,
+							$mdgriffith$elm_ui$Element$layout,
 							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Pinging' + model.server)
-								]));
+							$mdgriffith$elm_ui$Element$text('Pinging' + model.server));
 					case 'Querying':
 						return A2(
 							$mdgriffith$elm_ui$Element$layout,
@@ -17063,23 +17059,19 @@ var $author$project$Main$view = function (model) {
 							$author$project$Main$elOfMainPage(model));
 					case 'Waiting':
 						return A2(
-							$elm$html$Html$div,
-							_List_fromArray(
-								[
-									A2($elm$html$Html$Attributes$style, 'cursor', 'progress')
-								]),
-							_List_fromArray(
-								[
-									$author$project$Main$uploadQueryFromFile,
-									A2($author$project$Main$queryInput, model.server, model.query),
-									A2(
-									$elm$html$Html$b,
-									_List_Nil,
-									_List_fromArray(
-										[
-											$elm$html$Html$text('Wating for server response...')
-										]))
-								]));
+							$mdgriffith$elm_ui$Element$layout,
+							_List_Nil,
+							A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										$author$project$Main$elOfMainPage(model),
+										$mdgriffith$elm_ui$Element$text('Wating for server response...')
+									])));
 					case 'ApiError':
 						var error = _v0.a;
 						if (error.$ === 'BadBody') {
