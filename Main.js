@@ -13680,6 +13680,7 @@ var $author$project$Main$colorPalette = {
 	button: A3($mdgriffith$elm_ui$Element$rgb255, 217, 246, 255),
 	header: A3($mdgriffith$elm_ui$Element$rgb255, 77, 195, 230),
 	highlight: A3($mdgriffith$elm_ui$Element$rgb255, 68, 242, 187),
+	lowlight: A3($mdgriffith$elm_ui$Element$rgb255, 34, 86, 102),
 	material: A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255)
 };
 var $mdgriffith$elm_ui$Element$el = F2(
@@ -16034,6 +16035,17 @@ var $mdgriffith$elm_ui$Element$link = F2(
 				_List_fromArray(
 					[label])));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Hover = {$: 'Hover'};
+var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
+var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$hover,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
+			$mdgriffith$elm_ui$Internal$Model$Hover,
+			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
+};
 var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
 var $mdgriffith$elm_ui$Element$newTabLink = F2(
 	function (attrs, _v0) {
@@ -16150,7 +16162,12 @@ var $author$project$Main$elOfRdfNode = F3(
 											$mdgriffith$elm_ui$Element$link,
 											_List_fromArray(
 												[
-													$mdgriffith$elm_ui$Element$Font$color($author$project$Main$colorPalette.header)
+													$mdgriffith$elm_ui$Element$Font$color($author$project$Main$colorPalette.header),
+													$mdgriffith$elm_ui$Element$mouseOver(
+													_List_fromArray(
+														[
+															$mdgriffith$elm_ui$Element$Font$color($author$project$Main$colorPalette.lowlight)
+														]))
 												]),
 											{
 												label: $mdgriffith$elm_ui$Element$text(a.value),

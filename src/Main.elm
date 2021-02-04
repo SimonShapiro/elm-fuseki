@@ -53,6 +53,7 @@ import Element
 import Element
 import Element
 import Element
+import Element
 
 type alias Document msg =
     { title : String
@@ -553,7 +554,9 @@ elOfRdfNode model nodeType node =
             case nodeType of
                 Object ->
                     Element.el []   (Element.row []
-                                        [ Element.link [ Element.Font.color colorPalette.header] 
+                                        [ Element.link [ Element.Font.color colorPalette.header
+                                        , Element.mouseOver [Element.Font.color colorPalette.lowlight]
+                                        ] 
                                         { url=("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")
                                         , label=Element.text a.value
                                         }
@@ -788,6 +791,7 @@ colorPalette =
     , background = Element.rgb255 255 247 250 
     , button = Element.rgb255 217 246 255
     , highlight = Element.rgb255 68 242 187
+    , lowlight = Element.rgb255 34 86 102
     , material = Element.rgb255 255 255 255 
     }
 
