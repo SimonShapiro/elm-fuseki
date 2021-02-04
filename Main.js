@@ -8148,25 +8148,18 @@ var $author$project$Main$update = F2(
 				}
 			case 'ChangePredicateStyle':
 				var predicateStyle = msg.a;
-				switch (predicateStyle) {
-					case 'verbose':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{predicateStyle: $author$project$Main$Verbose}),
-							$elm$core$Platform$Cmd$none);
-					case 'terse':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{predicateStyle: $author$project$Main$Terse}),
-							$elm$core$Platform$Cmd$none);
-					default:
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{predicateStyle: $author$project$Main$Verbose}),
-							$elm$core$Platform$Cmd$none);
+				if (predicateStyle.$ === 'Verbose') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{predicateStyle: $author$project$Main$Verbose}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{predicateStyle: $author$project$Main$Terse}),
+						$elm$core$Platform$Cmd$none);
 				}
 			case 'RegisterSubjectPredicateOpen':
 				var selected = msg.a;
@@ -16914,6 +16907,41 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
+var $author$project$Main$ChangePredicateStyle = function (a) {
+	return {$: 'ChangePredicateStyle', a: a};
+};
+var $author$project$Main$predicateStyleToggle = function (selected) {
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$radioRow,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$padding(0),
+				$mdgriffith$elm_ui$Element$spacing(10),
+				$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
+			]),
+		{
+			label: A2(
+				$mdgriffith$elm_ui$Element$Input$labelLeft,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
+					]),
+				$mdgriffith$elm_ui$Element$text('Output Format')),
+			onChange: $author$project$Main$ChangePredicateStyle,
+			options: _List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$option,
+					$author$project$Main$Verbose,
+					$mdgriffith$elm_ui$Element$text('Verbose')),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$option,
+					$author$project$Main$Terse,
+					$mdgriffith$elm_ui$Element$text('Terse'))
+				]),
+			selected: $elm$core$Maybe$Just(selected)
+		});
+};
 var $elm$html$Html$Attributes$cols = function (n) {
 	return A2(
 		_VirtualDom_attribute,
@@ -17149,6 +17177,7 @@ var $author$project$Main$view = function (model) {
 										_List_fromArray(
 											[
 												$author$project$Main$elOfMainPage(model),
+												$author$project$Main$predicateStyleToggle(model.predicateStyle),
 												$author$project$Main$elOfSubjects(model)
 											])));
 							} else {

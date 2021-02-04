@@ -124,7 +124,7 @@ type Msg
     | DownloadFile
     | DownloadResultsAsCSV ServerVars (ServerForm SelectAtom)
     | ChangeOutputFormat ResultsDisplay
-    | ChangePredicateStyle String
+    | ChangePredicateStyle PredicateStyle
     | BackToQuery
     | RegisterSubjectPredicateOpen (RdfNode, RdfNode)
     | DeregisterSubjectPredicateOpen (RdfNode, RdfNode)
@@ -342,9 +342,8 @@ update msg model =
                SubjectOrientation -> ({model | resultsDisplay = SubjectOrientation}, Cmd.none)
         ChangePredicateStyle predicateStyle ->
             case predicateStyle of
-               "verbose" -> ({model | predicateStyle = Verbose}, Cmd.none)
-               "terse" -> ({model | predicateStyle = Terse}, Cmd.none)
-               _ -> ({model | predicateStyle = Verbose}, Cmd.none)
+               Verbose -> ({model | predicateStyle = Verbose}, Cmd.none)
+               Terse -> ({model | predicateStyle = Terse}, Cmd.none)
         RegisterSubjectPredicateOpen selected -> 
             ({model | openPredicatesInSubject = selected::model.openPredicatesInSubject}, Cmd.none)
         DeregisterSubjectPredicateOpen selected -> 
@@ -740,25 +739,36 @@ queryInput newServer query =
 --         , Html.text "Subjects"
 --         ]
 
-predicateStyleToggle: PredicateStyle -> Html Msg
+predicateStyleToggle: PredicateStyle -> Element Msg
 predicateStyleToggle selected =
-    div []
-        [ Html.text "Output format"
-        , input [ type_ "radio"
-                , name "predicateStyle"
-                , value "verbose"
-                , checked (selected == Verbose)
-                , onInput ChangePredicateStyle
-                ][]
-        , Html.text "Verbose"
-        , input [ type_ "radio"
-                , name "predicateStyle"
-                , value "terse"
-                , checked (selected == Terse)
-                , onInput ChangePredicateStyle
-                ][]
-        , Html.text "Terse"
-        ]
+    Element.Input.radioRow  [ Element.padding 0
+                            , Element.spacing 10
+                            , Element.Font.size sizePalette.command
+                            ]   { onChange = ChangePredicateStyle
+                                , selected = Just selected
+                                , label = Element.Input.labelLeft [Element.Font.size sizePalette.command] (Element.text "Output Format")
+                                , options = [ Element.Input.option Verbose (Element.text "Verbose")
+                                            , Element.Input.option Terse (Element.text "Terse")
+                                            ]
+                                }
+
+    -- div []
+    --     [ Html.text "Output format"
+    --     , input [ type_ "radio"
+    --             , name "predicateStyle"
+    --             , value "verbose"
+    --             , checked (selected == Verbose)
+    --             , onInput ChangePredicateStyle
+    --             ][]
+    --     , Html.text "Verbose"
+    --     , input [ type_ "radio"
+    --             , name "predicateStyle"
+    --             , value "terse"
+    --             , checked (selected == Terse)
+    --             , onInput ChangePredicateStyle
+    --             ][]
+    --     , Html.text "Terse"
+    --     ]
 
 
 uploadQueryFromFile:  Html Msg
@@ -985,6 +995,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                     case contracted of
                                         Just a ->
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                            , predicateStyleToggle model.predicateStyle
                                                             , elOfSubjects model
                                                             ]
                                             |> Element.layout []
