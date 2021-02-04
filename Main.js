@@ -16257,21 +16257,21 @@ var $author$project$Main$elOfRestOfObjectList = F4(
 			var a = _v0.a;
 			return A2(
 				$elm$core$List$cons,
-				A3($author$project$Main$elOfRdfNode, model, $author$project$Main$Object, obj),
+				A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$alignLeft,
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button)
+						]),
+					{
+						label: $mdgriffith$elm_ui$Element$text(' less'),
+						onPress: $elm$core$Maybe$Just(
+							$author$project$Main$DeregisterSubjectPredicateOpen(selected))
+					}),
 				A2(
 					$elm$core$List$cons,
-					A2(
-						$mdgriffith$elm_ui$Element$Input$button,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$alignLeft,
-								$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button)
-							]),
-						{
-							label: $mdgriffith$elm_ui$Element$text(' less'),
-							onPress: $elm$core$Maybe$Just(
-								$author$project$Main$DeregisterSubjectPredicateOpen(selected))
-						}),
+					A3($author$project$Main$elOfRdfNode, model, $author$project$Main$Object, obj),
 					A2(
 						$elm$core$List$map,
 						function (r) {

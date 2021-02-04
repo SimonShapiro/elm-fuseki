@@ -652,13 +652,13 @@ viewObjects model subj po =
 elOfRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Element Msg)
 elOfRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
-        Just a -> elOfRdfNode model Object obj
-                  :: Element.Input.button   [ Element.alignLeft
+        Just a -> Element.Input.button   [ Element.alignLeft
                                             , Element.Background.color colorPalette.button
                                             ]
                                             { onPress=Just (DeregisterSubjectPredicateOpen selected)
                                             , label=Element.text " less"
                                             }
+                  :: elOfRdfNode model Object obj
                   :: (List.map (
                         \r -> elOfRdfNode model Object r
                     ) rest)
