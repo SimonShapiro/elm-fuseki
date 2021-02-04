@@ -52,6 +52,7 @@ import Element
 import Element
 import Element
 import Element
+import Element
 
 type alias Document msg =
     { title : String
@@ -426,9 +427,11 @@ viewSubjects model =
 
 elOfCardAttributes =
     [ Element.Border.rounded 5
-    , Element.Border.shadow {offset=(0.0, 4.0), size=8, blur=0, color=Element.rgba 0 0 0 0.2}
+    , Element.Border.width 1    
+    , Element.Border.shadow {offset=(0.0, 4.0), size=4, blur=0, color=Element.rgba 0 0 0 0.1}
     , Element.Background.color colorPalette.material
     , Element.width (Element.px 900)
+    , Element.paddingXY 5 0
     ]
 
 elOfSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
@@ -436,14 +439,21 @@ elOfSubjectMoleculeCard model mole =
     let
         subj = Tuple.first mole
     in
-        Element.column elOfCardAttributes
-            [ Element.el [Element.Font.size sizePalette.highlight] 
-                (Element.link [] {url=("/index.html?query=describe <"
-                ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
-                ++">"), label=elOfRdfNode model Subject subj}) -- make case here to clean up the view function below
-            , elOfPredicates model mole
-            ]
- 
+        case subj of
+            BlankNode _ -> 
+                Element.column elOfCardAttributes
+                    [ elOfPredicates model mole
+                    ]
+            
+            Uri _ ->
+                Element.column elOfCardAttributes
+                    [ Element.el [Element.Font.size sizePalette.subject] 
+                        (Element.link [] {url=("/index.html?query=describe <"
+                        ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
+                        ++">"), label=elOfRdfNode model Subject subj}) -- make case here to clean up the view function below
+                    , elOfPredicates model mole
+                    ]
+            _ -> Element.none
 
 makeSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
 makeSubjectMoleculeCard model mole =    
@@ -504,11 +514,16 @@ elOfRdfNodeAsPredicate: Model -> RdfNode -> Element Msg
 elOfRdfNodeAsPredicate model node =
     case node of
         Uri a ->
-            (Element.row [Element.Font.bold][ Element.text (aka model.predicateStyle a.value)
+            (Element.row    [ Element.Font.bold
+                            , Element.Font.size sizePalette.command
+                            ]
+                            [ Element.text (aka model.predicateStyle a.value)
                     , Element.text ": "
                     ])
         _ ->
-            Element.el [Element.Font.bold] (Element.text "All predicates should be Uri")
+            Element.el  [ Element.Font.bold
+                        , Element.Font.size sizePalette.command
+                        ] (Element.text "All predicates should be Uri")
 
 
 viewRdfNodeAsPredicate: Model -> RdfNode -> Html Msg
@@ -538,9 +553,11 @@ elOfRdfNode model nodeType node =
         Uri a ->
             case nodeType of
                 Object ->
-                    Element.el []   (Element.row [][ Element.link [] { url=("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")
-                                                        , label=Element.text a.value
-                                                        }
+                    Element.el []   (Element.row []
+                                        [ Element.link [ Element.Font.color colorPalette.header] 
+                                        { url=("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")
+                                        , label=Element.text a.value
+                                        }
                                     , Element.newTabLink [] {url=a.value, label = Element.image [] { src = "www-12px.svg", description = "" }}])
                 Subject -> Element.text a.value
                 Predicate -> 
@@ -652,7 +669,7 @@ viewObjects model subj po =
 elOfRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Element Msg)
 elOfRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
-        Just a -> Element.Input.button   [ Element.alignLeft
+        Just _ -> Element.Input.button   [ Element.alignLeft
                                             , Element.Background.color colorPalette.button
                                             ]
                                             { onPress=Just (DeregisterSubjectPredicateOpen selected)
@@ -761,7 +778,7 @@ colorPalette =
     , background = Element.rgb255 255 247 250 
     , button = Element.rgb255 217 246 255
     , highlight = Element.rgb255 68 242 187
-    , material = Element.rgb255 147 214 234
+    , material = Element.rgb255 255 255 255 
     }
 
 sizePalette = 
@@ -769,6 +786,7 @@ sizePalette =
     , command = 12
     , normal = 14
     , highlight = 20
+    , subject = 32
     }
 
 elOfTabularResults: ServerVars -> ServerForm SelectAtom -> Element msgDecoder
@@ -791,6 +809,7 @@ elOfQueryHistory history =
                 Debug.log (Sparql.toString query)
                 Element.row [spacing 10][ Element.Input.button
                                                 [ Element.Background.color colorPalette.highlight 
+                                                , Element.Border.rounded 5
                                                 , Element.focused
                                                     [ Element.Background.color colorPalette.highlight ]
                                                 ]
@@ -811,12 +830,14 @@ elOfUploadQueryFromFile =
                 , Element.width Element.fill
                 , Element.Background.color colorPalette.header
                 ]   [ Element.Input.button  [ Element.Background.color colorPalette.button
+                                            , Element.Border.rounded 5
                                             , Element.height (Element.px 20)
                                             , Element.width (Element.px 100)
                                             ]   { onPress = Just FileRequested
                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Load Query"
                                                 }
                     , Element.Input.button  [ Element.Background.color colorPalette.button
+                                            , Element.Border.rounded 5
                                             , Element.height (Element.px 20)
                                             , Element.width (Element.px 100)
                                             ]   { onPress = Just DownloadFile
@@ -852,6 +873,7 @@ elOfQueryPanel model =
                                                 , Element.Input.button  [ Element.width (Element.px 60)
                                                 , Element.height (Element.px 30)
                                                 , Element.spacingXY 50 0 
+                                                , Element.Border.rounded 5
                                                 , Element.Background.color colorPalette.highlight
                                                 ] { onPress = Just (SubmitQuery model.query)
                                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go!"
@@ -899,7 +921,9 @@ elOfServerInput model =
                                                 , Element.Input.button  [ Element.alignLeft
                                                                         , Element.paddingXY 5 0
                                                                         , Element.height (Element.px 20)
-                                                                        , Element.Background.color colorPalette.button]   
+                                                                        , Element.Border.rounded 5
+                                                                        , Element.Background.color colorPalette.button
+                                                                        ]   
                                                                             { onPress = Just PingServer
                                                                             , label= (Element.text "Connect")
                                                                             }

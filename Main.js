@@ -13687,7 +13687,7 @@ var $author$project$Main$colorPalette = {
 	button: A3($mdgriffith$elm_ui$Element$rgb255, 217, 246, 255),
 	header: A3($mdgriffith$elm_ui$Element$rgb255, 77, 195, 230),
 	highlight: A3($mdgriffith$elm_ui$Element$rgb255, 68, 242, 187),
-	material: A3($mdgriffith$elm_ui$Element$rgb255, 147, 214, 234)
+	material: A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255)
 };
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
@@ -13916,6 +13916,17 @@ var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 	return {$: 'Px', a: a};
 };
 var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$row = F2(
@@ -14127,17 +14138,6 @@ var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
 var $mdgriffith$elm_ui$Element$spacing = function (x) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -14947,6 +14947,7 @@ var $author$project$Main$elOfServerInput = function (model) {
 							A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
 							$mdgriffith$elm_ui$Element$height(
 							$mdgriffith$elm_ui$Element$px(20)),
+							$mdgriffith$elm_ui$Element$Border$rounded(5),
 							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button)
 						]),
 					{
@@ -15222,6 +15223,7 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 							_List_fromArray(
 								[
 									$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight),
+									$mdgriffith$elm_ui$Element$Border$rounded(5),
 									$mdgriffith$elm_ui$Element$focused(
 									_List_fromArray(
 										[
@@ -15304,6 +15306,7 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 								$mdgriffith$elm_ui$Element$height(
 								$mdgriffith$elm_ui$Element$px(30)),
 								A2($mdgriffith$elm_ui$Element$spacingXY, 50, 0),
+								$mdgriffith$elm_ui$Element$Border$rounded(5),
 								$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
 							]),
 						{
@@ -15706,7 +15709,7 @@ var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
 			optionArea);
 	});
 var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
-var $author$project$Main$sizePalette = {command: 12, highlight: 20, normal: 14, smallPrint: 8};
+var $author$project$Main$sizePalette = {command: 12, highlight: 20, normal: 14, smallPrint: 8, subject: 32};
 var $author$project$Main$elOfResultFormatToggle = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$Input$radioRow,
@@ -15760,6 +15763,7 @@ var $author$project$Main$elOfUploadQueryFromFile = A2(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+					$mdgriffith$elm_ui$Element$Border$rounded(5),
 					$mdgriffith$elm_ui$Element$height(
 					$mdgriffith$elm_ui$Element$px(20)),
 					$mdgriffith$elm_ui$Element$width(
@@ -15781,6 +15785,7 @@ var $author$project$Main$elOfUploadQueryFromFile = A2(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+					$mdgriffith$elm_ui$Element$Border$rounded(5),
 					$mdgriffith$elm_ui$Element$height(
 					$mdgriffith$elm_ui$Element$px(20)),
 					$mdgriffith$elm_ui$Element$width(
@@ -15863,16 +15868,18 @@ var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
 var $author$project$Main$elOfCardAttributes = _List_fromArray(
 	[
 		$mdgriffith$elm_ui$Element$Border$rounded(5),
+		$mdgriffith$elm_ui$Element$Border$width(1),
 		$mdgriffith$elm_ui$Element$Border$shadow(
 		{
 			blur: 0,
-			color: A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0.2),
+			color: A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0.1),
 			offset: _Utils_Tuple2(0.0, 4.0),
-			size: 8
+			size: 4
 		}),
 		$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.material),
 		$mdgriffith$elm_ui$Element$width(
-		$mdgriffith$elm_ui$Element$px(900))
+		$mdgriffith$elm_ui$Element$px(900)),
+		A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
 	]);
 var $author$project$Main$aka = F2(
 	function (predicateStyle, pred) {
@@ -15894,7 +15901,10 @@ var $author$project$Main$elOfRdfNodeAsPredicate = F2(
 			return A2(
 				$mdgriffith$elm_ui$Element$row,
 				_List_fromArray(
-					[$mdgriffith$elm_ui$Element$Font$bold]),
+					[
+						$mdgriffith$elm_ui$Element$Font$bold,
+						$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
+					]),
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$text(
@@ -15905,7 +15915,10 @@ var $author$project$Main$elOfRdfNodeAsPredicate = F2(
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
-					[$mdgriffith$elm_ui$Element$Font$bold]),
+					[
+						$mdgriffith$elm_ui$Element$Font$bold,
+						$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
+					]),
 				$mdgriffith$elm_ui$Element$text('All predicates should be Uri'));
 		}
 	});
@@ -16074,9 +16087,9 @@ var $elm$core$List$tail = function (list) {
 };
 var $author$project$Main$elOfObjects = F3(
 	function (model, subj, po) {
-		var _v6 = po;
-		var pred = _v6.a;
-		var objs = _v6.b;
+		var _v7 = po;
+		var pred = _v7.a;
+		var objs = _v7.b;
 		var head = $elm$core$List$head(objs);
 		var rest = A2(
 			$elm$core$Maybe$withDefault,
@@ -16142,7 +16155,10 @@ var $author$project$Main$elOfRdfNode = F3(
 										[
 											A2(
 											$mdgriffith$elm_ui$Element$link,
-											_List_Nil,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$Font$color($author$project$Main$colorPalette.header)
+												]),
 											{
 												label: $mdgriffith$elm_ui$Element$text(a.value),
 												url: '/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>')
@@ -16165,11 +16181,11 @@ var $author$project$Main$elOfRdfNode = F3(
 					}
 				case 'BlankNode':
 					var a = node.a;
-					var _v3 = model.currentRdfDict;
-					if (_v3.$ === 'Nothing') {
+					var _v4 = model.currentRdfDict;
+					if (_v4.$ === 'Nothing') {
 						return $mdgriffith$elm_ui$Element$text(a.value);
 					} else {
-						var dict = _v3.a;
+						var dict = _v4.a;
 						var related = A2($elm$core$Dict$get, a.value, dict);
 						if (related.$ === 'Nothing') {
 							return $mdgriffith$elm_ui$Element$text(a.value);
@@ -16247,14 +16263,13 @@ var $author$project$Main$elOfRdfNode = F3(
 	});
 var $author$project$Main$elOfRestOfObjectList = F4(
 	function (model, selected, obj, rest) {
-		var _v0 = A2(
+		var _v1 = A2(
 			$elm_community$list_extra$List$Extra$find,
 			function (o) {
 				return _Utils_eq(o, selected);
 			},
 			model.openPredicatesInSubject);
-		if (_v0.$ === 'Just') {
-			var a = _v0.a;
+		if (_v1.$ === 'Just') {
 			return A2(
 				$elm$core$List$cons,
 				A2(
@@ -16302,30 +16317,43 @@ var $author$project$Main$elOfRestOfObjectList = F4(
 var $author$project$Main$elOfSubjectMoleculeCard = F2(
 	function (model, mole) {
 		var subj = mole.a;
-		return A2(
-			$mdgriffith$elm_ui$Element$column,
-			$author$project$Main$elOfCardAttributes,
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$el,
+		switch (subj.$) {
+			case 'BlankNode':
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					$author$project$Main$elOfCardAttributes,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.highlight)
-						]),
-					A2(
-						$mdgriffith$elm_ui$Element$link,
-						_List_Nil,
-						{
-							label: A3($author$project$Main$elOfRdfNode, model, $author$project$Main$Subject, subj),
-							url: '/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(
-								A2(
-									$elm$core$Maybe$withDefault,
-									'unknown',
-									$author$project$RdfDict$makeRdfKey(subj))) + '>')
-						})),
-					A2($author$project$Main$elOfPredicates, model, mole)
-				]));
+							A2($author$project$Main$elOfPredicates, model, mole)
+						]));
+			case 'Uri':
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					$author$project$Main$elOfCardAttributes,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.subject)
+								]),
+							A2(
+								$mdgriffith$elm_ui$Element$link,
+								_List_Nil,
+								{
+									label: A3($author$project$Main$elOfRdfNode, model, $author$project$Main$Subject, subj),
+									url: '/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(
+										A2(
+											$elm$core$Maybe$withDefault,
+											'unknown',
+											$author$project$RdfDict$makeRdfKey(subj))) + '>')
+								})),
+							A2($author$project$Main$elOfPredicates, model, mole)
+						]));
+			default:
+				return $mdgriffith$elm_ui$Element$none;
+		}
 	});
 var $author$project$Main$viewSubjectMolecule = F2(
 	function (model, mole) {
