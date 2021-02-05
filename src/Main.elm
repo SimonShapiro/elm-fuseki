@@ -82,6 +82,8 @@ type alias Model =
     , urlQuery: Maybe SparqlQuery
     , query: SparqlQuery
     , queryHistory: List SparqlQuery
+    , vars: ServerVars
+    , results: ServerForm SelectAtom
     , currentRdfDict: Maybe RdfDict
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
@@ -124,7 +126,7 @@ type Msg
     | FileSelected File
     | FileLoaded String
     | DownloadFile
-    | DownloadResultsAsCSV ServerVars (ServerForm SelectAtom)
+    | DownloadResultsAsCSV
     | ChangeOutputFormat ResultsDisplay
     | ChangePredicateStyle PredicateStyle
     | BackToQuery
@@ -181,12 +183,28 @@ server = "http://localhost:port"
 -- startWith: Model
 -- startWith = Model Initialising server "" Normal Table Terse [] 
 
+
 initialFn: flags -> Url -> Key -> (Model, (Cmd Msg))
-initialFn _ url key =
+initialFn _ url elmKey =
     let
         initialQuery = parseUrlForIndexQuery url
+        initialModel : Model
+        initialModel =  { state = Initialising
+                        , server = server
+                        , urlQuery = initialQuery
+                        , query = (Ask "ask {?s ?p ?o}")
+                        , queryHistory = []
+                        , vars = []
+                        , results = []
+                        , currentRdfDict = Nothing
+                        , keyboard = Normal
+                        , resultsDisplay = Table
+                        , predicateStyle = Terse
+                        , openPredicatesInSubject = []
+                        , key = elmKey
+                        }
     in
-        (Model Initialising server initialQuery (Ask "ask {?s ?p ?o}") [] Nothing Normal Table Terse [] key, Cmd.none)
+        (initialModel, Cmd.none)
 
 parseUrlForDetailsSubject : Url -> Maybe String
 parseUrlForDetailsSubject url =
@@ -311,6 +329,8 @@ update msg model =
                         200 ->
                             -- could transform to graph here
                             ({ model | state = DisplayingSelectResult okData.vars okData.result
+                             , vars = okData.vars
+                             , results = okData.result
                              , currentRdfDict = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
                                                 |> Maybe.map makeRdfDict 
                              }, Cmd.none)
@@ -331,11 +351,11 @@ update msg model =
             ({model | query = establishQueryType content}, Cmd.none)
         DownloadFile -> 
             (model, downloadFile "query.txt" (Sparql.toString model.query))
-        DownloadResultsAsCSV vars results -> 
+        DownloadResultsAsCSV  -> 
             let
-                headedResults = (String.join "|" vars) :: List.map (\r -> extractValues r
+                headedResults = (String.join "|" model.vars) :: List.map (\r -> extractValues r
                                                         |> String.join "|"
-                                                 ) results
+                                                 ) model.results
             in
                 (model, downloadFile "result.csv" <| String.join "\n" headedResults)
         ChangeOutputFormat outputFormat ->
@@ -707,6 +727,18 @@ elOfUploadQueryFromFile =
                                                 }
                     ]
 
+elOfDownloadCsv: Element Msg
+elOfDownloadCsv =
+    Element.row [
+                ]
+                [ Element.Input.button [ Element.Background.color colorPalette.highlight
+                                            , Element.Border.rounded 5
+                                            , Element.height (Element.px 20)
+                                            , Element.width (Element.px 100)
+                                            ]   { onPress = Just DownloadResultsAsCSV
+                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Download"
+                                                }]
+
 elOfResultFormatToggle: Model -> Element Msg
 elOfResultFormatToggle model =
     Element.Input.radioRow  [ Element.padding 0
@@ -844,6 +876,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                             case model.resultsDisplay of
                                 Table ->
                                         Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                        , elOfDownloadCsv
                                                         , elOfTabularResults vars result
                                                         ]
                                         |> Element.layout []
