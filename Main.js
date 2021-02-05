@@ -16235,11 +16235,17 @@ var $author$project$Main$elOfRdfNode = F3(
 					}
 				case 'LiteralOnlyValue':
 					var a = node.a;
-					return $mdgriffith$elm_ui$Element$text(a.value);
+					return A2(
+						$mdgriffith$elm_ui$Element$paragraph,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$text(a.value)
+							]));
 				case 'LiteralValueAndDataType':
 					var a = node.a;
 					return A2(
-						$mdgriffith$elm_ui$Element$row,
+						$mdgriffith$elm_ui$Element$paragraph,
 						_List_Nil,
 						_List_fromArray(
 							[
@@ -16260,7 +16266,7 @@ var $author$project$Main$elOfRdfNode = F3(
 				case 'LiteralValueAndLanguageString':
 					var a = node.a;
 					return A2(
-						$mdgriffith$elm_ui$Element$row,
+						$mdgriffith$elm_ui$Element$paragraph,
 						_List_Nil,
 						_List_fromArray(
 							[

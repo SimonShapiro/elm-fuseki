@@ -9,6 +9,9 @@
 - ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
 - ~~Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.~~
 - ~~Add lru caching to improve query performance~~
+- Element.text word wrap of object literals
+- Element.Input.text loss of focus
+- Element
 - Command line query should not be submitted
 - Add message to `load' response
 - Add port as commandline paramter for Server.py 
@@ -32,15 +35,16 @@
 - ~~Link on subject as well~~
 - ~~Implement `load` in update~~
 - ~~Updates according to~~ [sparql cheat sheet](https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf)
-- Maintain scrolling query list
-- Investigate elm-ui
+- ~~Maintain scrolling query list~~
+- ~~Investigate elm-ui~~
+- ~~Simple styling~~
+- show/hide query history (use n more / less) semantics
 - Improve url routing
 - Add settings - api url; allow implied external links to model
-- check for accessability of object uri
-- Simple styling
+- check for in result/graph access to object uri
 - Consider doing something special with #type???
 - Save ttl in subject view
-- Tableview to get hyperlink logic
+- Tableview to get hyperlink logic?
 - Dockerise server.py
 - graph view
 - Add limit and offset semantics in table and subject oriented list
