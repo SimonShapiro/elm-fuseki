@@ -304,12 +304,8 @@ update msg model =
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
         ChangeQuery newQuery -> 
-            case model.keyboard of
-                ReadyToAcceptControl ->
-                    Debug.log ("Query "++newQuery)
-                    ({model | query = (establishQueryType newQuery), state = Querying}, Cmd.none)
-                _ ->
-                    (model, Cmd.none) 
+                Debug.log ("Query "++newQuery)
+                ({model | query = (establishQueryType newQuery)}, Cmd.none)
         SubmitQuery query -> 
             case model.query of
                Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString model.query)))}, Cmd.none)
@@ -396,7 +392,7 @@ handleUrlChange url =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onKeyDown msgDecoder
+    Sub.none
 
 pingServer : Server -> (Cmd Msg)
 pingServer newServer = 
@@ -901,11 +897,6 @@ view model = { title = "Sparql Query Playground - 0.0"
             )}
 
 -- Decoders
-
-msgDecoder : Decoder Msg
-msgDecoder =
-    field "key" string
-        |> Json.Decode.map PressedKey
 
 selectAtomDecoder: Decoder SelectAtom
 selectAtomDecoder = 

@@ -1,0 +1,16 @@
+base <https://simonshapiro.github.io/ttlStore/>
+prefix : <annotations.ttl#>
+prefix oa: <http://www.w3.org/ns/oa#>
+prefix dc: <http://purl.org/dc/terms/>
+
+: a :AnnotationList .
+
+:001 a oa:Annotation;
+    oa:bodyValue "A great guide to the sparql language.  Short pdf";
+    oa:hasTarget <https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf>;
+    dc:created "2021-01-28" .
+
+:002 a oa:Annotation;
+    oa:bodyValue "A great guide to !the sparql language.  Mauris quis leo in nunc hendrerit faucibus. Nam convallis ipsum in rhoncus finibus. Aenean malesuada, libero id facilisis maximus, turpis lacus dictum lorem, vitae condimentum dui turpis non quam. Fusce convallis justo nec nisl pulvinar, at efficitur nulla tincidunt. Sed laoreet elementum imperdiet. Sed accumsan, lacus non tincidunt porta, neque magna venenatis libero, eu porttitor magna tortor non lectus. Vivamus condimentum, nibh non feugiat posuere, quam felis pretium augue, ac egestas augue sapien vel est. Sed non scelerisque magna. Vestibulum feugiat lectus a risus dignissim efficitur. Aliquam ut auctor metus, vitae aliquam ipsum."@en ;
+    oa:hasTarget <https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf>;
+    dc:created "2021-02-05" .

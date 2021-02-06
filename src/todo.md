@@ -9,11 +9,11 @@
 - ~~Resolve treatment of fragments in url's - there is a cut-off on the # on transfer to a server - this is a general browser problem - perhaps encode it as %23 or cut it off before # and then close the > for describe links - choose second method %23~~
 - ~~Resolve differences between bnode on select and contruct in server.py - one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.~~
 - ~~Add lru caching to improve query performance~~
-- Element.text word wrap of object literals
-- Element.Input.text loss of focus
-- Element
+- ~~Element.text word wrap of object literals~~
+- ~~Element.Input.text loss of focus~~
+- Need to get server errors back to ui
 - Command line query should not be submitted
-- Add message to `load' response
+- ~~Add message to `load` response~~
 - Add port as commandline paramter for Server.py 
 - A bug on `select distinct ?g {?s ?p ?o.}`
 - Fine tune chache maxsize
@@ -38,7 +38,11 @@
 - ~~Maintain scrolling query list~~
 - ~~Investigate elm-ui~~
 - ~~Simple styling~~
+- devlop ontology buttons 
+- add load in addition to execute query icon on query history
+- automatically sense non-s, p, o in subject view
 - show/hide query history (use n more / less) semantics
+- make no info on subject view more obvious
 - Improve url routing
 - Add settings - api url; allow implied external links to model
 - check for in result/graph access to object uri

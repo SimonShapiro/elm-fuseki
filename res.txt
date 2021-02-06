@@ -1,0 +1,748 @@
+<http://example.com/ElmAndApi> {
+    <http://example.com/>
+            a       <http://example.com/ToDoList> .
+    
+    <http://example.com/1>
+            a                            <http://example.com/ToDo> ;
+            <http://example.com/description>
+                    "Add sparql snippet loader/saver" ;
+            <http://example.com/status>  "Pending" .
+    
+    <http://example.com/2>
+            a                             <http://example.com/ToDo> ;
+            <http://example.com/description>
+                    "Add graph, predicate lookup to sparlq text area"@en ;
+            <http://example.com/related>  <http://example.com/1> ;
+            <http://example.com/status>   "Pending" .
+    
+    <http://example.com/Simon>
+            a                              <http://example.com/Person> ;
+            <http://example.com/bookmark>  <https://simonshapiro.github.io/breadrecipe/main.html> ;
+            <http://example.com/hasProfile>
+                    <https://www.linkedin.com/in/smshapiro/> ;
+            <http://example.com/livesIn>   [ a       <http://example.com/Country> ;
+                                             <http://example.com/countryName>
+                                                     "England"
+                                           ] ;
+            <http://example.com/livesIn>   [ a       <http://example.com/Country> ;
+                                             <http://example.com/countryName>
+                                                     "England"
+                                           ] ;
+            <http://example.com/livesIn>   [ a       <http://example.com/Country> ;
+                                             <http://example.com/countryName>
+                                                     "South Africa"
+                                           ] .
+    
+    <http://example.com/3>
+            a                             <http://example.com/ToDo> ;
+            <http://example.com/description>
+                    "English Add graph, predicate lookup to sparlq text area"@en ;
+            <http://example.com/related>  <http://example.com/1> ;
+            <http://example.com/status>   "Pending" .
+    
+    <http://example.com/4>
+            a                              <http://example.com/ToDo> ;
+            <http://example.com/description>
+                    "English Add graph, predicate lookup to sparlq text area"@en ;
+            <http://example.com/priority>  1 ;
+            <http://example.com/related>   <http://example.com/1> ;
+            <http://example.com/status>    "Pending" .
+}
+
+<http://server/unset-base/archimate3> {
+    <http://example.com/Country>
+            a       <http://atlaskg.global.hsbc/global/archi31/LocationCompositeElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "According to Wikipedia a country is a political state, nation, or controlled territory." ;
+            <http://atlaskg.global.hsbc/global/archi31/externalReference>
+                    <https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes> , <https://en.wikipedia.org/wiki/Country> , <https://en.wikipedia.org/wiki/List_of_sovereign_states> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/>
+            a       <http://www.w3.org/2002/07/owl#Ontology> ;
+            <http://www.w3.org/2002/07/owl#versionIRI>
+                    <http://atlaskg.global.hsbc/global/archi31/v1.0> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/descripion>
+            <http://www.w3.org/2004/02/skos/core#exactMatch>
+                    <http://www.w3.org/2004/02/skos/core#definition> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/externalReference>
+            a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> ;
+            <http://www.w3.org/2004/02/skos/core#closeMatch>
+                    <http://www.w3.org/2004/02/skos/core#related> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/AtlasClass>
+            a       <http://atlaskg.global.hsbc/global/archi31/Concept> ;
+            <http://www.w3.org/2004/02/skos/core#exactMatch>
+                    <http://www.w3.org/2002/07/owl#Class> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+            a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+            a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/relationship>
+            a       <http://www.w3.org/1999/02/22-rdf-syntax-ns#Property> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Concept> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/structuralRelationship>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/relationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/dependencyRelationship>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/relationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/dynamicRelationship>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/relationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/flow>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/dynamicRelationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/assignedTo>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/structuralRelationship> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://atlaskg.global.hsbc/global/archi31/assignedFrom> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/assignedFrom>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/structuralRelationship> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://atlaskg.global.hsbc/global/archi31/assignedTo> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/aggregates>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/structuralRelationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/realizes>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/structuralRelationship> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://atlaskg.global.hsbc/global/archi31/realizedBy> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/realizedBy>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/structuralRelationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/associates>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/dependencyRelationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/accesses>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/dependencyRelationship> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/CoreFramework>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://atlaskg.global.hsbc/global/archi31/relationship> , <http://atlaskg.global.hsbc/global/archi31/Layer> , <http://atlaskg.global.hsbc/global/archi31/Aspect> , <http://atlaskg.global.hsbc/global/archi31/Element> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The ArchiMate core language defines a structure of generic elements and their relationships, which can be specialized in different layers and from different aspects." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Layer>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Concept> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An abstraction of the ArchiMate framework at which an enterprise can be modeled." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Aspect>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Concept> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "Aspects classify elements across all layers by their nature: Structural or Behavioural.  Structural can also be regarded as Active or Passive.\n\nThese three aspects – active structure, behavior, and passive structure – have been inspired by natural language, where a sentence has a subject (active structure), a verb (behavior), and an object (passive structure)." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Element>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Concept> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement> , <http://atlaskg.global.hsbc/global/archi31/StructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "Elements are the top level of the layer-independent hierarchy in Archimate.   They consist of consists of two main types of elements: structure (“nouns”) and behavior elements (“verbs”)." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralAspect>
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Aspect> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The Active Structure Aspect, which represents the structural elements (the business actors, application components, and devices that display actual behavior; i.e., the “subjects” of activity)" ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Layer> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/BehaviouralAspect>
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Aspect> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The Behavior Aspect, which represents the behavior (processes, functions, events, and services) performed by the actors; structural elements are assigned to behavioral elements, to show who or what displays the behavior" ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Layer> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/PassiveStructuralAspect>
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Aspect> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The Passive Structure Aspect, which represents the objects on which behavior is performed; these are usually information objects in the Business Layer and data objects in the Application Layer, but they may also be used to represent physical objects" ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Layer> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/BusinessLayer>
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Layer> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The Business Layer depicts business services offered to customers, which are realized in the organization by business processes performed by business actors." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Aspect> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ApplicationLayer>
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Layer> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The Application Layer depicts application services that support the business, and the applications that realize them." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Aspect> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/TechnologyLayer>
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Layer> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    " The Technology Layer depicts technology services such as processing, storage, and communication services needed to run the applications, and the computer and communication hardware and system software that realize those services. " ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Aspect> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Element> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "Behavior elements represent the dynamic aspects of the enterprise. Similar to active structure elements, behavior elements can be subdivided into internal behavior elements and external behavior elements; i.e., the services that are exposed to the environment." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/StructuralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Element> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/CompositeElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/Element> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "Composite elements consist of other concepts, possibly from multiple aspects or layers of the language. Grouping and location are generic composite elements. Composite elements can themselves aggregate or compose other composite elements." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/LocationCompositeElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/CompositeElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A location represents a conceptual or physical place or position where concepts are located (e.g., structure elements) or performed (e.g., behavior elements)." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Element> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Grouping>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/CompositeElement> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/StructuralElement> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Service>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "a service is the externally visible behavior of the providing system, from the perspective of systems that use that service; the environment consists of everything outside this providing system. The value offered to the user of the service provides the motivation for the existence of the service. For the users, only this exposed behavior and value, together with non-functional aspects such as the quality of service, costs, etc., are relevant. These can be specified in a contract or Service-Level Agreement (SLA). Services are accessible through interfaces." ;
+            <http://www.w3.org/2004/02/skos/core#exactMatch>
+                    <http://atlaskg.global.hsbc/global/archi31/ExternalBehaviouralElement> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ExternalBehaviouralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An external behavior element, called a service, represents an explicitly defined exposed behavior." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Event>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An event represents a state change." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/InternalBehaviouralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An internal behavior element represents a unit of activity that can be performed by one or more active structure elements." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Process>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/InternalBehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A process represents a sequence of behaviors that achieves a specific result. Informally speaking, processes describe some kind of “flow” of activities, whereas functions group activities according to required skills, knowledge, resources, etc." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Function> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Function>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/InternalBehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A function represents a collection of behavior based on specific criteria, such as required resources, competencies, or location. Just like a business process, a business function also describes internal behavior performed by a business role. However, while a business process groups behavior based on a sequence or flow of activities that is needed to realize a product or service, a business function typically groups behavior based on required business resources, skills, competencies, knowledge, etc. There is a potential many-to-many relation between business processes and business functions." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Process> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Interaction>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/InternalBehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An interaction represents a unit of collective behavior that must be performed by two or more internal active structure elements, either assigned directly or aggregated in a collaboration." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/BusinessActor>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A business actor represents a business entity that is capable of performing behavior.  Examples of business actors are humans, departments, and business units.  A business actor may be assigned to one or more business roles. It can then perform the behavior to which these business roles are assigned. A business actor can be aggregated in a location. The name of a business actor should preferably be a noun. " ;
+            <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BusinessLayer> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/BusinessRole>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A business role represents the responsibility for performing specific behavior, to which an actor can be assigned, or the part an actor plays in a particular action or event.  Business roles with certain responsibilities or skills are assigned to business processes or business functions. A business actor that is assigned to a business role is responsible for ensuring that the corresponding behavior is carried out, either by performing it or by delegating and managing its performance. In addition to the relation of a business role with behavior, a business role is also useful in a (structural) organizational sense; for instance, in the division of labor within an organization. " ;
+            <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BusinessLayer> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ApplicationComponent>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An application component represents an encapsulation of application functionality aligned to implementation structure, which is modular and replaceable.  It is independently deployable, re-usable, and replaceable. An application component performs one or more application functions. It encapsulates its behavior and data, exposes services, and makes them available through interfaces. Cooperating application components are connected via application collaborations.  An application component may be assigned to one or more application functions. " ;
+            <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ApplicationLayer> ;
+            <http://www.w3.org/2004/02/skos/core#exactMatch>
+                    <http://atlaskg.global.hsbc/global/archi31/ApplicationInstance> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ApplicationInstance>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "In HSBC :ApplicationInstance is a direct equivalent of Archimate :ApplicationComponent." ;
+            <http://www.w3.org/2004/02/skos/core#exactMatch>
+                    <http://atlaskg.global.hsbc/global/archi31/ApplicationComponent> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ApplicationFunction>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BehaviouralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An application function represents automated behavior that can be performed by an application component. If this behavior is exposed externally, this is done through one or more services. An application function abstracts from the way it is implemented. Only the necessary behavior is specified. An application function may access data objects. An application component may be assigned to an application function (which means that the application component performs the application function). The name of an application function should preferably be a verb ending with “-ing”; e.g., “accounting”." ;
+            <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ApplicationLayer> ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/ApplicationComponent> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/BusinessObject>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/PassiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A business object represents a concept used within a particular business domain.  Business objects are passive in the sense that they do not trigger or perform processes. Business objects represent information produced and consumed by behavior elements such as business processes. A business object could be used to represent information assets that are relevant from a business point of view and can be realized by data objects. A business object typically models an object type (cf. a UML class). " ;
+            <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BusinessLayer> ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Representation> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Representation>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/PassiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A representation represents a perceptible form of the information carried by a business object. Representations (for example, reports, messages or documents) are the perceptible carriers of information that are related to business objects. If relevant, representations can be classified in various ways; for example, in terms of medium (electronic, paper, audio, etc.) or format (HTML, ASCII, PDF, RTF, etc.). A single business object can have a number of different representations. Also, a single representation can realize one or more specific business objects. A meaning can be associated with a representation that carries this meaning. The name of a representation is preferably a noun." ;
+            <http://atlaskg.global.hsbc/global/archi31/isPartOf>
+                    <http://atlaskg.global.hsbc/global/archi31/BusinessLayer> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/PassiveStructuralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/StructuralElement> .
+    
+    <http://atlaskg.global.hsbc/global/archi31/InternalActiveStructuralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "Represents an entity that is capable of performing behavior." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/Collaboration>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/InternalActiveStructuralElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A collaboration represents an aggregate of two or more internal active structure elements, working together to perform some collective behavior." .
+    
+    <http://atlaskg.global.hsbc/global/archi31/ExternalActiveStructuralElement>
+            a       <http://atlaskg.global.hsbc/global/archi31/AtlasClass> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://atlaskg.global.hsbc/global/archi31/ActiveStructuralElement> .
+    
+    <http://example.com/BusinessUnit>
+            a       <http://atlaskg.global.hsbc/global/archi31/BusinessActor> .
+    
+    <http://example.com/LegalEntity>
+            a       <http://atlaskg.global.hsbc/global/archi31/BusinessActor> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A real or incorpeal entity capable of being sued." .
+    
+    <http://example.com/HSBCLegalEntity>
+            a       <http://example.com/LegalEntity> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A legal entity that forms part of HSBC.  Plc secretariat arranges these entities into a five level ragged hierarchy." .
+    
+    <http://example.com/BusinessLegalEntityCombo>
+            a       <http://atlaskg.global.hsbc/global/archi31/BusinessActor> , <http://atlaskg.global.hsbc/global/archi31/Collaboration> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://example.com/BusinessUnit> , <http://example.com/LegalEntity> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "A derived combination of BusinessUnit and HSBCLegalEntity used as a summary of the OSPD - HSBCLegalEntity data with cost centre dropped out to create unique combinations of BusinessUnit and HSBCLegalEntity." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://example.com/CostCentre> .
+    
+    <http://example.com/CostCentre>
+            a       <http://atlaskg.global.hsbc/global/archi31/Grouping> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://example.com/BusinessUnit> , <http://example.com/HSBCLegalEntity> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "The cost centre aggregates accounting entries.  It is owned by a business unit.  The (speculative) source of cost centre data is OSPD." .
+    
+    <http://example.com/HSBCReportingLocation>
+            a       <http://atlaskg.global.hsbc/global/archi31/LocationCompositeElement> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "An HSBC Reporting Location acts as a classifier used by HSBC for reporting purposes.  Instances are arranged in  three level hierarchy.  The (speculative) source of this reporting hierarchy is Helios via Group Operational Risk." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://example.com/Country> .
+    
+    <http://example.com/isRegistrationLocationOf>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/Country> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/LegalEntity> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/aggregates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/registeredIn> .
+    
+    <http://example.com/registeredIn>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/aggregates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/isRegistrationLocationOf> .
+    
+    <http://example.com/reportsActivitiesOf>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/HSBCReportingLocation> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/BusinessLegalEntityCombo> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/aggregates> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "HSBCReportingLocation is a location oriented hierarchy.  An open question exists about the range of 'things' to which it can point.  Documented here is ex:BusinessUnit and ex:BusinessLegalEntityCombo until the range can be finalised." ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/reportsVia> ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/LocationCompositeElement> .
+    
+    <http://example.com/reportsVia>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/aggregates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/reportsActivitiesOf> .
+    
+    <http://example.com/EPMProcess>
+            a       <http://atlaskg.global.hsbc/global/archi31/Function> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "In HSBC the notion of process is often used in the manner envisaged by Function in Achimate." ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://atlaskg.global.hsbc/global/archi31/Process> .
+    
+    <http://example.com/carriesOut>
+            a       <http://atlaskg.global.hsbc/global/archi31/assignedTo> ;
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/BusinessLegalEntityCombo> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/EPMProcess> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/performedBy> .
+    
+    <http://example.com/performedBy>
+            a       <http://atlaskg.global.hsbc/global/archi31/assignedFrom> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/carriesOut> .
+    
+    <http://example.com/USA>
+            a       <http://example.com/Country> ;
+            <http://atlaskg.global.hsbc/global/archi31/externalReference>
+                    <https://www.iso.org/obp/ui/#iso:code:3166:US> , <https://en.wikipedia.org/wiki/United_States> ;
+            <http://example.com/usesCurrency>
+                    <http://www.hsbc.com/referencedata/Currency/USD> .
+    
+    <http://example.com/UK>
+            a       <http://example.com/Country> ;
+            <http://atlaskg.global.hsbc/global/archi31/externalReference>
+                    <https://www.iso.org/obp/ui/#iso:code:3166:UK> , <https://en.wikipedia.org/wiki/United_Kingdom> .
+    
+    <http://example.com/CN>
+            a       <http://example.com/Country> ;
+            <http://atlaskg.global.hsbc/global/archi31/externalReference>
+                    <https://www.iso.org/obp/ui/#iso:code:3166:CN> , <https://en.wikipedia.org/wiki/China> .
+    
+    <http://example.com/HASE_China>
+            a       <http://example.com/HSBCReportingLocation> ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://example.com/CN> .
+    
+    <http://example.com/UK_ReportingLocation>
+            a       <http://example.com/HSBCReportingLocation> ;
+            <http://www.w3.org/2004/02/skos/core#related>
+                    <http://example.com/UK> .
+    
+    <http://example.com/HANA>
+            a       <http://example.com/HSBCLegalEntity> ;
+            <http://example.com/registeredIn>
+                    <http://example.com/USA> .
+    
+    <http://example.com/HBFR>
+            a       <http://example.com/HSBCLegalEntity> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://example.com/HSBCIrelnBranch> ;
+            <http://example.com/registeredIn>
+                    <http://example.com/FR> .
+    
+    <http://example.com/HSBCIrelnBranch>
+            a       <http://example.com/HSBCLegalEntity> .
+    
+    <http://example.com/HSBCBankUK>
+            a       <http://example.com/HSBCLegalEntity> ;
+            <http://example.com/registeredIn>
+                    <http://example.com/UK> .
+    
+    <http://example.com/HBPLC>
+            a       <http://example.com/HSBCLegalEntity> ;
+            <http://example.com/registeredIn>
+                    <http://example.com/UK> .
+    
+    <http://example.com/HongKongShanghaiBankLimited_China>
+            a       <http://example.com/HSBCLegalEntity> ;
+            <http://example.com/registeredIn>
+                    <http://example.com/CN> .
+    
+    <http://example.com/hasCostCentreId>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/CostCentre> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://www.w3.org/2001/XMLSchema#string> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> .
+    
+    <http://example.com/ownsCostCentre>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/BusinessUnit> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/CostCentre> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/costCentreOwnedBy> .
+    
+    <http://example.com/costCentreOwnedBy>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/ownsCostCentre> .
+    
+    <http://example.com/isAnAccountingGroupingFor>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/CostCentre> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/HSBCLegalEntity> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/accountsUsing> .
+    
+    <http://example.com/accountsUsing>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/isAnAccountingGroupingFor> .
+    
+    <http://example.com/isaCollaborationBetween>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/BusinessLegalEntityCombo> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/BusinessUnit> , <http://example.com/ex:HSBCBankUK> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/partOfCollaboration> .
+    
+    <http://example.com/partOfCollaboration>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/associates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/isaCollaborationBetween> .
+    
+    <http://example.com/CostCentre/50235000>
+            a       <http://example.com/CostCentre> ;
+            <http://example.com/costCentreOwnedBy>
+                    <http://example.com/GBM> ;
+            <http://example.com/hasCostCentreId>
+                    "50235000" ;
+            <http://example.com/isAnAccountingGroupingFor>
+                    <http://example.com/HongKongShanghaiBankLimited_China> .
+    
+    <http://example.com/GBM>
+            a       <http://example.com/BusinessUnit> .
+    
+    <http://example.com/GBMInHongKongShanghaiBankLimited_China>
+            a       <http://example.com/BusinessLegalEntityCombo> ;
+            <http://example.com/isaCollaborationBetween>
+                    <http://example.com/HongKongShanghaiBankLimited_China> , <http://example.com/GBM> ;
+            <http://example.com/reportsVia>
+                    <http://example.com/HASE_China> .
+    
+    <http://example.com/GBMInHSBCBankUK>
+            a       <http://example.com/BusinessLegalEntityCombo> ;
+            <http://example.com/isaCollaborationBetween>
+                    <http://example.com/HSBCBankUK> , <http://example.com/GBM> ;
+            <http://example.com/reportsVia>
+                    <http://example.com/UK_ReportingLocation> .
+    
+    <http://example.com/GlobalRisk>
+            a       <http://example.com/BusinessUnit> .
+    
+    <http://example.com/GlobalFinance>
+            a       <http://example.com/BusinessUnit> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://example.com/ALCM> .
+    
+    <http://example.com/ALCM>
+            a       <http://example.com/BusinessUnit> .
+    
+    <http://example.com/ALCMInHBPLC>
+            a       <http://example.com/BusinessLegalEntityCombo> ;
+            <http://example.com/isaCollaborationBetween>
+                    <http://example.com/HBPLC> , <http://example.com/ALCM> ;
+            <http://example.com/reportsVia>
+                    <http://example.com/UK_ReportingLocation> .
+    
+    <http://example.com/WPBInHSBCBankUK>
+            a       <http://example.com/BusinessLegalEntityCombo> ;
+            <http://example.com/isaCollaborationBetween>
+                    <http://example.com/HSBCBankUK> , <http://example.com/WPB> ;
+            <http://example.com/reportsVia>
+                    <http://example.com/UK_ReportingLocation> .
+    
+    <http://example.com/WPB>
+            a       <http://example.com/BusinessUnit> .
+    
+    <http://example.com/ALMProductionManagement>
+            a       <http://example.com/EPMProcess> ;
+            <http://atlaskg.global.hsbc/global/archi31/consistsOf>
+                    <http://example.com/LiquidityFundingAndInterestRateRiskProcessingManagement> .
+    
+    <http://example.com/LiquidityFundingAndInterestRateRiskProcessingManagement>
+            a                              <http://example.com/EPMProcess> ;
+            <http://example.com/performedBy>
+                    <http://example.com/ALCMInHBPLC> ;
+            <http://example.com/produces>  <http://example.com/LiquidityCoverageRatio> .
+    
+    <http://example.com/produces>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/BusinessLegalEntityCombo> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/BusinessObject> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/accesses> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/producedBy> .
+    
+    <http://example.com/LiquidityCoverageRatio>
+            a       <http://example.com/Metric> .
+    
+    <http://example.com/containsMetric>
+            <http://www.w3.org/2000/01/rdf-schema#domain>
+                    <http://example.com/Report> ;
+            <http://www.w3.org/2000/01/rdf-schema#range>
+                    <http://example.com/Metric> ;
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/aggregates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/appearsOnReport> .
+    
+    <http://example.com/Report>
+            a       <http://atlaskg.global.hsbc/global/archi31/Representation> .
+    
+    <http://example.com/Metric>
+            a       <http://atlaskg.global.hsbc/global/archi31/BusinessObject> .
+    
+    <http://example.com/appearsOnReport>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/aggregates> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/containsMetric> .
+    
+    <http://example.com/ALCOReport>
+            a       <http://atlaskg.global.hsbc/global/archi31/Representation> ;
+            <http://www.w3.org/2000/01/rdf-schema#subClassOf>
+                    <http://example.com/Report> ;
+            <http://example.com/containsMetric>
+                    <http://example.com/LiquidityCoverageRatio> .
+    
+    <http://example.com/producedBy>
+            <http://www.w3.org/2000/01/rdf-schema#subPropertyOf>
+                    <http://atlaskg.global.hsbc/global/archi31/accesses> ;
+            <http://atlaskg.global.hsbc/global/archi31/invertedAs>
+                    <http://example.com/produces> .
+    
+    <http://example.com/ApplictionInstance/7491774>
+            a                               <http://atlaskg.global.hsbc/global/archi31/ApplicationInstance> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "Migration of functions related to Global Liquidity Calculation and Reporting to the Google Cloud Platform, driven by a change in our vendor strategy and aligned to Cloud First. The first phase of the Global Finance Stratus project" ;
+            <http://atlaskg.global.hsbc/global/archi31/externalReference>
+                    <https://atlas.uk.hsbc/?App_Instance=7491774> ;
+            <http://example.com/name>       "Group Finance Cloud Liquidity Platform" ;
+            <http://example.com/shortName>  "GFCLP" .
+    
+    <http://example.com/ApplictionInstance/242813>
+            a                               <http://atlaskg.global.hsbc/global/archi31/ApplicationInstance> ;
+            <http://atlaskg.global.hsbc/global/archi31/description>
+                    "DRR ipso facto" ;
+            <http://atlaskg.global.hsbc/global/archi31/externalReference>
+                    <https://atlas.uk.hsbc/?App_Instance=242813> ;
+            <http://example.com/shortName>  "DRR" .
+    
+    <http://example.com/ApplictionFunction/ManagingLiquidityFundingAndInterestRateRiskProcessing>
+            a       <http://atlaskg.global.hsbc/global/archi31/ApplicationFunction> ;
+            <http://atlaskg.global.hsbc/global/archi31/assignedTo>
+                    <http://example.com/ApplictionInstance/7491774> ;
+            <http://atlaskg.global.hsbc/global/archi31/realizes>
+                    <http://example.com/LiquidityFundingAndInterestRateRiskProcessingManagement> .
+}
