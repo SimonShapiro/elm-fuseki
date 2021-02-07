@@ -1,0 +1,9 @@
+base <https://timbl.inrupt.net/profile/> 
+prefix : <http://example.com/>
+construct
+{ 
+?t :appearsOn [ :type ?type; 
+                        :as   [
+                     ?p ?s
+] ].
+}  {bind(<http://www.w3.org/ns/auth/acl#Read> as ?t) . ?s ?p ?t. optional { ?t a ?type .}}

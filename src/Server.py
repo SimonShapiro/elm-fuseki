@@ -150,12 +150,18 @@ def processUpdateQuery(qType, queryString, res):
                 ]]
         status = 200
     else:
-        vars = [qType]
+        vars = [qType, "Reason"]
+        print("I have an error from Fuseki", error)
         rows = [[Atom(key=qType, 
                         value=str(False), 
                         aType="literal", 
                         datatype="http://www.w3.org/2001/XMLSchema#boolean"
-                    )
+                    ),
+                Atom(key="Reason", 
+                        value=error, 
+                        aType="literal", 
+                        datatype="http://www.w3.org/2001/XMLSchema#string"
+                    )                
                 ]]
         status = 200
     print(status, error, vars, rows)    
@@ -281,11 +287,11 @@ def establishQueryType(queryString):
     else:
         return "select"  #  might need something else here
 
-@lru_cache(maxsize=None)        
+#@lru_cache(maxsize=None)        
 def forwardSparqlToKnowledgeGraphUpdate(clientAcceptHeader, qType, queryString):
     print(f"Uncached server request for {queryString} at {datetime.datetime.now()}")
-    forwardSparqlToKnowledgeGraph.cache_clear()
-    forwardSparqlToKnowledgeGraphUpdate.cache_clear()
+#    forwardSparqlToKnowledgeGraph.cache_clear()
+#    forwardSparqlToKnowledgeGraphUpdate.cache_clear()
     res = requests.request("POST", SERVER+"/update",
             data = queryString.encode('utf-8'), 
             headers = {
@@ -302,7 +308,7 @@ def forwardSparqlToKnowledgeGraphUpdate(clientAcceptHeader, qType, queryString):
     else:
         return None
 
-@lru_cache(maxsize=None)
+#@lru_cache(maxsize=None)
 def forwardSparqlToKnowledgeGraph(clientAcceptHeader, qType, queryString):
     print(f"Uncached server request for {queryString} at {datetime.datetime.now()}")
     res = requests.request("POST", SERVER+"/sparql",
@@ -337,6 +343,7 @@ def forwardSparqlToKnowledgeGraph(clientAcceptHeader, qType, queryString):
 @app.route("/sparql", methods=['POST'])
 def sparql():
     queryString = request.data.decode()
+    print("Processing query")
     print(queryString)
     print(request.headers)
     clientAcceptHeader = request.headers["Accept"] if request.headers.get("Accept") else "application/json"  # test qType here

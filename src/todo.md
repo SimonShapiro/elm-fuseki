@@ -11,10 +11,9 @@
 - ~~Add lru caching to improve query performance~~
 - ~~Element.text word wrap of object literals~~
 - ~~Element.Input.text loss of focus~~
-- Need to get server errors back to ui
+- ~~Need to get server errors back to ui - especiallly related to update~~
 - Command line query should not be submitted
-- ~~Add message to `load` response~~
-- Add port as commandline paramter for Server.py 
+- Add port as commandline parameter for Server.py 
 - A bug on `select distinct ?g {?s ?p ?o.}`
 - Fine tune chache maxsize
 - Back reloads page and loses reference position 
@@ -43,6 +42,7 @@
 - automatically sense non-s, p, o in subject view
 - show/hide query history (use n more / less) semantics
 - make no info on subject view more obvious
+- add reverse cards via query
 - Improve url routing
 - Add settings - api url; allow implied external links to model
 - check for in result/graph access to object uri
@@ -50,6 +50,7 @@
 - Save ttl in subject view
 - Tableview to get hyperlink logic?
 - Dockerise server.py
+- Investigate fuseki deployment/embedding and tdb sync
 - graph view
 - Add limit and offset semantics in table and subject oriented list
 - csv download - filename to be input
