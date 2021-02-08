@@ -448,7 +448,7 @@ elOfSubjectMoleculeCard model mole =
     in
         case subj of
             BlankNode _ -> 
-                Element.column elOfCardAttributes
+                Element.column [Element.paddingXY 10 0, Element.Border.dotted, Element.Border.width 1]
                     [ elOfPredicates model mole
                     ]
             
@@ -515,16 +515,6 @@ elOfRdfNodeAsPredicate model node =
                         ] (Element.text "All predicates should be Uri")
 
 
-viewRdfNodeAsPredicate: Model -> RdfNode -> Html Msg
-viewRdfNodeAsPredicate model node = 
-    case node of
-        Uri a ->
-            b []    [ Html.text (aka model.predicateStyle a.value)
-                    , Html.text ": "
-                    ]
-        _ ->
-            b []    [ Html.text "All predicates should be Uri"]
-
 removeUrlFragment: String -> String
 removeUrlFragment urlString =
     urlString 
@@ -542,7 +532,7 @@ elOfRdfNode model nodeType node =
         Uri a ->
             case nodeType of
                 Object ->
-                    Element.el []   (Element.row []
+                    Element.el [Element.paddingXY 5 0]   (Element.row []
                                         [ Element.link [ Element.Font.color colorPalette.header
                                         , Element.mouseOver [Element.Font.color colorPalette.lowlight]
                                         ] 
@@ -570,16 +560,16 @@ elOfRdfNode model nodeType node =
                                 Subject -> Element.text a.value
                                 Predicate -> elOfRdfNode model Predicate node
         LiteralOnlyValue a ->
-            Element.paragraph [] [Element.text a.value]
+            Element.paragraph [Element.paddingXY 5 0] [Element.text a.value]
         LiteralValueAndDataType a ->
-            Element.paragraph [] [ Element.text a.value
+            Element.paragraph [Element.paddingXY 5 0] [ Element.text a.value
                                 , Element.row [Element.Font.size sizePalette.smallPrint][ Element.text "  ("
                                                 , Element.text a.dataType
                                                 , Element.text ")"]
                                 ]
 
         LiteralValueAndLanguageString a ->
-            Element.paragraph [] [ Element.text a.value
+            Element.paragraph [Element.paddingXY 5 0] [ Element.text a.value
                     , Element.row [Element.Font.size sizePalette.smallPrint]
                             [ Element.text "  ("
                             , Element.text a.language

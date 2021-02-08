@@ -15582,6 +15582,8 @@ var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
 var $author$project$Main$Subject = {$: 'Subject'};
 var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
 var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
+var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
+var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
 var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
 	return $elm$core$String$concat(
 		_List_fromArray(
@@ -15899,7 +15901,10 @@ var $author$project$Main$elOfRdfNode = F3(
 						case 'Object':
 							return A2(
 								$mdgriffith$elm_ui$Element$el,
-								_List_Nil,
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+									]),
 								A2(
 									$mdgriffith$elm_ui$Element$row,
 									_List_Nil,
@@ -15968,7 +15973,10 @@ var $author$project$Main$elOfRdfNode = F3(
 					var a = node.a;
 					return A2(
 						$mdgriffith$elm_ui$Element$paragraph,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+							]),
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$text(a.value)
@@ -15977,7 +15985,10 @@ var $author$project$Main$elOfRdfNode = F3(
 					var a = node.a;
 					return A2(
 						$mdgriffith$elm_ui$Element$paragraph,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+							]),
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$text(a.value),
@@ -15998,7 +16009,10 @@ var $author$project$Main$elOfRdfNode = F3(
 					var a = node.a;
 					return A2(
 						$mdgriffith$elm_ui$Element$paragraph,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+							]),
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$text(a.value),
@@ -16084,7 +16098,12 @@ var $author$project$Main$elOfSubjectMoleculeCard = F2(
 			case 'BlankNode':
 				return A2(
 					$mdgriffith$elm_ui$Element$column,
-					$author$project$Main$elOfCardAttributes,
+					_List_fromArray(
+						[
+							A2($mdgriffith$elm_ui$Element$paddingXY, 10, 0),
+							$mdgriffith$elm_ui$Element$Border$dotted,
+							$mdgriffith$elm_ui$Element$Border$width(1)
+						]),
 					_List_fromArray(
 						[
 							A2($author$project$Main$elOfPredicates, model, mole)
