@@ -560,9 +560,9 @@ elOfRdfNode model nodeType node =
                                 Subject -> Element.text a.value
                                 Predicate -> elOfRdfNode model Predicate node
         LiteralOnlyValue a ->
-            Element.paragraph [Element.paddingXY 5 0] [Element.text a.value]
+            Element.paragraph [Element.paddingXY 5 0, Element.width fill] [Element.text a.value]
         LiteralValueAndDataType a ->
-            Element.paragraph [Element.paddingXY 5 0] [ Element.text a.value
+            Element.paragraph [Element.paddingXY 5 0, Element.width fill] [ Element.text a.value
                                 , Element.row [Element.Font.size sizePalette.smallPrint][ Element.text "  ("
                                                 , Element.text a.dataType
                                                 , Element.text ")"]

@@ -15975,7 +15975,8 @@ var $author$project$Main$elOfRdfNode = F3(
 						$mdgriffith$elm_ui$Element$paragraph,
 						_List_fromArray(
 							[
-								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
 						_List_fromArray(
 							[
@@ -15987,7 +15988,8 @@ var $author$project$Main$elOfRdfNode = F3(
 						$mdgriffith$elm_ui$Element$paragraph,
 						_List_fromArray(
 							[
-								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
 						_List_fromArray(
 							[
