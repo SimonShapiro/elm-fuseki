@@ -56,6 +56,8 @@ import Element
 import Element
 import Element
 
+version: String
+version = "v0.1"
 type alias Document msg =
     { title : String
     , body : List (Html msg)
@@ -784,7 +786,7 @@ elOfHeading model =
                                 , Element.width Element.fill
                                 ]   
                                     [ elOfServerInput model
-                                    , Element.el [Element.centerY, Element.alignRight, Element.paddingXY 5 0] (Element.text "Sparql Playground - v0.0")
+                                    , Element.el [Element.centerY, Element.alignRight, Element.paddingXY 5 0] (Element.text <| "Sparql Playground - "++version)
                                     ])
 
 elOfServerInput: Model -> Element Msg

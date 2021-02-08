@@ -14709,6 +14709,7 @@ var $mdgriffith$elm_ui$Element$Font$size = function (i) {
 		$mdgriffith$elm_ui$Internal$Flag$fontSize,
 		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
 };
+var $author$project$Main$version = 'v0.1';
 var $author$project$Main$elOfHeading = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$el,
@@ -14738,7 +14739,7 @@ var $author$project$Main$elOfHeading = function (model) {
 							$mdgriffith$elm_ui$Element$alignRight,
 							A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
 						]),
-					$mdgriffith$elm_ui$Element$text('Sparql Playground - v0.0'))
+					$mdgriffith$elm_ui$Element$text('Sparql Playground - ' + $author$project$Main$version))
 				])));
 };
 var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
