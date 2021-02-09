@@ -230,6 +230,21 @@ parseUrlForIndexQuery url =
     in
         Url.Parser.parse parseQuery url |> join |> Maybe.map establishQueryType
 
+-- Utility functions
+
+urlTextAbbreviator: String -> String
+urlTextAbbreviator longUrl = 
+-- the size here is dependent on font choosen, so shouldn't be constants
+    let
+        halfLength = String.length longUrl // 2 |> min 40
+        usableString = if (String.length longUrl) > 86
+            then
+                (String.left halfLength longUrl)++"..."++(String.right halfLength longUrl)
+            else
+                longUrl
+    in
+        usableString
+
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -551,7 +566,7 @@ elOfRdfNode model nodeType node =
                                         , Element.mouseOver [Element.Font.color colorPalette.lowlight]
                                         ] 
                                         { url=("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")
-                                        , label=Element.text a.value
+                                        , label=Element.text <| urlTextAbbreviator <| a.value  
                                         }
                                     , Element.newTabLink [] {url=a.value, label = Element.image [] { src = "www-12px.svg", description = "" }}])
                 Subject -> Element.text a.value
@@ -574,6 +589,7 @@ elOfRdfNode model nodeType node =
                                 Subject -> Element.text a.value
                                 Predicate -> elOfRdfNode model Predicate node
         LiteralOnlyValue a ->
+            Debug.log ("Hunting the string wrapping issue "++(String.left 20 a.value)++(a.value |> String.words |> List.length |> String.fromInt))
             Element.paragraph [Element.paddingXY 5 0, Element.width fill] [Element.text a.value]
         LiteralValueAndDataType a ->
             Element.paragraph [Element.paddingXY 5 0, Element.width fill] [ Element.text a.value

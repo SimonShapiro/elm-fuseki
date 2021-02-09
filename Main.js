@@ -15840,6 +15840,23 @@ var $elm$core$List$tail = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$core$String$right = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(
+			$elm$core$String$slice,
+			-n,
+			$elm$core$String$length(string),
+			string);
+	});
+var $author$project$Main$urlTextAbbreviator = function (longUrl) {
+	var halfLength = A2(
+		$elm$core$Basics$min,
+		40,
+		($elm$core$String$length(longUrl) / 2) | 0);
+	var usableString = ($elm$core$String$length(longUrl) > 86) ? (A2($elm$core$String$left, halfLength, longUrl) + ('...' + A2($elm$core$String$right, halfLength, longUrl))) : longUrl;
+	return usableString;
+};
+var $elm$core$String$words = _String_words;
 var $author$project$Main$elOfObjects = F3(
 	function (model, subj, po) {
 		var _v7 = po;
@@ -15923,7 +15940,8 @@ var $author$project$Main$elOfRdfNode = F3(
 														]))
 												]),
 											{
-												label: $mdgriffith$elm_ui$Element$text(a.value),
+												label: $mdgriffith$elm_ui$Element$text(
+													$author$project$Main$urlTextAbbreviator(a.value)),
 												url: '/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>')
 											}),
 											A2(
@@ -15972,7 +15990,11 @@ var $author$project$Main$elOfRdfNode = F3(
 					}
 				case 'LiteralOnlyValue':
 					var a = node.a;
-					return A2(
+					return A4(
+						$elm$core$Debug$log,
+						'Hunting the string wrapping issue ' + (A2($elm$core$String$left, 20, a.value) + $elm$core$String$fromInt(
+							$elm$core$List$length(
+								$elm$core$String$words(a.value)))),
 						$mdgriffith$elm_ui$Element$paragraph,
 						_List_fromArray(
 							[
@@ -16625,7 +16647,6 @@ var $mdgriffith$elm_ui$Internal$Model$Typeface = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Flag$fontFamily = $mdgriffith$elm_ui$Internal$Flag$flag(5);
 var $elm$core$String$toLower = _String_toLower;
-var $elm$core$String$words = _String_words;
 var $mdgriffith$elm_ui$Internal$Model$renderFontClassName = F2(
 	function (font, current) {
 		return _Utils_ap(

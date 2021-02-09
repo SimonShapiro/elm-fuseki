@@ -13,6 +13,7 @@
 - ~~Element.Input.text loss of focus~~
 - ~~Need to get server errors back to ui - especiallly related to update~~
 - ~~A bug on `select distinct ?g {?s ?p ?o.}`~~
+- need to short the text on ultralong joined up objects - esp Url a
 - replace error elements with paragraph elements.
 - Paragraph does not always flow at end of box - currently only observed intermitently at work version???!!!
 - Command line query should not be submitted
@@ -40,6 +41,7 @@
 - ~~Investigate elm-ui~~
 - ~~Simple styling~~
 - ~~add reverse cards via query - ie back links~~
+- find some way to sort lists
 - automatically sense non-s, p, o in subject view
 - make no info on subject view more obvious
 - devlop ontology buttons 
