@@ -466,9 +466,9 @@ elOfSubjectMoleculeCard model mole =
             [ 
             --    "base <http://kg.info/temp/> , 
             "construct"
-            , "{<"++target++"> <appearsAsObjectOn> "
-            , "[ ?p ?s ] } {"
-            , "?s ?p <"++target++">. }"        
+            , "{<"++target++"> ?passive ?s } {"
+            , "?s ?p <"++target++">. "
+            , "bind(uri(concat(str(?p), '_Inverted')) as ?passive)}"        
             ]
     in
         case subj of

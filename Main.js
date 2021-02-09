@@ -16124,7 +16124,7 @@ var $author$project$Main$elOfSubjectMoleculeCard = F2(
 				$elm$core$String$join,
 				'\n',
 				_List_fromArray(
-					['construct', '{<' + (target + '> <appearsAsObjectOn> '), '[ ?p ?s ] } {', '?s ?p <' + (target + '>. }')]));
+					['construct', '{<' + (target + '> ?passive ?s } {'), '?s ?p <' + (target + '>. '), 'bind(uri(concat(str(?p), \'Inverted\')) as ?passive)}']));
 		};
 		switch (subj.$) {
 			case 'BlankNode':
