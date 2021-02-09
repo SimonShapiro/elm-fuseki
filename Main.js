@@ -16097,6 +16097,13 @@ var $author$project$Main$elOfRestOfObjectList = F4(
 var $author$project$Main$elOfSubjectMoleculeCard = F2(
 	function (model, mole) {
 		var subj = mole.a;
+		var backLinksQuery = function (target) {
+			return A2(
+				$elm$core$String$join,
+				'\n',
+				_List_fromArray(
+					['construct', '{<' + (target + '> <appearsAsObjectOn> '), '[ ?p ?s ] } {', '?s ?p <' + (target + '>. }')]));
+		};
 		switch (subj.$) {
 			case 'BlankNode':
 				return A2(
@@ -16117,6 +16124,25 @@ var $author$project$Main$elOfSubjectMoleculeCard = F2(
 					$author$project$Main$elOfCardAttributes,
 					_List_fromArray(
 						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command),
+									$mdgriffith$elm_ui$Element$alignRight
+								]),
+							A2(
+								$mdgriffith$elm_ui$Element$link,
+								_List_Nil,
+								{
+									label: $mdgriffith$elm_ui$Element$text('Back links'),
+									url: '/index.html?query=' + backLinksQuery(
+										$author$project$Main$encodeUrlFragmentMarker(
+											A2(
+												$elm$core$Maybe$withDefault,
+												'unknown',
+												$author$project$RdfDict$makeRdfKey(subj))))
+								})),
 							A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(

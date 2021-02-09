@@ -447,6 +447,14 @@ elOfSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
 elOfSubjectMoleculeCard model mole =
     let
         subj = Tuple.first mole
+        backLinksQuery target =  String.join "\n" 
+            [ 
+            --    "base <http://kg.info/temp/> , 
+            "construct"
+            , "{<"++target++"> <appearsAsObjectOn> "
+            , "[ ?p ?s ] } {"
+            , "?s ?p <"++target++">. }"        
+            ]
     in
         case subj of
             BlankNode _ -> 
@@ -456,7 +464,11 @@ elOfSubjectMoleculeCard model mole =
             
             Uri _ ->
                 Element.column elOfCardAttributes
-                    [ Element.el [Element.Font.size sizePalette.subject] 
+                    [ Element.el [Element.Font.size sizePalette.command, Element.alignRight] 
+                        (Element.link [] {url=("/index.html?query="
+                        ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker |> backLinksQuery) 
+                        ), label=Element.text "Back links"})
+                    , Element.el [Element.Font.size sizePalette.subject] 
                         (Element.link [] {url=("/index.html?query=describe <"
                         ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
                         ++">"), label=elOfRdfNode model Subject subj}) -- make case here to clean up the view function below

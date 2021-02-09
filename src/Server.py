@@ -37,16 +37,23 @@ def hello():
 
 def buildAtom(v, bound):
     # standardise shape format of bnode to _:
-    if bound[v]["type"] == 'bnode':
-        bound[v]["value"] = "_:"+bound[v]["value"]
-    atom = Atom(key=v, 
-                value=bound[v]["value"] if bound.get(v) else "",
-                aType=bound[v]["type"]
-            )
-    if bound[v].get("xml:lang"):
-        atom.language = bound[v].get("xml:lang")
-    if bound[v].get("datatype"):
-        atom.datatype = bound[v].get("datatype")
+    # wht to do if v is not in bound
+    if bound.get(v):
+        if bound[v]["type"] == 'bnode':
+            bound[v]["value"] = "_:"+bound[v]["value"]
+        atom = Atom(key=v, 
+                    value=bound[v]["value"] if bound.get(v) else "",
+                    aType=bound[v]["type"]
+                )
+        if bound[v].get("xml:lang"):
+            atom.language = bound[v].get("xml:lang")
+        if bound[v].get("datatype"):
+            atom.datatype = bound[v].get("datatype")
+    else:
+        atom = Atom(key=v,
+                value="Failure: Impossible query",
+                aType="Error"
+        )
     return atom
 
 def serializeResults(rows):
@@ -237,20 +244,44 @@ def processConstructQuery(qType, queryString, res):
 #                            print(f'--{objectAtom}')
 #                        print([subjectAtom, predicateAtom, objectAtom])
                         resultArray.append([subjectAtom, predicateAtom, objectAtom])
+        return {
+            "status": 200,
+            "response": json.dumps({
+                "server": request.url_root[:-1],
+                "status": status,
+                "reason": error,
+                "queryType": qType,
+                "query": queryString,
+                "vars": ['s', 'p', 'o'],
+                "result": serializeResults(resultArray)
+            })}
     else:
-        pass
-    print(serializeResults(resultArray))
-    return {
-        "status": 200,
-        "response": json.dumps({
-            "server": request.url_root[:-1],
-            "status": status,
-            "reason": error,
-            "queryType": qType,
-            "query": queryString,
-            "vars": ['s', 'p', 'o'],
-            "result": serializeResults(resultArray)
-        })}
+        vars = [qType, "Reason"]
+        print("I have an error from Fuseki", error)
+        rows = [[Atom(key=qType, 
+                        value="Failure", 
+                        aType="literal", 
+                        datatype="http://www.w3.org/2001/XMLSchema#string"
+                    ),
+                Atom(key="Reason", 
+                        value=error, 
+                        aType="literal", 
+                        datatype="http://www.w3.org/2001/XMLSchema#string"
+                    )                
+                ]]
+        status = 200
+        print(serializeResults(resultArray))
+        return {
+            "status": 200,
+            "response": json.dumps({
+                "server": request.url_root[:-1],
+                "status": status,
+                "reason": error,
+                "queryType": qType,
+                "query": queryString,
+                "vars": vars,
+                "result": serializeResults(rows)
+            })}
 
 def establishQueryType(queryString):
     q = queryString.lower()

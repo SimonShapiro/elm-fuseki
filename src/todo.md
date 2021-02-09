@@ -12,9 +12,11 @@
 - ~~Element.text word wrap of object literals~~
 - ~~Element.Input.text loss of focus~~
 - ~~Need to get server errors back to ui - especiallly related to update~~
+- ~~A bug on `select distinct ?g {?s ?p ?o.}`~~
+- replace error elements with paragraph elements.
+- Paragraph does not always flow at end of box - currently only observed intermitently at work version???!!!
 - Command line query should not be submitted
 - Add port as commandline parameter for Server.py 
-- A bug on `select distinct ?g {?s ?p ?o.}`
 - Fine tune chache maxsize
 - Back reloads page and loses reference position 
 
@@ -37,12 +39,12 @@
 - ~~Maintain scrolling query list~~
 - ~~Investigate elm-ui~~
 - ~~Simple styling~~
+- ~~add reverse cards via query - ie back links~~
+- automatically sense non-s, p, o in subject view
+- make no info on subject view more obvious
 - devlop ontology buttons 
 - add load in addition to execute query icon on query history
-- automatically sense non-s, p, o in subject view
 - show/hide query history (use n more / less) semantics
-- make no info on subject view more obvious
-- add reverse cards via query
 - Improve url routing
 - Add settings - api url; allow implied external links to model
 - check for in result/graph access to object uri
