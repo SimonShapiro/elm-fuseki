@@ -13,9 +13,9 @@
 - ~~Element.Input.text loss of focus~~
 - ~~Need to get server errors back to ui - especiallly related to update~~
 - ~~A bug on `select distinct ?g {?s ?p ?o.}`~~
-- need to short the text on ultralong joined up objects - esp Url a
+- ~~need to short the text on ultralong joined up objects - esp Url a~~
+- ~~Paragraph does not always flow at end of box - currently only observed intermitently at work version???!!!~~
 - replace error elements with paragraph elements.
-- Paragraph does not always flow at end of box - currently only observed intermitently at work version???!!!
 - Command line query should not be submitted
 - Add port as commandline parameter for Server.py 
 - Fine tune chache maxsize
@@ -41,6 +41,7 @@
 - ~~Investigate elm-ui~~
 - ~~Simple styling~~
 - ~~add reverse cards via query - ie back links~~
+- improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the molculeCard.
 - find some way to sort lists
 - automatically sense non-s, p, o in subject view
 - make no info on subject view more obvious

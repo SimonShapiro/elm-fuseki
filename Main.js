@@ -15451,7 +15451,27 @@ var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
 			optionArea);
 	});
 var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
-var $author$project$Main$sizePalette = {command: 12, highlight: 20, normal: 14, smallPrint: 8, subject: 32};
+var $author$project$Main$AllCaps = {$: 'AllCaps'};
+var $author$project$Main$Light = {$: 'Light'};
+var $author$project$Main$Medium = {$: 'Medium'};
+var $author$project$Main$Regular = {$: 'Regular'};
+var $author$project$Main$Sentence = {$: 'Sentence'};
+var $author$project$Main$materialPalette = {
+	body1: {case_: $author$project$Main$Sentence, size: 16, weight: $author$project$Main$Regular},
+	body2: {case_: $author$project$Main$Sentence, size: 14, weight: $author$project$Main$Regular},
+	button: {case_: $author$project$Main$AllCaps, size: 14, weight: $author$project$Main$Medium},
+	caption: {case_: $author$project$Main$Sentence, size: 12, weight: $author$project$Main$Regular},
+	h1: {case_: $author$project$Main$Sentence, size: 96, weight: $author$project$Main$Light},
+	h2: {case_: $author$project$Main$Sentence, size: 60, weight: $author$project$Main$Light},
+	h3: {case_: $author$project$Main$Sentence, size: 48, weight: $author$project$Main$Regular},
+	h4: {case_: $author$project$Main$Sentence, size: 34, weight: $author$project$Main$Regular},
+	h5: {case_: $author$project$Main$Sentence, size: 24, weight: $author$project$Main$Regular},
+	h6: {case_: $author$project$Main$Sentence, size: 20, weight: $author$project$Main$Medium},
+	overline: {case_: $author$project$Main$AllCaps, size: 10, weight: $author$project$Main$Regular},
+	subtitle1: {case_: $author$project$Main$Sentence, size: 16, weight: $author$project$Main$Regular},
+	subtitle2: {case_: $author$project$Main$Sentence, size: 14, weight: $author$project$Main$Medium}
+};
+var $author$project$Main$sizePalette = {command: $author$project$Main$materialPalette.caption.size, highlight: $author$project$Main$materialPalette.h6.size, normal: $author$project$Main$materialPalette.body2.size, smallPrint: $author$project$Main$materialPalette.overline.size, subject: $author$project$Main$materialPalette.h4.size};
 var $author$project$Main$elOfResultFormatToggle = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$Input$radioRow,
@@ -15921,7 +15941,8 @@ var $author$project$Main$elOfRdfNode = F3(
 								$mdgriffith$elm_ui$Element$el,
 								_List_fromArray(
 									[
-										A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+										A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
+										$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal)
 									]),
 								A2(
 									$mdgriffith$elm_ui$Element$row,
@@ -15999,6 +16020,7 @@ var $author$project$Main$elOfRdfNode = F3(
 						_List_fromArray(
 							[
 								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
+								$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal),
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
 						_List_fromArray(
@@ -16012,6 +16034,7 @@ var $author$project$Main$elOfRdfNode = F3(
 						_List_fromArray(
 							[
 								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
+								$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal),
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 							]),
 						_List_fromArray(
@@ -16036,7 +16059,8 @@ var $author$project$Main$elOfRdfNode = F3(
 						$mdgriffith$elm_ui$Element$paragraph,
 						_List_fromArray(
 							[
-								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0)
+								A2($mdgriffith$elm_ui$Element$paddingXY, 5, 0),
+								$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal)
 							]),
 						_List_fromArray(
 							[
@@ -16079,7 +16103,8 @@ var $author$project$Main$elOfRestOfObjectList = F4(
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$alignLeft,
-							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button)
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+							$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
 						]),
 					{
 						label: $mdgriffith$elm_ui$Element$text(' less'),
@@ -16104,7 +16129,8 @@ var $author$project$Main$elOfRestOfObjectList = F4(
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$alignLeft,
-							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button)
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+							$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
 						]),
 					{
 						label: $mdgriffith$elm_ui$Element$text(
@@ -16124,7 +16150,7 @@ var $author$project$Main$elOfSubjectMoleculeCard = F2(
 				$elm$core$String$join,
 				'\n',
 				_List_fromArray(
-					['construct', '{<' + (target + '> ?passive ?s } {'), '?s ?p <' + (target + '>. '), 'bind(uri(concat(str(?p), \'Inverted\')) as ?passive)}']));
+					['construct', '{<' + (target + '> ?passive ?s } {'), '?s ?p <' + (target + '>. '), 'bind(uri(concat(str(?p), \'_Inverted\')) as ?passive)}']));
 		};
 		switch (subj.$) {
 			case 'BlankNode':

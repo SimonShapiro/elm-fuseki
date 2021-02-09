@@ -245,6 +245,23 @@ urlTextAbbreviator longUrl =
     in
         usableString
 
+prefixHumnaReadablePartOfUrl: String -> String -> String
+prefixHumnaReadablePartOfUrl prefix urlString = 
+    let
+        lastPart = urlString 
+                    |> String.split "/"
+                    |> List.reverse
+                    |> List.head
+                    |> Maybe.withDefault ""
+        firstPart = urlString
+                    |> String.split "/"
+                    |> List.drop -1
+        prefixed = [prefix++lastPart]
+        reconstructedUrl = List.append firstPart prefixed
+                            |> String.join ""
+    in
+        reconstructedUrl
+
 update: Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -543,7 +560,6 @@ elOfRdfNodeAsPredicate model node =
                         , Element.Font.size sizePalette.command
                         ] (Element.text "All predicates should be Uri")
 
-
 removeUrlFragment: String -> String
 removeUrlFragment urlString =
     urlString 
@@ -561,7 +577,7 @@ elOfRdfNode model nodeType node =
         Uri a ->
             case nodeType of
                 Object ->
-                    Element.el [Element.paddingXY 5 0]   (Element.row []
+                    Element.el [Element.paddingXY 5 0, Element.Font.size sizePalette.normal]   (Element.row []
                                         [ Element.link [ Element.Font.color colorPalette.header
                                         , Element.mouseOver [Element.Font.color colorPalette.lowlight]
                                         ] 
@@ -590,16 +606,16 @@ elOfRdfNode model nodeType node =
                                 Predicate -> elOfRdfNode model Predicate node
         LiteralOnlyValue a ->
             Debug.log ("Hunting the string wrapping issue "++(String.left 20 a.value)++(a.value |> String.words |> List.length |> String.fromInt))
-            Element.paragraph [Element.paddingXY 5 0, Element.width fill] [Element.text a.value]
+            Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [Element.text a.value]
         LiteralValueAndDataType a ->
-            Element.paragraph [Element.paddingXY 5 0, Element.width fill] [ Element.text a.value
+            Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [ Element.text a.value
                                 , Element.row [Element.Font.size sizePalette.smallPrint][ Element.text "  ("
                                                 , Element.text a.dataType
                                                 , Element.text ")"]
                                 ]
 
         LiteralValueAndLanguageString a ->
-            Element.paragraph [Element.paddingXY 5 0] [ Element.text a.value
+            Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal] [ Element.text a.value
                     , Element.row [Element.Font.size sizePalette.smallPrint]
                             [ Element.text "  ("
                             , Element.text a.language
@@ -628,6 +644,7 @@ elOfRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
         Just _ -> Element.Input.button   [ Element.alignLeft
                                             , Element.Background.color colorPalette.button
+                                            , Element.Font.size sizePalette.command
                                             ]
                                             { onPress=Just (DeregisterSubjectPredicateOpen selected)
                                             , label=Element.text " less"
@@ -639,6 +656,7 @@ elOfRestOfObjectList model selected obj rest =
         Nothing -> [ elOfRdfNode model Object obj
                     , Element.Input.button [ Element.alignLeft
                                             , Element.Background.color colorPalette.button
+                                            , Element.Font.size sizePalette.command
                                             ] 
                                             { onPress=Just (RegisterSubjectPredicateOpen selected)
                                         , label=Element.text ((String.fromInt <| List.length rest)++" more")
@@ -681,11 +699,36 @@ colorPalette =
     }
 
 sizePalette = 
-    { smallPrint = 8
-    , command = 12
-    , normal = 14
-    , highlight = 20
-    , subject = 32
+    { smallPrint = materialPalette.overline.size  --10 -- overline
+    , command = materialPalette.caption.size  -- 12  -- Caption
+    , normal = materialPalette.body2.size  --14  -- body2, +bold caps for buttons.
+    , highlight = materialPalette.h6.size --20 -- h6
+    , subject = materialPalette.h4.size  --34 -- h4
+    }
+
+type TypoWeight 
+    = Light
+    | Regular
+    | Medium  
+
+type TypoCase
+    = Sentence
+    | AllCaps
+
+materialPalette =
+    { h1 = { size = 96, weight = Light, case_ = Sentence }
+    , h2 = { size = 60, weight = Light, case_ = Sentence }    
+    , h3 = { size = 48, weight = Regular, case_ = Sentence }    
+    , h4 = { size = 34, weight = Regular, case_ = Sentence }    
+    , h5 = { size = 24, weight = Regular, case_ = Sentence }    
+    , h6 = { size = 20, weight = Medium, case_ = Sentence }    
+    , subtitle1 = { size = 16, weight = Regular, case_ = Sentence }    
+    , subtitle2 = { size = 14, weight = Medium, case_ = Sentence }    
+    , body1 = { size = 16, weight = Regular, case_ = Sentence }    
+    , body2 = { size = 14, weight = Regular, case_ = Sentence }    
+    , button = { size = 14, weight = Medium, case_ = AllCaps }    
+    , caption = { size = 12, weight = Regular, case_ = Sentence }    
+    , overline = { size = 10, weight = Regular, case_ = AllCaps }    
     }
 
 elOfTabularResults: ServerVars -> ServerForm SelectAtom -> Element msgDecoder
