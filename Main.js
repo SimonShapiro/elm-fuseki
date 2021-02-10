@@ -14742,6 +14742,8 @@ var $author$project$Main$elOfHeading = function (model) {
 					$mdgriffith$elm_ui$Element$text('Sparql Playground - ' + $author$project$Main$version))
 				])));
 };
+var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
+var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
 var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
 var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
 	function (a, b) {
@@ -14904,6 +14906,27 @@ var $mdgriffith$elm_ui$Element$paragraph = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $author$project$Main$AllCaps = {$: 'AllCaps'};
+var $author$project$Main$Light = {$: 'Light'};
+var $author$project$Main$Medium = {$: 'Medium'};
+var $author$project$Main$Regular = {$: 'Regular'};
+var $author$project$Main$Sentence = {$: 'Sentence'};
+var $author$project$Main$materialPalette = {
+	body1: {case_: $author$project$Main$Sentence, size: 16, weight: $author$project$Main$Regular},
+	body2: {case_: $author$project$Main$Sentence, size: 14, weight: $author$project$Main$Regular},
+	button: {case_: $author$project$Main$AllCaps, size: 14, weight: $author$project$Main$Medium},
+	caption: {case_: $author$project$Main$Sentence, size: 12, weight: $author$project$Main$Regular},
+	h1: {case_: $author$project$Main$Sentence, size: 96, weight: $author$project$Main$Light},
+	h2: {case_: $author$project$Main$Sentence, size: 60, weight: $author$project$Main$Light},
+	h3: {case_: $author$project$Main$Sentence, size: 48, weight: $author$project$Main$Regular},
+	h4: {case_: $author$project$Main$Sentence, size: 34, weight: $author$project$Main$Regular},
+	h5: {case_: $author$project$Main$Sentence, size: 24, weight: $author$project$Main$Regular},
+	h6: {case_: $author$project$Main$Sentence, size: 20, weight: $author$project$Main$Medium},
+	overline: {case_: $author$project$Main$AllCaps, size: 10, weight: $author$project$Main$Regular},
+	subtitle1: {case_: $author$project$Main$Sentence, size: 16, weight: $author$project$Main$Regular},
+	subtitle2: {case_: $author$project$Main$Sentence, size: 14, weight: $author$project$Main$Medium}
+};
+var $author$project$Main$sizePalette = {command: $author$project$Main$materialPalette.caption.size, highlight: $author$project$Main$materialPalette.h6.size, input: $author$project$Main$materialPalette.body1.size, normal: $author$project$Main$materialPalette.body2.size, smallPrint: $author$project$Main$materialPalette.overline.size, subject: $author$project$Main$materialPalette.h4.size};
 var $mdgriffith$elm_ui$Internal$Model$AsTextColumn = {$: 'AsTextColumn'};
 var $mdgriffith$elm_ui$Internal$Model$asTextColumn = $mdgriffith$elm_ui$Internal$Model$AsTextColumn;
 var $mdgriffith$elm_ui$Internal$Model$Max = F2(
@@ -14981,7 +15004,11 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 							}),
 							A2(
 							$mdgriffith$elm_ui$Element$paragraph,
-							_List_Nil,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal),
+									$mdgriffith$elm_ui$Element$Border$dotted
+								]),
 							_List_fromArray(
 								[
 									$mdgriffith$elm_ui$Element$text(
@@ -15012,7 +15039,8 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				A2($mdgriffith$elm_ui$Element$spacingXY, 0, 5)
+				A2($mdgriffith$elm_ui$Element$spacingXY, 0, 5),
+				$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.input)
 			]),
 		_List_fromArray(
 			[
@@ -15451,27 +15479,6 @@ var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
 			optionArea);
 	});
 var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
-var $author$project$Main$AllCaps = {$: 'AllCaps'};
-var $author$project$Main$Light = {$: 'Light'};
-var $author$project$Main$Medium = {$: 'Medium'};
-var $author$project$Main$Regular = {$: 'Regular'};
-var $author$project$Main$Sentence = {$: 'Sentence'};
-var $author$project$Main$materialPalette = {
-	body1: {case_: $author$project$Main$Sentence, size: 16, weight: $author$project$Main$Regular},
-	body2: {case_: $author$project$Main$Sentence, size: 14, weight: $author$project$Main$Regular},
-	button: {case_: $author$project$Main$AllCaps, size: 14, weight: $author$project$Main$Medium},
-	caption: {case_: $author$project$Main$Sentence, size: 12, weight: $author$project$Main$Regular},
-	h1: {case_: $author$project$Main$Sentence, size: 96, weight: $author$project$Main$Light},
-	h2: {case_: $author$project$Main$Sentence, size: 60, weight: $author$project$Main$Light},
-	h3: {case_: $author$project$Main$Sentence, size: 48, weight: $author$project$Main$Regular},
-	h4: {case_: $author$project$Main$Sentence, size: 34, weight: $author$project$Main$Regular},
-	h5: {case_: $author$project$Main$Sentence, size: 24, weight: $author$project$Main$Regular},
-	h6: {case_: $author$project$Main$Sentence, size: 20, weight: $author$project$Main$Medium},
-	overline: {case_: $author$project$Main$AllCaps, size: 10, weight: $author$project$Main$Regular},
-	subtitle1: {case_: $author$project$Main$Sentence, size: 16, weight: $author$project$Main$Regular},
-	subtitle2: {case_: $author$project$Main$Sentence, size: 14, weight: $author$project$Main$Medium}
-};
-var $author$project$Main$sizePalette = {command: $author$project$Main$materialPalette.caption.size, highlight: $author$project$Main$materialPalette.h6.size, normal: $author$project$Main$materialPalette.body2.size, smallPrint: $author$project$Main$materialPalette.overline.size, subject: $author$project$Main$materialPalette.h4.size};
 var $author$project$Main$elOfResultFormatToggle = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$Input$radioRow,
@@ -15603,8 +15610,6 @@ var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
 var $author$project$Main$Subject = {$: 'Subject'};
 var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
 var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
-var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
-var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
 var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
 	return $elm$core$String$concat(
 		_List_fromArray(

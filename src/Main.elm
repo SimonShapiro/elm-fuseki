@@ -704,6 +704,7 @@ sizePalette =
     , normal = materialPalette.body2.size  --14  -- body2, +bold caps for buttons.
     , highlight = materialPalette.h6.size --20 -- h6
     , subject = materialPalette.h4.size  --34 -- h4
+    , input = materialPalette.body1.size  -- 16 -- body1
     }
 
 type TypoWeight 
@@ -758,7 +759,10 @@ elOfQueryHistory history =
                                                 { onPress = Just (SubmitQueryWhileNavigating query)
                                                 , label = Element.text ">"
                                                 }
-                                        , paragraph [] [ Element.text <| Sparql.toString query]
+                                        , paragraph [ Element.Font.size sizePalette.normal
+                                                    , Element.Border.dotted
+                                                    ] 
+                                                        [ Element.text <| Sparql.toString query]
                                         ]
             ) history)
 
@@ -816,6 +820,7 @@ elOfQueryPanel: Model -> Element Msg
 elOfQueryPanel model =
     Element.column  [ Element.width Element.fill
                     , Element.spacingXY 0 5
+                    , Element.Font.size sizePalette.input
                     ]   [ Element.Input.multiline []
                                 { onChange = ChangeQuery
                                 , text = (Sparql.toString model.query)
