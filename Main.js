@@ -16921,7 +16921,16 @@ var $author$project$Main$view = function (model) {
 								_List_fromArray(
 									[
 										$author$project$Main$elOfMainPage(model),
-										$mdgriffith$elm_ui$Element$text(message)
+										A2(
+										$mdgriffith$elm_ui$Element$paragraph,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal)
+											]),
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$text(message)
+											]))
 									])));
 					default:
 						var vars = _v0.a;

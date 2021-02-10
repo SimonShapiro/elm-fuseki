@@ -898,8 +898,6 @@ view model = { title = "Sparql Query Playground - 0.0"
                             Element.layout [] (Element.text <| "Pinging"++model.server)
                         Querying -> 
                                 Element.layout [] (elOfMainPage model)
---                                , Element.layout [] (elOfQueryHistory model.queryHistory)
---                                , resultFormatToggle model.resultsDisplay
                         Waiting -> 
                                 Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                 , Element.text  "Wating for server response..."
@@ -933,8 +931,9 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                                 }
                                         ])
                         DisplayingSelectError message ->
-                                            Element.column  [ Element.width Element.fill]   [ elOfMainPage model
-                                                                                            , (Element.text message)
+                                            Element.column  [ Element.width Element.fill]   
+                                                                [ elOfMainPage model
+                                                                , Element.paragraph [Element.Font.size sizePalette.normal] [(Element.text message)]
                                                             ]
                                             |> Element.layout []
                         DisplayingSelectResult vars result ->
