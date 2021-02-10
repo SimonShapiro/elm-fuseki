@@ -15918,13 +15918,19 @@ var $author$project$Main$elOfPredicates = F2(
 		var preds = mole.b;
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
-			_List_Nil,
+			_List_fromArray(
+				[
+					A2($mdgriffith$elm_ui$Element$spacingXY, 0, 2)
+				]),
 			A2(
 				$elm$core$List$map,
 				function (po) {
 					return A2(
 						$mdgriffith$elm_ui$Element$column,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Element$spacingXY, 0, 0)
+							]),
 						_List_fromArray(
 							[
 								A3($author$project$Main$elOfRdfNode, model, $author$project$Main$Predicate, po.a),

@@ -15,6 +15,9 @@
 - ~~A bug on `select distinct ?g {?s ?p ?o.}`~~
 - ~~need to short the text on ultralong joined up objects - esp Url a~~
 - ~~Paragraph does not always flow at end of box - currently only observed intermitently at work version???!!!~~
+- extra long unwrappables in ui - like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
+- `Ouput format` used in two places on sparql page
+- Increase vertical spacing on moleculeCard
 - replace error elements with paragraph elements.
 - Command line query should not be submitted
 - Add port as commandline parameter for Server.py 
@@ -41,7 +44,7 @@
 - ~~Investigate elm-ui~~
 - ~~Simple styling~~
 - ~~add reverse cards via query - ie back links~~
-- improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the molculeCard.
+- improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.
 - find some way to sort lists
 - automatically sense non-s, p, o in subject view
 - make no info on subject view more obvious

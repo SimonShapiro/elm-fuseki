@@ -536,9 +536,9 @@ elOfPredicates model mole =
         subj = Tuple.first mole
         preds = Tuple.second mole
     in
-        Element.column []
+        Element.column [Element.spacingXY 0 2]
             (List.map(\po -> 
-                Element.column []
+                Element.column [Element.spacingXY 0 0]   -- attempt to switch off spacingXY above - not working
                     [ elOfRdfNode model Predicate (Tuple.first po)
                     , elOfObjects model subj po
                     ]
