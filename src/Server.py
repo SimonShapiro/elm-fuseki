@@ -270,7 +270,7 @@ def processConstructQuery(qType, queryString, res):
                     )                
                 ]]
         status = 200
-        print(serializeResults(resultArray))
+        print(serializeResults(rows))
         return {
             "status": 200,
             "response": json.dumps({
