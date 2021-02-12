@@ -5907,7 +5907,13 @@ var $author$project$PlaygroundQuery$shriekCommands = $elm$core$Dict$fromList(
 			$author$project$Sparql$Select('construct {?domain <hasProperty> ?predicate} {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } \n                                        ')),
 			_Utils_Tuple2(
 			'!size',
-			$author$project$Sparql$Select('select (count(*) as ?count) {?s ?p ?o}'))
+			$author$project$Sparql$Select('select (count(*) as ?count) {?s ?p ?o}')),
+			_Utils_Tuple2(
+			'!types',
+			$author$project$Sparql$Select('select distinct ?type {?s a ?type} order by ?type')),
+			_Utils_Tuple2(
+			'!predicates',
+			$author$project$Sparql$Select('select distinct ?predicate {?s ?predicate ?o} order by ?predicate'))
 		]));
 var $author$project$PlaygroundQuery$establishQueryType = function (query) {
 	var selectRe = A2(

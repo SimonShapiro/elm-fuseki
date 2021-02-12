@@ -68,6 +68,8 @@ shriekCommands =    [ ("!graphs", Select "select distinct ?graph (count(*) as ?c
                                     } 
                                         """)
                     , ("!size", Select "select (count(*) as ?count) {?s ?p ?o}")
+                    , ("!types", Select "select distinct ?type {?s a ?type} order by ?type")
+                    , ("!predicates", Select "select distinct ?predicate {?s ?predicate ?o} order by ?predicate")
                     ] |> Dict.fromList
 
 
