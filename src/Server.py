@@ -51,8 +51,8 @@ def buildAtom(v, bound):
             atom.datatype = bound[v].get("datatype")
     else:
         atom = Atom(key=v,
-                value="Failure: Impossible query",
-                aType="Error"
+                value="http://www.w3.org/2001/XMLSchema#",
+                aType="Uri"
         )
     return atom
 
