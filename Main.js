@@ -5690,12 +5690,26 @@ var $author$project$Sparql$Select = function (a) {
 var $author$project$Sparql$Unrecognised = function (a) {
 	return {$: 'Unrecognised', a: a};
 };
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
 		return {index: index, match: match, number: number, submatches: submatches};
 	});
-var $elm$regex$Regex$contains = _Regex_contains;
 var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
 var $elm$regex$Regex$never = _Regex_never;
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
@@ -5706,163 +5720,21 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$PlaygroundQuery$establishQueryType = function (query) {
-	var selectRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^select'));
-	var loadRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^load'));
-	var insertRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^insert'));
-	var dropRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^drop'));
-	var describeRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^describe'));
-	var deleteRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^delete'));
-	var createRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^create'));
-	var constructRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^construct'));
-	var clearRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^clear'));
-	var askRe = A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		A2(
-			$elm$regex$Regex$fromStringWith,
-			{caseInsensitive: true, multiline: true},
-			'^ask'));
-	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : (A2($elm$regex$Regex$contains, deleteRe, query) ? $author$project$Sparql$Delete(query) : (A2($elm$regex$Regex$contains, loadRe, query) ? $author$project$Sparql$Load(query) : (A2($elm$regex$Regex$contains, dropRe, query) ? $author$project$Sparql$Drop(query) : (A2($elm$regex$Regex$contains, clearRe, query) ? $author$project$Sparql$Clear(query) : (A2($elm$regex$Regex$contains, createRe, query) ? $author$project$Sparql$Create(query) : $author$project$Sparql$Unrecognised(query))))))))));
+var $elm_community$string_extra$String$Extra$regexFromString = A2(
+	$elm$core$Basics$composeR,
+	$elm$regex$Regex$fromString,
+	$elm$core$Maybe$withDefault($elm$regex$Regex$never));
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $elm$core$String$trim = _String_trim;
+var $elm_community$string_extra$String$Extra$clean = function (string) {
+	return $elm$core$String$trim(
+		A3(
+			$elm$regex$Regex$replace,
+			$elm_community$string_extra$String$Extra$regexFromString('\\s\\s+'),
+			$elm$core$Basics$always(' '),
+			string));
 };
-var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
-	if (mx.$ === 'Just') {
-		var x = mx.a;
-		return x;
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$url$Url$Parser$State = F5(
-	function (visited, unvisited, params, frag, value) {
-		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
-	});
-var $elm$url$Url$Parser$getFirstMatch = function (states) {
-	getFirstMatch:
-	while (true) {
-		if (!states.b) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var state = states.a;
-			var rest = states.b;
-			var _v1 = state.unvisited;
-			if (!_v1.b) {
-				return $elm$core$Maybe$Just(state.value);
-			} else {
-				if ((_v1.a === '') && (!_v1.b.b)) {
-					return $elm$core$Maybe$Just(state.value);
-				} else {
-					var $temp$states = rest;
-					states = $temp$states;
-					continue getFirstMatch;
-				}
-			}
-		}
-	}
-};
-var $elm$url$Url$Parser$removeFinalEmpty = function (segments) {
-	if (!segments.b) {
-		return _List_Nil;
-	} else {
-		if ((segments.a === '') && (!segments.b.b)) {
-			return _List_Nil;
-		} else {
-			var segment = segments.a;
-			var rest = segments.b;
-			return A2(
-				$elm$core$List$cons,
-				segment,
-				$elm$url$Url$Parser$removeFinalEmpty(rest));
-		}
-	}
-};
-var $elm$url$Url$Parser$preparePath = function (path) {
-	var _v0 = A2($elm$core$String$split, '/', path);
-	if (_v0.b && (_v0.a === '')) {
-		var segments = _v0.b;
-		return $elm$url$Url$Parser$removeFinalEmpty(segments);
-	} else {
-		var segments = _v0;
-		return $elm$url$Url$Parser$removeFinalEmpty(segments);
-	}
-};
-var $elm$url$Url$Parser$addToParametersHelp = F2(
-	function (value, maybeList) {
-		if (maybeList.$ === 'Nothing') {
-			return $elm$core$Maybe$Just(
-				_List_fromArray(
-					[value]));
-		} else {
-			var list = maybeList.a;
-			return $elm$core$Maybe$Just(
-				A2($elm$core$List$cons, value, list));
-		}
-	});
-var $elm$url$Url$percentDecode = _Url_percentDecode;
+var $elm$regex$Regex$contains = _Regex_contains;
 var $elm$core$Basics$compare = _Utils_compare;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
@@ -5895,12 +5767,20 @@ var $elm$core$Dict$get = F2(
 			}
 		}
 	});
+var $author$project$PlaygroundQuery$lookupCommand = F2(
+	function (dict, cmd) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$Sparql$Unrecognised(cmd),
+			A4($elm$core$Debug$log, cmd, $elm$core$Dict$get, cmd, dict));
+	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Dict$Black = {$: 'Black'};
 var $elm$core$Dict$RBNode_elm_builtin = F5(
 	function (a, b, c, d, e) {
 		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
 	});
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$Red = {$: 'Red'};
 var $elm$core$Dict$balance = F5(
 	function (color, key, value, left, right) {
@@ -6004,6 +5884,198 @@ var $elm$core$Dict$insert = F3(
 			return x;
 		}
 	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $author$project$PlaygroundQuery$shriekCommands = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(
+			'!graphs',
+			$author$project$Sparql$Select('select distinct ?graph (count(*) as ?count) {graph ?graph {?s ?p ?o}} group by ?graph')),
+			_Utils_Tuple2(
+			'!ontology',
+			$author$project$Sparql$Select('construct {?domain <hasProperty> ?predicate} {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } \n                                        ')),
+			_Utils_Tuple2(
+			'!size',
+			$author$project$Sparql$Select('select (count(*) as ?count) {?s ?p ?o}'))
+		]));
+var $author$project$PlaygroundQuery$establishQueryType = function (query) {
+	var selectRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^select'));
+	var loadRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^load'));
+	var insertRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^insert'));
+	var dropRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^drop'));
+	var describeRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^describe'));
+	var deleteRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^delete'));
+	var createRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^create'));
+	var constructRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^construct'));
+	var cmdGraphsRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^!'));
+	var clearRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^clear'));
+	var askRe = A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		A2(
+			$elm$regex$Regex$fromStringWith,
+			{caseInsensitive: true, multiline: true},
+			'^ask'));
+	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : (A2($elm$regex$Regex$contains, deleteRe, query) ? $author$project$Sparql$Delete(query) : (A2($elm$regex$Regex$contains, loadRe, query) ? $author$project$Sparql$Load(query) : (A2($elm$regex$Regex$contains, dropRe, query) ? $author$project$Sparql$Drop(query) : (A2($elm$regex$Regex$contains, clearRe, query) ? $author$project$Sparql$Clear(query) : (A2($elm$regex$Regex$contains, createRe, query) ? $author$project$Sparql$Create(query) : (A2($elm$regex$Regex$contains, cmdGraphsRe, query) ? A2(
+		$author$project$PlaygroundQuery$lookupCommand,
+		$author$project$PlaygroundQuery$shriekCommands,
+		$elm_community$string_extra$String$Extra$clean(query)) : $author$project$Sparql$Unrecognised(query)))))))))));
+};
+var $elm_community$maybe_extra$Maybe$Extra$join = function (mx) {
+	if (mx.$ === 'Just') {
+		var x = mx.a;
+		return x;
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$url$Url$Parser$State = F5(
+	function (visited, unvisited, params, frag, value) {
+		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
+	});
+var $elm$url$Url$Parser$getFirstMatch = function (states) {
+	getFirstMatch:
+	while (true) {
+		if (!states.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var state = states.a;
+			var rest = states.b;
+			var _v1 = state.unvisited;
+			if (!_v1.b) {
+				return $elm$core$Maybe$Just(state.value);
+			} else {
+				if ((_v1.a === '') && (!_v1.b.b)) {
+					return $elm$core$Maybe$Just(state.value);
+				} else {
+					var $temp$states = rest;
+					states = $temp$states;
+					continue getFirstMatch;
+				}
+			}
+		}
+	}
+};
+var $elm$url$Url$Parser$removeFinalEmpty = function (segments) {
+	if (!segments.b) {
+		return _List_Nil;
+	} else {
+		if ((segments.a === '') && (!segments.b.b)) {
+			return _List_Nil;
+		} else {
+			var segment = segments.a;
+			var rest = segments.b;
+			return A2(
+				$elm$core$List$cons,
+				segment,
+				$elm$url$Url$Parser$removeFinalEmpty(rest));
+		}
+	}
+};
+var $elm$url$Url$Parser$preparePath = function (path) {
+	var _v0 = A2($elm$core$String$split, '/', path);
+	if (_v0.b && (_v0.a === '')) {
+		var segments = _v0.b;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	} else {
+		var segments = _v0;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	}
+};
+var $elm$url$Url$Parser$addToParametersHelp = F2(
+	function (value, maybeList) {
+		if (maybeList.$ === 'Nothing') {
+			return $elm$core$Maybe$Just(
+				_List_fromArray(
+					[value]));
+		} else {
+			var list = maybeList.a;
+			return $elm$core$Maybe$Just(
+				A2($elm$core$List$cons, value, list));
+		}
+	});
+var $elm$url$Url$percentDecode = _Url_percentDecode;
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
@@ -6405,7 +6477,6 @@ var $elm$url$Url$Parser$addParam = F2(
 			return dict;
 		}
 	});
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$url$Url$Parser$prepareQuery = function (maybeQuery) {
 	if (maybeQuery.$ === 'Nothing') {
 		return $elm$core$Dict$empty;
@@ -6977,11 +7048,6 @@ var $elm$core$Maybe$isJust = function (maybe) {
 	}
 };
 var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var $elm$http$Http$expectStringResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
@@ -7100,18 +7166,6 @@ var $author$project$Main$mainDecoder = A8(
 		'result',
 		$elm$json$Json$Decode$list(
 			$elm$json$Json$Decode$list($author$project$Main$selectAtomDecoder))));
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
 var $author$project$RdfDict$makeRdfKey = function (n) {
 	switch (n.$) {
 		case 'Uri':
@@ -14410,10 +14464,6 @@ var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
 var $mdgriffith$elm_ui$Element$Input$spellcheck = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$spellcheck);
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $mdgriffith$elm_ui$Element$Input$value = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$value);

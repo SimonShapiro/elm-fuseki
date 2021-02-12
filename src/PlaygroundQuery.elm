@@ -3,6 +3,7 @@ module PlaygroundQuery exposing (..)
 import Sparql exposing (..)
 import Dict exposing (..)
 import Regex exposing (..)
+import String.Extra exposing (..)
 
 type PlaygroundQuery 
     = SparqlQuery SparqlQuery
@@ -12,6 +13,8 @@ type PlaygroundCommand
     = Graphs SparqlQuery
     | Ontology SparqlQuery
     | Size SparqlQuery
+
+type alias CommandDict = Dict String SparqlQuery
 
 toString: PlaygroundQuery -> String
 toString playQuery =
@@ -36,6 +39,7 @@ establishQueryType query =
         dropRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^drop"
         createRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^create"
         clearRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^clear"
+        cmdGraphsRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^!"
     in
         if Regex.contains selectRe query then Select query
         else if Regex.contains askRe query then Ask query
@@ -47,17 +51,23 @@ establishQueryType query =
         else if Regex.contains dropRe query then Drop query
         else if Regex.contains clearRe query then Clear query
         else if Regex.contains createRe query then Create query
+        else if Regex.contains cmdGraphsRe query then query |> String.Extra.clean |> lookupCommand shriekCommands 
         else Unrecognised query
 
+lookupCommand: CommandDict -> String -> SparqlQuery
+lookupCommand dict cmd =
+    Debug.log cmd
+    Dict.get cmd dict |> Maybe.withDefault (Unrecognised cmd)
 
-shriekCommands: Dict String PlaygroundCommand
-shriekCommands =    [ ("!graphs", Graphs <| Select "select distinct ?graph (count(*) as ?count) {graph ?g {?S ?p ?o} group by ?graph}")
-                    , ("!ontology", Ontology <| Select """select distinct ?domain ?predicate {
+
+shriekCommands: CommandDict
+shriekCommands =    [ ("!graphs", Select "select distinct ?graph (count(*) as ?count) {graph ?graph {?s ?p ?o}} group by ?graph")
+                    , ("!ontology", Select """construct {?domain <hasProperty> ?predicate} {
                                     ?s ?predicate ?o.
                                     ?s a ?domain .
-                                    } order by ?domain ?predicate
+                                    } 
                                         """)
-                    , ("!size", Size <| Select "(count(*) as ?count) {?s ?p ?o}")
+                    , ("!size", Select "select (count(*) as ?count) {?s ?p ?o}")
                     ] |> Dict.fromList
 
 

@@ -45,6 +45,7 @@
 - ~~Simple styling~~
 - ~~add reverse cards via query - ie back links~~
 - improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.
+- use a decoder strategy for establishQueryType
 - find some way to sort lists
 - automatically sense non-s, p, o in subject view
 - make no info on subject view more obvious
@@ -67,7 +68,7 @@
 
 # Pending Re-factors
 
-- Replace Sparql.toString with PlaygroundQUery.toString
+- ~~Replace Sparql.toString with PlaygroundQuery.toString~~
 
 - Make DisplaySelectResults flow from RdfNode rather than SelectAtom
 
