@@ -40,32 +40,6 @@ toString sparql =
        Clear s -> s
        Create s -> s
 
-establishQueryType: String -> SparqlQuery
-establishQueryType query = 
-    let
-        selectRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^select"
-        askRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^ask"
-        constructRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^construct"
-        describeRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^describe"
-        insertRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^insert"
-        deleteRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^delete"
-        loadRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^load"
-        dropRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^drop"
-        createRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^create"
-        clearRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^clear"
-    in
-        if Regex.contains selectRe query then Select query
-        else if Regex.contains askRe query then Ask query
-        else if Regex.contains constructRe query then Construct query
-        else if Regex.contains describeRe query then Describe query
-        else if Regex.contains insertRe query then Insert query
-        else if Regex.contains deleteRe query then Delete query
-        else if Regex.contains loadRe query then Load query
-        else if Regex.contains dropRe query then Drop query
-        else if Regex.contains clearRe query then Clear query
-        else if Regex.contains createRe query then Create query
-        else Unrecognised query
-
 prepareHttpRequest: Server -> ContentType -> AcceptHeader -> QueryType -> String -> (Http.Expect msg) -> (Cmd msg)
 prepareHttpRequest newServer contentType header qtype query expect =
     let

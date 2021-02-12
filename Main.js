@@ -5706,7 +5706,7 @@ var $elm$core$Maybe$withDefault = F2(
 			return _default;
 		}
 	});
-var $author$project$Sparql$establishQueryType = function (query) {
+var $author$project$PlaygroundQuery$establishQueryType = function (query) {
 	var selectRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
@@ -6552,7 +6552,7 @@ var $author$project$Main$parseUrlForIndexQuery = function (url) {
 		subject);
 	return A2(
 		$elm$core$Maybe$map,
-		$author$project$Sparql$establishQueryType,
+		$author$project$PlaygroundQuery$establishQueryType,
 		$elm_community$maybe_extra$Maybe$Extra$join(
 			A2($elm$url$Url$Parser$parse, parseQuery, url)));
 };
@@ -7717,7 +7717,7 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								query: $author$project$PlaygroundQuery$SparqlQuery(
-									$author$project$Sparql$establishQueryType(newQuery))
+									$author$project$PlaygroundQuery$establishQueryType(newQuery))
 							}),
 						$elm$core$Platform$Cmd$none));
 			case 'SubmitQuery':
@@ -7839,7 +7839,7 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							query: $author$project$PlaygroundQuery$SparqlQuery(
-								$author$project$Sparql$establishQueryType(content))
+								$author$project$PlaygroundQuery$establishQueryType(content))
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DownloadFile':
@@ -15056,7 +15056,23 @@ var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 	});
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $author$project$PlaygroundQuery$toString = function (playQuery) {
-	return 'A play query';
+	if (playQuery.$ === 'SparqlQuery') {
+		var q = playQuery.a;
+		return $author$project$Sparql$toString(q);
+	} else {
+		var cmd = playQuery.a;
+		switch (cmd.$) {
+			case 'Graphs':
+				var q = cmd.a;
+				return $author$project$Sparql$toString(q);
+			case 'Ontology':
+				var q = cmd.a;
+				return $author$project$Sparql$toString(q);
+			default:
+				var q = cmd.a;
+				return $author$project$Sparql$toString(q);
+		}
+	}
 };
 var $author$project$Main$elOfQueryPanel = function (model) {
 	return A2(
