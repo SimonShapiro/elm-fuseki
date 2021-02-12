@@ -105,7 +105,6 @@ type ViewRdfNodeAs
 
 type Msg 
     = NoOp
-    | PressedKey String
     | ChangeServer Server
     | PingServer 
     | Pinged (Result Http.Error ())
@@ -276,37 +275,6 @@ update msg model =
                     , load url
                     )
         BackToQuery -> ({model | state = Querying}, Cmd.none)
-        PressedKey s -> 
-           case model.keyboard of
-                ReadyToAcceptControl -> 
---                    Debug.log ("Key = "++s)
---                    (model, Cmd.none)
-                    case s of
-                        "Control" ->
-                            Debug.log "Entering Ctrl mode" 
-                            ({model | keyboard = Ctrl}, Cmd.none)
-                        _ -> (model, Cmd.none)
-                Ctrl ->
-                    case s of 
-                        "Shift" -> 
-                            let
-                                queryString = """select distinct ?domain ?predicate {
-                                    ?s ?predicate ?o.
-                                    ?s a ?domain .
-                                    } order by ?domain ?predicate
-                                        """
-                                command = submitQuery model.server (Sparql.Select queryString) (Http.expectJson GotSparqlResponse mainDecoder)
-                                _ = Debug.log ("In Ctrl+F2 mode "++s)
-                            in
-                                ({model | keyboard = ReadyToAcceptControl, state = Waiting}, command)
---                            , 
---                            )
-                        _ ->
-                            Debug.log ("Leaving Ctrl mode "++s)
-                            ({model | keyboard = ReadyToAcceptControl}, Cmd.none)
-                Normal -> 
-                    ({model | keyboard = Normal}, Cmd.none)
---            ({model | query = model.query++s}, Cmd.none )
         ChangeServer newServer -> ({model | server = newServer}, Cmd.none)
         PingServer -> ({model | state = Pinging}, pingServer model.server)
         Pinged result ->
@@ -541,13 +509,6 @@ elOfRdfNodeAsPredicate model node =
             Element.el  [ Element.Font.bold
                         , Element.Font.size sizePalette.command
                         ] (Element.text "All predicates should be Uri")
-
-removeUrlFragment: String -> String
-removeUrlFragment urlString =
-    urlString 
-    |> String.split "#"
-    |> List.head
-    |> Maybe.withDefault urlString 
 
 encodeUrlFragmentMarker: String -> String
 encodeUrlFragmentMarker urlString =

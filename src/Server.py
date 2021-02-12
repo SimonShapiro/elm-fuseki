@@ -49,7 +49,7 @@ def buildAtom(v, bound):
             atom.language = bound[v].get("xml:lang")
         if bound[v].get("datatype"):
             atom.datatype = bound[v].get("datatype")
-    else:
+    else:  # in most cases this should not be possible, but the rdfs query in the elm front end needs this to resolve to unknown data type
         atom = Atom(key=v,
                 value="http://www.w3.org/2001/XMLSchema#",
                 aType="Uri"

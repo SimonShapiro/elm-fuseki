@@ -5913,7 +5913,11 @@ var $author$project$PlaygroundQuery$shriekCommands = $elm$core$Dict$fromList(
 			$author$project$Sparql$Select('select distinct ?type {?s a ?type} order by ?type')),
 			_Utils_Tuple2(
 			'!predicates',
-			$author$project$Sparql$Select('select distinct ?predicate {?s ?predicate ?o} order by ?predicate'))
+			$author$project$Sparql$Select('select distinct ?predicate {?s ?predicate ?o} order by ?predicate')),
+			_Utils_Tuple2(
+			'!rdfs',
+			$author$project$Sparql$Construct(
+				$elm_community$string_extra$String$Extra$clean('\n                                            construct {?p a <predicate>. ?p <rdfs> [<domain> ?t; <range> ?tt]}\n                                            {select distinct ?t ?p ?tt {?s ?p ?o. ?s a ?t. optional {?o a ?tt}}}\n                                        ')))
 		]));
 var $author$project$PlaygroundQuery$establishQueryType = function (query) {
 	var selectRe = A2(
@@ -5972,7 +5976,7 @@ var $author$project$PlaygroundQuery$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^construct'));
-	var cmdGraphsRe = A2(
+	var commandReRe = A2(
 		$elm$core$Maybe$withDefault,
 		$elm$regex$Regex$never,
 		A2(
@@ -5993,7 +5997,7 @@ var $author$project$PlaygroundQuery$establishQueryType = function (query) {
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
 			'^ask'));
-	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : (A2($elm$regex$Regex$contains, deleteRe, query) ? $author$project$Sparql$Delete(query) : (A2($elm$regex$Regex$contains, loadRe, query) ? $author$project$Sparql$Load(query) : (A2($elm$regex$Regex$contains, dropRe, query) ? $author$project$Sparql$Drop(query) : (A2($elm$regex$Regex$contains, clearRe, query) ? $author$project$Sparql$Clear(query) : (A2($elm$regex$Regex$contains, createRe, query) ? $author$project$Sparql$Create(query) : (A2($elm$regex$Regex$contains, cmdGraphsRe, query) ? A2(
+	return A2($elm$regex$Regex$contains, selectRe, query) ? $author$project$Sparql$Select(query) : (A2($elm$regex$Regex$contains, askRe, query) ? $author$project$Sparql$Ask(query) : (A2($elm$regex$Regex$contains, constructRe, query) ? $author$project$Sparql$Construct(query) : (A2($elm$regex$Regex$contains, describeRe, query) ? $author$project$Sparql$Describe(query) : (A2($elm$regex$Regex$contains, insertRe, query) ? $author$project$Sparql$Insert(query) : (A2($elm$regex$Regex$contains, deleteRe, query) ? $author$project$Sparql$Delete(query) : (A2($elm$regex$Regex$contains, loadRe, query) ? $author$project$Sparql$Load(query) : (A2($elm$regex$Regex$contains, dropRe, query) ? $author$project$Sparql$Drop(query) : (A2($elm$regex$Regex$contains, clearRe, query) ? $author$project$Sparql$Clear(query) : (A2($elm$regex$Regex$contains, createRe, query) ? $author$project$Sparql$Create(query) : (A2($elm$regex$Regex$contains, commandReRe, query) ? A2(
 		$author$project$PlaygroundQuery$lookupCommand,
 		$author$project$PlaygroundQuery$shriekCommands,
 		$elm_community$string_extra$String$Extra$clean(query)) : $author$project$Sparql$Unrecognised(query)))))))))));
@@ -6745,7 +6749,6 @@ var $author$project$Main$ApiError = function (a) {
 var $elm$http$Http$BadBody = function (a) {
 	return {$: 'BadBody', a: a};
 };
-var $author$project$Main$Ctrl = {$: 'Ctrl'};
 var $author$project$Main$DisplayingSelectError = function (a) {
 	return {$: 'DisplayingSelectError', a: a};
 };
@@ -7664,54 +7667,6 @@ var $author$project$Main$update = F2(
 						model,
 						{state: $author$project$Main$Querying}),
 					$elm$core$Platform$Cmd$none);
-			case 'PressedKey':
-				var s = msg.a;
-				var _v4 = model.keyboard;
-				switch (_v4.$) {
-					case 'ReadyToAcceptControl':
-						if (s === 'Control') {
-							return A2(
-								$elm$core$Debug$log,
-								'Entering Ctrl mode',
-								_Utils_Tuple2(
-									_Utils_update(
-										model,
-										{keyboard: $author$project$Main$Ctrl}),
-									$elm$core$Platform$Cmd$none));
-						} else {
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-						}
-					case 'Ctrl':
-						if (s === 'Shift') {
-							var queryString = 'select distinct ?domain ?predicate {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } order by ?domain ?predicate\n                                        ';
-							var command = A3(
-								$author$project$Sparql$submitQuery,
-								model.server,
-								$author$project$Sparql$Select(queryString),
-								A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder));
-							var _v7 = $elm$core$Debug$log('In Ctrl+F2 mode ' + s);
-							return _Utils_Tuple2(
-								_Utils_update(
-									model,
-									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Waiting}),
-								command);
-						} else {
-							return A2(
-								$elm$core$Debug$log,
-								'Leaving Ctrl mode ' + s,
-								_Utils_Tuple2(
-									_Utils_update(
-										model,
-										{keyboard: $author$project$Main$ReadyToAcceptControl}),
-									$elm$core$Platform$Cmd$none));
-						}
-					default:
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{keyboard: $author$project$Main$Normal}),
-							$elm$core$Platform$Cmd$none);
-				}
 			case 'ChangeServer':
 				var newServer = msg.a;
 				return _Utils_Tuple2(
@@ -7728,8 +7683,8 @@ var $author$project$Main$update = F2(
 			case 'Pinged':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
-					var _v9 = model.urlQuery;
-					if (_v9.$ === 'Nothing') {
+					var _v5 = model.urlQuery;
+					if (_v5.$ === 'Nothing') {
 						return A2(
 							$elm$core$Debug$log,
 							'Pinged OK - no initial query',
@@ -7739,13 +7694,13 @@ var $author$project$Main$update = F2(
 									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
 								$elm$core$Platform$Cmd$none));
 					} else {
-						var query = _v9.a;
+						var query = _v5.a;
 						var command = A3(
 							$author$project$Sparql$submitQuery,
 							model.server,
 							query,
 							A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder));
-						var _v10 = A2($elm$core$Debug$log, 'Pinged OK with', query);
+						var _v6 = A2($elm$core$Debug$log, 'Pinged OK with', query);
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7781,12 +7736,12 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none));
 			case 'SubmitQuery':
-				var _v11 = model.query;
-				if (_v11.$ === 'PlaygroundCommand') {
-					var cmd = _v11.a;
+				var _v7 = model.query;
+				if (_v7.$ === 'PlaygroundCommand') {
+					var cmd = _v7.a;
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var sQuery = _v11.a;
+					var sQuery = _v7.a;
 					if (sQuery.$ === 'Unrecognised') {
 						var newQuery = sQuery.a;
 						return _Utils_Tuple2(
@@ -7827,7 +7782,7 @@ var $author$project$Main$update = F2(
 						queryHistory: A2($elm$core$List$cons, query, model.queryHistory),
 						state: $author$project$Main$Waiting
 					});
-				var _v13 = A2($elm$core$Debug$log, 'query=', newModel.query);
+				var _v9 = A2($elm$core$Debug$log, 'query=', newModel.query);
 				return _Utils_Tuple2(
 					newModel,
 					A3(
@@ -7839,8 +7794,8 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v15 = okData.status;
-					if (_v15 === 200) {
+					var _v11 = okData.status;
+					if (_v11 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7903,12 +7858,12 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DownloadFile':
-				var _v16 = model.query;
-				if (_v16.$ === 'PlaygroundCommand') {
-					var cmd = _v16.a;
+				var _v12 = model.query;
+				if (_v12.$ === 'PlaygroundCommand') {
+					var cmd = _v12.a;
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var query = _v16.a;
+					var query = _v12.a;
 					return _Utils_Tuple2(
 						model,
 						A2(
