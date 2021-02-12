@@ -4,6 +4,7 @@ import Regex exposing (..)
 import Http exposing (..)
 import Task exposing (..)
 import Html exposing (pre)
+import Dict exposing (..)
 
 type alias Server = String
 type alias ContentType = String

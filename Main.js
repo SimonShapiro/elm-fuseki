@@ -6628,6 +6628,9 @@ var $author$project$Main$handleUrlRequest = function (req) {
 };
 var $author$project$Main$Initialising = {$: 'Initialising'};
 var $author$project$Main$Normal = {$: 'Normal'};
+var $author$project$PlaygroundQuery$SparqlQuery = function (a) {
+	return {$: 'SparqlQuery', a: a};
+};
 var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6642,7 +6645,8 @@ var $author$project$Main$initialFn = F3(
 			keyboard: $author$project$Main$Normal,
 			openPredicatesInSubject: _List_Nil,
 			predicateStyle: $author$project$Main$Terse,
-			query: $author$project$Sparql$Ask('ask {?s ?p ?o}'),
+			query: $author$project$PlaygroundQuery$SparqlQuery(
+				$author$project$Sparql$Ask('ask {?s ?p ?o}')),
 			queryHistory: _List_Nil,
 			results: _List_Nil,
 			resultsDisplay: $author$project$Main$Table,
@@ -7571,7 +7575,9 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{query: a}),
+								{
+									query: $author$project$PlaygroundQuery$SparqlQuery(a)
+								}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
 								model.key,
@@ -7683,7 +7689,11 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
+								{
+									keyboard: $author$project$Main$ReadyToAcceptControl,
+									query: $author$project$PlaygroundQuery$SparqlQuery(query),
+									state: $author$project$Main$Querying
+								}),
 							$elm$core$Platform$Cmd$none);
 					}
 				} else {
@@ -7706,65 +7716,71 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								query: $author$project$Sparql$establishQueryType(newQuery)
+								query: $author$project$PlaygroundQuery$SparqlQuery(
+									$author$project$Sparql$establishQueryType(newQuery))
 							}),
 						$elm$core$Platform$Cmd$none));
 			case 'SubmitQuery':
-				var query = msg.a;
 				var _v11 = model.query;
-				if (_v11.$ === 'Unrecognised') {
-					var newQuery = _v11.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								state: $author$project$Main$ApiError(
-									$elm$http$Http$BadBody(
-										'I don\'t recognise this query type ' + $author$project$Sparql$toString(model.query)))
-							}),
-						$elm$core$Platform$Cmd$none);
+				if (_v11.$ === 'PlaygroundCommand') {
+					var cmd = _v11.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{state: $author$project$Main$Waiting}),
-						A2(
-							$elm$browser$Browser$Navigation$pushUrl,
-							model.key,
+					var sQuery = _v11.a;
+					if (sQuery.$ === 'Unrecognised') {
+						var newQuery = sQuery.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									state: $author$project$Main$ApiError(
+										$elm$http$Http$BadBody(
+											'I don\'t recognise this query type ' + $author$project$Sparql$toString(sQuery)))
+								}),
+							$elm$core$Platform$Cmd$none);
+					} else {
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Waiting}),
 							A2(
-								$elm$url$Url$Builder$relative,
-								_List_Nil,
-								_List_fromArray(
-									[
-										A2(
-										$elm$url$Url$Builder$string,
-										'query',
-										$author$project$Sparql$toString(query))
-									]))));
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.key,
+								A2(
+									$elm$url$Url$Builder$relative,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$url$Url$Builder$string,
+											'query',
+											$author$project$Sparql$toString(sQuery))
+										]))));
+					}
 				}
 			case 'SubmitQueryWhileNavigating':
 				var query = msg.a;
 				var newModel = _Utils_update(
 					model,
 					{
-						query: query,
+						query: $author$project$PlaygroundQuery$SparqlQuery(query),
 						queryHistory: A2($elm$core$List$cons, query, model.queryHistory),
 						state: $author$project$Main$Waiting
 					});
-				var _v12 = A2($elm$core$Debug$log, 'query=', newModel.query);
+				var _v13 = A2($elm$core$Debug$log, 'query=', newModel.query);
 				return _Utils_Tuple2(
 					newModel,
 					A3(
 						$author$project$Sparql$submitQuery,
 						newModel.server,
-						newModel.query,
+						query,
 						A2($elm$http$Http$expectJson, $author$project$Main$GotSparqlResponse, $author$project$Main$mainDecoder)));
 			case 'GotSparqlResponse':
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v14 = okData.status;
-					if (_v14 === 200) {
+					var _v15 = okData.status;
+					if (_v15 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7822,16 +7838,24 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							query: $author$project$Sparql$establishQueryType(content)
+							query: $author$project$PlaygroundQuery$SparqlQuery(
+								$author$project$Sparql$establishQueryType(content))
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DownloadFile':
-				return _Utils_Tuple2(
-					model,
-					A2(
-						$author$project$Main$downloadFile,
-						'query.txt',
-						$author$project$Sparql$toString(model.query)));
+				var _v16 = model.query;
+				if (_v16.$ === 'PlaygroundCommand') {
+					var cmd = _v16.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				} else {
+					var query = _v16.a;
+					return _Utils_Tuple2(
+						model,
+						A2(
+							$author$project$Main$downloadFile,
+							'query.txt',
+							$author$project$Sparql$toString(query)));
+				}
 			case 'DownloadResultsAsCSV':
 				var headedResults = A2(
 					$elm$core$List$cons,
@@ -15021,9 +15045,7 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 var $author$project$Main$ChangeQuery = function (a) {
 	return {$: 'ChangeQuery', a: a};
 };
-var $author$project$Main$SubmitQuery = function (a) {
-	return {$: 'SubmitQuery', a: a};
-};
+var $author$project$Main$SubmitQuery = {$: 'SubmitQuery'};
 var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 	function (attrs, multi) {
 		return A3(
@@ -15033,6 +15055,9 @@ var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 			{label: multi.label, onChange: multi.onChange, placeholder: multi.placeholder, text: multi.text});
 	});
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
+var $author$project$PlaygroundQuery$toString = function (playQuery) {
+	return 'A play query';
+};
 var $author$project$Main$elOfQueryPanel = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$column,
@@ -15056,7 +15081,7 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 					onChange: $author$project$Main$ChangeQuery,
 					placeholder: $elm$core$Maybe$Nothing,
 					spellcheck: false,
-					text: $author$project$Sparql$toString(model.query)
+					text: $author$project$PlaygroundQuery$toString(model.query)
 				}),
 				A2(
 				$mdgriffith$elm_ui$Element$row,
@@ -15088,8 +15113,7 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 									]),
 								$mdgriffith$elm_ui$Element$text('Go!')),
-							onPress: $elm$core$Maybe$Just(
-								$author$project$Main$SubmitQuery(model.query))
+							onPress: $elm$core$Maybe$Just($author$project$Main$SubmitQuery)
 						})
 					]))
 			]));

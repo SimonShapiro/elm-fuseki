@@ -32,6 +32,7 @@ import Json.Decode exposing (index)
 import String
 
 import Sparql exposing (..)
+import PlaygroundQuery exposing (..)
 import RdfDict exposing (..)
 import List.Extra exposing (uncons, groupWhile)
 
@@ -42,18 +43,6 @@ import Element.Input exposing (..)
 import Element.Font exposing (..)
 import Dict
 import List.Extra
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
-import Element
 import Element
 
 version: String
@@ -82,7 +71,7 @@ type alias Model =
     { state: UIState
     , server: Server
     , urlQuery: Maybe SparqlQuery
-    , query: SparqlQuery
+    , query: PlaygroundQuery
     , queryHistory: List SparqlQuery
     , vars: ServerVars
     , results: ServerForm SelectAtom
@@ -121,7 +110,7 @@ type Msg
     | PingServer 
     | Pinged (Result Http.Error ())
     | ChangeQuery String
-    | SubmitQuery SparqlQuery
+    | SubmitQuery -- its contained in the model but isa PlaygroundQuery
     | SubmitQueryWhileNavigating SparqlQuery
     | GotSparqlResponse (Result Http.Error KGResponse)
     | FileRequested 
@@ -194,7 +183,7 @@ initialFn _ url elmKey =
         initialModel =  { state = Initialising
                         , server = server
                         , urlQuery = initialQuery
-                        , query = (Ask "ask {?s ?p ?o}")
+                        , query =  SparqlQuery (Ask "ask {?s ?p ?o}")
                         , queryHistory = []
                         , vars = []
                         , results = []
@@ -279,7 +268,7 @@ update msg model =
                             let
                                 _ = Debug.log "Internal update running " a    --(Url.toString url)) 
                             in
-                                ( {model | query = a}
+                                ( {model | query = SparqlQuery a}
                                 , pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString a)]) 
                                 )
                 External url ->
@@ -333,25 +322,28 @@ update msg model =
                                 _ = Debug.log "Pinged OK with" query
 
                             in
-                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = query}, Cmd.none)
+                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = SparqlQuery query}, Cmd.none)
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
         ChangeQuery newQuery -> 
                 Debug.log ("Query "++newQuery)
-                ({model | query = (establishQueryType newQuery)}, Cmd.none)
-        SubmitQuery query -> 
+                ({model | query = SparqlQuery (establishQueryType newQuery)}, Cmd.none)
+        SubmitQuery -> 
             case model.query of
-               Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString model.query)))}, Cmd.none)
-               _ ->
-                --    Debug.log ("Submitting Query " model.query
-                    ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString query)])) -- submitQuery model.server query)
+                PlaygroundCommand cmd -> (model, Cmd.none)
+                SparqlQuery sQuery ->
+                    case sQuery of                        
+                        Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString sQuery)))}, Cmd.none)
+                        _ ->
+                            --    Debug.log ("Submitting Query " model.query
+                                ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString sQuery)])) -- submitQuery model.server query)
         SubmitQueryWhileNavigating query ->
             let
-                newModel = {model | query = query, state = Waiting, queryHistory = query::model.queryHistory}
+                newModel = {model | query = SparqlQuery query, state = Waiting, queryHistory = query::model.queryHistory}
                 _ = Debug.log "query=" newModel.query
             in
-                (newModel, submitQuery newModel.server newModel.query (Http.expectJson GotSparqlResponse mainDecoder))         
+                (newModel, submitQuery newModel.server query (Http.expectJson GotSparqlResponse mainDecoder))         
         GotSparqlResponse response -> 
             case response of
                 Ok okData -> 
@@ -378,9 +370,12 @@ update msg model =
                 , Task.perform FileLoaded (File.toString file)
                 )
         FileLoaded content ->
-            ({model | query = establishQueryType content}, Cmd.none)
+            ({model | query = SparqlQuery <| establishQueryType content}, Cmd.none)
         DownloadFile -> 
-            (model, downloadFile "query.txt" (Sparql.toString model.query))
+            case model.query of
+               PlaygroundCommand cmd -> (model, Cmd.none)  -- do nothing
+               SparqlQuery query ->
+                    (model, downloadFile "query.txt" (Sparql.toString query))
         DownloadResultsAsCSV  -> 
             let
                 headedResults = (String.join "|" model.vars) :: List.map (\r -> extractValues r
@@ -508,19 +503,6 @@ elOfSubjectMoleculeCard model mole =
                     ]
             _ -> Element.none
 
-makeSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
-makeSubjectMoleculeCard model mole =    
-    let
-        subj = Tuple.first mole
-    in
-        Element.column []
-                    [ Element.el [Element.Font.size sizePalette.highlight] 
-                        (Element.link [] {url=("/index.html?query=describe <"
-                        ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
-                        ++">"), label=elOfRdfNode model Subject subj}) -- make case here to clean up the view function below
-                    , elOfPredicates model mole
-                    ]
- 
 viewSubjectMolecule: Model -> (SubjectMolecule RdfNode) -> Element Msg
 viewSubjectMolecule model mole =
     let
@@ -823,7 +805,7 @@ elOfQueryPanel model =
                     , Element.Font.size sizePalette.input
                     ]   [ Element.Input.multiline []
                                 { onChange = ChangeQuery
-                                , text = (Sparql.toString model.query)
+                                , text = (PlaygroundQuery.toString model.query)
                                 , placeholder = Nothing
                                 , label = Element.Input.labelLeft [Element.centerY] (Element.none)
                                 , spellcheck = False
@@ -834,7 +816,7 @@ elOfQueryPanel model =
                                                 , Element.spacingXY 50 0 
                                                 , Element.Border.rounded 5
                                                 , Element.Background.color colorPalette.highlight
-                                                ] { onPress = Just (SubmitQuery model.query)
+                                                ] { onPress = Just (SubmitQuery)
                                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go!"
                                                                 }
                                             ]

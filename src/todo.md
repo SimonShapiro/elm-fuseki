@@ -48,7 +48,7 @@
 - find some way to sort lists
 - automatically sense non-s, p, o in subject view
 - make no info on subject view more obvious
-- devlop ontology buttons 
+- packaged queries through a range of ! commands 
 - add load in addition to execute query icon on query history
 - show/hide query history (use n more / less) semantics
 - Improve url routing
@@ -58,6 +58,7 @@
 - Save ttl in subject view
 - Tableview to get hyperlink logic?
 - Dockerise server.py
+- Investigate local fuseki making federated queries.
 - Investigate fuseki deployment/embedding and tdb sync
 - graph view
 - Add limit and offset semantics in table and subject oriented list
@@ -65,6 +66,8 @@
 - Improve table (a more fully featured table)
 
 # Pending Re-factors
+
+- Replace Sparql.toString with PlaygroundQUery.toString
 
 - Make DisplaySelectResults flow from RdfNode rather than SelectAtom
 
