@@ -16,6 +16,7 @@
 - ~~need to short the text on ultralong joined up objects - esp Url a~~
 - ~~Paragraph does not always flow at end of box - currently only observed intermitently at work version???!!!~~
 - ~~Increase vertical spacing on moleculeCard~~
+- ~~make subject header respond to `terse/verbose`~~
 - extra long unwrappables in ui - like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - `Ouput format` used in two places on sparql page
 - replace error elements with paragraph elements.

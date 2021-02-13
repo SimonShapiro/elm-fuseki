@@ -39,7 +39,7 @@ establishQueryType query =
         dropRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^drop"
         createRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^create"
         clearRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^clear"
-        cmdGraphsRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^!"
+        commandReRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^!"
     in
         if Regex.contains selectRe query then Select query
         else if Regex.contains askRe query then Ask query
@@ -51,7 +51,7 @@ establishQueryType query =
         else if Regex.contains dropRe query then Drop query
         else if Regex.contains clearRe query then Clear query
         else if Regex.contains createRe query then Create query
-        else if Regex.contains cmdGraphsRe query then query |> String.Extra.clean |> lookupCommand shriekCommands 
+        else if Regex.contains commandReRe query then query |> String.Extra.clean |> lookupCommand shriekCommands 
         else Unrecognised query
 
 lookupCommand: CommandDict -> String -> SparqlQuery
@@ -70,6 +70,10 @@ shriekCommands =    [ ("!graphs", Select "select distinct ?graph (count(*) as ?c
                     , ("!size", Select "select (count(*) as ?count) {?s ?p ?o}")
                     , ("!types", Select "select distinct ?type {?s a ?type} order by ?type")
                     , ("!predicates", Select "select distinct ?predicate {?s ?predicate ?o} order by ?predicate")
+                    , ("!rdfs", Construct (String.Extra.clean """
+                                            construct {?p a <predicate>. ?p <rdfs> [<domain> ?t; <range> ?tt]}
+                                            {select distinct ?t ?p ?tt {?s ?p ?o. ?s a ?t. optional {?o a ?tt}}}
+                                        """))
                     ] |> Dict.fromList
 
 

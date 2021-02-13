@@ -528,7 +528,7 @@ elOfRdfNode model nodeType node =
                                         , label=Element.text <| urlTextAbbreviator <| a.value  
                                         }
                                     , Element.newTabLink [] {url=a.value, label = Element.image [] { src = "www-12px.svg", description = "" }}])
-                Subject -> Element.text a.value
+                Subject -> Element.text (aka model.predicateStyle a.value) -- a.value
                 Predicate -> 
                     elOfRdfNodeAsPredicate model node --text a.value -- makeSubjectMoleculeCard model node --text a.value  -- a is now an RdfKey and can be expanded via Model
         BlankNode a ->
