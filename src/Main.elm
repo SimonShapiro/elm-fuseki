@@ -44,8 +44,12 @@ import Element.Font exposing (..)
 import Dict
 import List.Extra
 import Element
+import Markdown exposing (..)
+import String.Extra
+import Element
+import Element
 
-version: String
+version : String
 version = "v0.1"
 type alias Document msg =
     { title : String
@@ -87,7 +91,6 @@ type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
 
 type KeyboardMode
     = Normal
-    | Ctrl
     | ReadyToAcceptControl
 
 type ResultsDisplay
@@ -134,7 +137,7 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , result: ServerForm SelectAtom
     }
 
-convertRdfDict2CommunityGraph: RdfDict -> Graph.Graph (SubjectMolecule RdfNode) String 
+convertRdfDict2CommunityGraph : RdfDict -> Graph.Graph (SubjectMolecule RdfNode) String 
 convertRdfDict2CommunityGraph d = 
 --(List (Graph.Node (SubjectMolecule RdfNode)), Dict String Int) 
     let
@@ -167,14 +170,14 @@ convertRdfDict2CommunityGraph d =
         Debug.log ("Building graph of "++(List.length nodes |> String.fromInt)++":"++(List.length edges |> String.fromInt))
         Graph.fromNodesAndEdges nodes edges
 
-server: Server
+server : Server
 server = "http://localhost:port"
 
 -- startWith: Model
 -- startWith = Model Initialising server "" Normal Table Terse [] 
 
 
-initialFn: flags -> Url -> Key -> (Model, (Cmd Msg))
+initialFn : flags -> Url -> Key -> (Model, (Cmd Msg))
 initialFn _ url elmKey =
     let
         initialQuery = parseUrlForIndexQuery url
@@ -199,7 +202,7 @@ initialFn _ url elmKey =
 parseUrlForDetailsSubject : Url -> Maybe String
 parseUrlForDetailsSubject url =
     let
-        subject: Query.Parser (Maybe String)
+        subject : Query.Parser (Maybe String)
         subject = 
             Query.string "subject"
         parseQuery =
@@ -210,7 +213,7 @@ parseUrlForDetailsSubject url =
 parseUrlForIndexQuery : Url -> Maybe SparqlQuery
 parseUrlForIndexQuery url =
     let
-        subject: Query.Parser (Maybe String)
+        subject : Query.Parser (Maybe String)
         subject = 
             Query.string "query"
         parseQuery =
@@ -220,7 +223,7 @@ parseUrlForIndexQuery url =
 
 -- Utility functions
 
-urlTextAbbreviator: String -> String
+urlTextAbbreviator : String -> String
 urlTextAbbreviator longUrl = 
 -- the size here is dependent on font choosen, so shouldn't be constants
     let
@@ -233,7 +236,7 @@ urlTextAbbreviator longUrl =
     in
         usableString
 
-prefixHumnaReadablePartOfUrl: String -> String -> String
+prefixHumnaReadablePartOfUrl : String -> String -> String
 prefixHumnaReadablePartOfUrl prefix urlString = 
     let
         lastPart = urlString 
@@ -250,7 +253,7 @@ prefixHumnaReadablePartOfUrl prefix urlString =
     in
         reconstructedUrl
 
-update: Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         NoOp -> (model, Cmd.none)
@@ -364,7 +367,7 @@ update msg model =
         DeregisterSubjectPredicateOpen selected -> 
             ({model | openPredicatesInSubject = List.Extra.remove selected model.openPredicatesInSubject}, Cmd.none)
 
-handleUrlRequest: UrlRequest -> Msg
+handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
         Internal url ->
@@ -375,7 +378,7 @@ handleUrlRequest req =
             ClickedLink req
 
 
-handleUrlChange: Url -> Msg
+handleUrlChange : Url -> Msg
 handleUrlChange url = 
     case (parseUrlForIndexQuery url) of -- have to reparse url
         Nothing ->
@@ -407,7 +410,7 @@ pingServer newServer =
                     , tracker = Nothing
                     }
 
-aka: PredicateStyle -> String -> String
+aka : PredicateStyle -> String -> String
 aka predicateStyle pred = 
     case predicateStyle of
        Verbose -> pred
@@ -416,7 +419,7 @@ aka predicateStyle pred =
                 |> List.head
                 |> Maybe.withDefault pred
 
-elOfSubjects: Model -> Element Msg 
+elOfSubjects : Model -> Element Msg 
 elOfSubjects model =
     case model.currentRdfDict of
        Nothing -> Element.text "rdfdict error"
@@ -428,7 +431,7 @@ elOfSubjects model =
                             viewSubjectMolecule model spo)
                         ) (Dict.values a))
 
-elOfCardAttributes: List (Element.Attribute msg)
+elOfCardAttributes : List (Element.Attribute msg)
 elOfCardAttributes =
     [ Element.Border.rounded 5
     , Element.Border.width 1    
@@ -438,7 +441,7 @@ elOfCardAttributes =
     , Element.paddingXY 5 0
     ]
 
-elOfSubjectMoleculeCard: Model -> (SubjectMolecule RdfNode) -> Element Msg
+elOfSubjectMoleculeCard : Model -> (SubjectMolecule RdfNode) -> Element Msg
 elOfSubjectMoleculeCard model mole =
     let
         subj = Tuple.first mole
@@ -471,7 +474,7 @@ elOfSubjectMoleculeCard model mole =
                     ]
             _ -> Element.none
 
-viewSubjectMolecule: Model -> (SubjectMolecule RdfNode) -> Element Msg
+viewSubjectMolecule : Model -> (SubjectMolecule RdfNode) -> Element Msg
 viewSubjectMolecule model mole =
     let
         subj = Tuple.first mole
@@ -480,7 +483,21 @@ viewSubjectMolecule model mole =
            BlankNode a -> Element.none -- "blank node detected"
            _ -> elOfSubjectMoleculeCard model mole
 
-elOfPredicates: Model -> SubjectMolecule RdfNode -> Element Msg
+elOfRdfNodeValue : RdfNode -> Element Msg
+elOfRdfNodeValue node =
+    let
+        leadingWhiteSpaceRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^\\s+"
+    in
+        case node of 
+            LiteralOnlyValue a -> Element.text a.value
+            LiteralValueAndLanguageString a -> Element.text a.value
+            LiteralValueAndDataType a -> 
+                if (a.dataType == "http://net.daringfireball.markdown") 
+                then   Regex.replace leadingWhiteSpaceRe (\_ -> "") a.value  |> Markdown.toHtml Nothing |> List.map (\b -> Element.html b) |> Element.column [] --|> Element.column []
+                else Element.text a.value
+            _ -> Element.none
+
+elOfPredicates : Model -> SubjectMolecule RdfNode -> Element Msg
 elOfPredicates model mole =
     let
         subj = Tuple.first mole
@@ -495,7 +512,7 @@ elOfPredicates model mole =
             )
             preds)
 
-elOfRdfNodeAsPredicate: Model -> RdfNode -> Element Msg
+elOfRdfNodeAsPredicate : Model -> RdfNode -> Element Msg
 elOfRdfNodeAsPredicate model node =
     case node of
         Uri a ->
@@ -510,11 +527,11 @@ elOfRdfNodeAsPredicate model node =
                         , Element.Font.size sizePalette.command
                         ] (Element.text "All predicates should be Uri")
 
-encodeUrlFragmentMarker: String -> String
+encodeUrlFragmentMarker : String -> String
 encodeUrlFragmentMarker urlString =
     String.replace "#" "%23" urlString
 
-elOfRdfNode: Model -> ViewRdfNodeAs -> RdfNode -> Element Msg
+elOfRdfNode : Model -> ViewRdfNodeAs -> RdfNode -> Element Msg
 elOfRdfNode model nodeType node =
     case node of
         Uri a ->
@@ -551,7 +568,7 @@ elOfRdfNode model nodeType node =
             Debug.log ("Hunting the string wrapping issue "++(String.left 20 a.value)++(a.value |> String.words |> List.length |> String.fromInt))
             Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [Element.text a.value]
         LiteralValueAndDataType a ->
-            Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [ Element.text a.value
+            Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [ elOfRdfNodeValue node
                                 , Element.row [Element.Font.size sizePalette.smallPrint][ Element.text "  ("
                                                 , Element.text a.dataType
                                                 , Element.text ")"]
@@ -566,7 +583,7 @@ elOfRdfNode model nodeType node =
         Unknown ->
             Element.el [Element.Font.bold] (Element.text "Unrecognised Atom")
 
-elOfObjects:  Model -> RdfNode -> (RdfNode, List RdfNode) -> Element Msg
+elOfObjects :  Model -> RdfNode -> (RdfNode, List RdfNode) -> Element Msg
 elOfObjects model subj po =
     let
         (pred, objs) = po
@@ -582,7 +599,7 @@ elOfObjects model subj po =
 
            Nothing -> Element.text ""
 
-elOfRestOfObjectList: Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Element Msg)
+elOfRestOfObjectList : Model -> (RdfNode, RdfNode) -> RdfNode -> List RdfNode -> List (Element Msg)
 elOfRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
         Just _ -> Element.Input.button   [ Element.alignLeft
@@ -607,13 +624,13 @@ elOfRestOfObjectList model selected obj rest =
                     ]
 -- View
 
-makeDict: ServerVars -> List SelectAtom -> Dict String String
+makeDict : ServerVars -> List SelectAtom -> Dict String String
 makeDict vars atom =
     List.map (\a -> a.value) atom
     |> List.Extra.zip vars
     |> Dict.fromList
 
-predicateStyleToggle: PredicateStyle -> Element Msg
+predicateStyleToggle : PredicateStyle -> Element Msg
 predicateStyleToggle selected =
     Element.Input.radioRow  [ Element.padding 0
                             , Element.spacing 10
@@ -626,7 +643,7 @@ predicateStyleToggle selected =
                                             ]
                                 }
 
-downloadFile: String -> String -> Cmd msg
+downloadFile : String -> String -> Cmd msg
 downloadFile fileName query =
   Download.string fileName "text" query
 
@@ -675,11 +692,14 @@ materialPalette =
     , overline = { size = 10, weight = Regular, case_ = AllCaps }    
     }
 
-elOfTabularResults: ServerVars -> ServerForm SelectAtom -> Element msgDecoder
+elOfTabularResults : ServerVars -> ServerForm SelectAtom -> Element msgDecoder
 elOfTabularResults vars result = 
     let
         data = List.map (\r -> makeDict vars r) result  -- List dict
-        columns = List.map (\v ->   { header = Element.text v
+        columns = List.map (\v ->   { header = Element.el   [ Element.centerX
+                                                            , Element.Font.bold
+                                                            , Element.Font.size sizePalette.input
+                                                            ] (Element.text v)
                                     , width = Element.fill
                                     , view = (\x -> Dict.get v x |> Maybe.withDefault "" |> Element.text) 
                                     }) vars
@@ -688,7 +708,7 @@ elOfTabularResults vars result =
                         , Element.Border.width 2
                         ] {data = data, columns = columns}
 
-elOfQueryHistory: List SparqlQuery -> Element Msg
+elOfQueryHistory : List SparqlQuery -> Element Msg
 elOfQueryHistory history =
     Element.textColumn [ spacing 10, padding 10, Element.height (Element.px 120), scrollbarY ]
         ( List.map (\query ->
@@ -710,7 +730,7 @@ elOfQueryHistory history =
             ) history)
 
 
-elOfUploadQueryFromFile: Element Msg
+elOfUploadQueryFromFile : Element Msg
 elOfUploadQueryFromFile =
     Element.row [ Element.spacing 5
                 , Element.Font.size sizePalette.command
@@ -734,7 +754,7 @@ elOfUploadQueryFromFile =
                                                 }
                     ]
 
-elOfDownloadCsv: Element Msg
+elOfDownloadCsv : Element Msg
 elOfDownloadCsv =
     Element.row [
                 ]
@@ -746,7 +766,7 @@ elOfDownloadCsv =
                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Download"
                                                 }]
 
-elOfResultFormatToggle: Model -> Element Msg
+elOfResultFormatToggle : Model -> Element Msg
 elOfResultFormatToggle model =
     Element.Input.radioRow  [ Element.padding 0
                             , Element.spacing 10
@@ -759,7 +779,7 @@ elOfResultFormatToggle model =
                                             ]
                                 }
 
-elOfQueryPanel: Model -> Element Msg
+elOfQueryPanel : Model -> Element Msg
 elOfQueryPanel model =
     Element.column  [ Element.width Element.fill
                     , Element.spacingXY 0 5
@@ -783,7 +803,7 @@ elOfQueryPanel model =
                                             ]
                         ]
 
-elOfMainPage: Model -> Element Msg
+elOfMainPage : Model -> Element Msg
 elOfMainPage model =
     Element.column  [ Element.width Element.fill
                     , Element.Background.color colorPalette.background
@@ -795,7 +815,7 @@ elOfMainPage model =
                         , elOfQueryHistory model.queryHistory
                         ]
 
-elOfHeading: Model -> Element Msg
+elOfHeading : Model -> Element Msg
 elOfHeading model =
     Element.el  [ Element.Background.color colorPalette.header
                 , Element.height (Element.px 40)
@@ -808,7 +828,7 @@ elOfHeading model =
                                     , Element.el [Element.centerY, Element.alignRight, Element.paddingXY 5 0] (Element.text <| "Sparql Playground - "++version)
                                     ])
 
-elOfServerInput: Model -> Element Msg
+elOfServerInput : Model -> Element Msg
 elOfServerInput model = 
     Element.el [] (Element.row  [Element.centerY
                                 , Element.spacingXY 5 0
@@ -831,7 +851,7 @@ elOfServerInput model =
                                                                             }
                                                 ])
 
-view: Model -> Document Msg
+view : Model -> Document Msg
 view model = { title = "Sparql Query Playground - 0.0"
             , body = (List.singleton <|
                     case model.state of
@@ -908,7 +928,7 @@ view model = { title = "Sparql Query Playground - 0.0"
 
 -- Decoders
 
-selectAtomDecoder: Decoder SelectAtom
+selectAtomDecoder : Decoder SelectAtom
 selectAtomDecoder = 
     map5 SelectAtom
         (field "key" string)
@@ -917,7 +937,7 @@ selectAtomDecoder =
         (field "language" string )
         (field "datatype" string )
 
-mainDecoder: Decoder KGResponse
+mainDecoder : Decoder KGResponse
 mainDecoder =
      map7 KGResponse
         (field "server" string)
@@ -929,7 +949,7 @@ mainDecoder =
         (field "result" (list (list selectAtomDecoder)))    
 -- Main
 
-main: Program () Model Msg
+main : Program () Model Msg
 main =
   Browser.application
     { init = initialFn

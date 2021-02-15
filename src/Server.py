@@ -228,7 +228,9 @@ def processConstructQuery(qType, queryString, res):
                                                 )
                                 if obj.get("@language"):
                                     objectAtom.language = obj.get("@language")
-                                if rdfTypeSignature(obj.get("@value")):
+                                if obj.get('@type') is not None:
+                                    objectAtom.datatype = obj['@type']
+                                elif rdfTypeSignature(obj.get("@value")):
                                     objectAtom.datatype = rdfTypeSignature(obj.get("@value"))
                             elif obj.get("@id"): 
                                 objectAtom = Atom(key="o", 
@@ -244,6 +246,7 @@ def processConstructQuery(qType, queryString, res):
 #                            print(f'--{objectAtom}')
 #                        print([subjectAtom, predicateAtom, objectAtom])
                         resultArray.append([subjectAtom, predicateAtom, objectAtom])
+        print(serializeResults(resultArray))
         return {
             "status": 200,
             "response": json.dumps({
