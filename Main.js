@@ -20308,8 +20308,6 @@ var $author$project$Main$elOfSubjects = function (model) {
 				$elm$core$Dict$values(a)));
 	}
 };
-var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
-var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
 var $elm$core$Tuple$pair = F2(
 	function (a, b) {
 		return _Utils_Tuple2(a, b);
@@ -20561,7 +20559,6 @@ var $author$project$Main$elOfTabularResults = F2(
 						$mdgriffith$elm_ui$Element$el,
 						_List_fromArray(
 							[
-								$mdgriffith$elm_ui$Element$centerX,
 								$mdgriffith$elm_ui$Element$Font$bold,
 								$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.input)
 							]),
@@ -21048,7 +21045,8 @@ var $author$project$Main$view = function (model) {
 										_List_fromArray(
 											[
 												$author$project$Main$elOfMainPage(model),
-												$mdgriffith$elm_ui$Element$text('Subject orientation only where results are in the shape of ?s ?p ?o')
+												$author$project$Main$elOfDownloadCsv,
+												A2($author$project$Main$elOfTabularResults, vars, result)
 											])));
 							}
 						}

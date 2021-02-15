@@ -696,8 +696,7 @@ elOfTabularResults : ServerVars -> ServerForm SelectAtom -> Element msgDecoder
 elOfTabularResults vars result = 
     let
         data = List.map (\r -> makeDict vars r) result  -- List dict
-        columns = List.map (\v ->   { header = Element.el   [ Element.centerX
-                                                            , Element.Font.bold
+        columns = List.map (\v ->   { header = Element.el   [ Element.Font.bold
                                                             , Element.Font.size sizePalette.input
                                                             ] (Element.text v)
                                     , width = Element.fill
@@ -920,9 +919,10 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                             ]
                                             |> Element.layout []
                                         Nothing ->
-                                            Element.column  [ Element.width Element.fill]   [ elOfMainPage model
-                                                                                            , (Element.text "Subject orientation only where results are in the shape of ?s ?p ?o")
-                                                            ]
+                                            Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                        , elOfDownloadCsv
+                                                        , elOfTabularResults vars result
+                                            ]
                                             |> Element.layout []
             )}
 

@@ -1,4 +1,6 @@
-# Known Bugs
+# To Do
+
+## Known Bugs
 
 - [x] Scan jsonld for `null` value
 - [x] Make error pages return to query screen Untested because it relates to APIError
@@ -6,7 +8,7 @@
 - [x] Remove hard coding of localhost 127.0.0.1 and port
 - [x] Resolve apparent differences between safari and chrome on back from history after eternal url click
 - [x] Improve methods of recognizing query type in api to fine tune headers
-- [x] Resolve treatment of fragments in url's - [ ] there is a cut-off on the # on transfer to a server - [ ] this is a general browser problem - [ ] perhaps encode it as %23 or cut it off before # and then close the > for describe links - [ ] choose second method %23
+- [x] Resolve treatment of fragments in url's - [ ] there is a cut-off on the `#` on transfer to a server - [ ] this is a general browser problem - [ ] perhaps encode it as %23 or cut it off before `#` and then close the > for describe links - [ ] choose second method %23
 - [x] Resolve differences between bnode on select and construct in server.py - [ ] one traces to b0 the other to \_:bo. Should probably fold blank nodes into there subject in some recursive function.
 - [x] Add lru caching to improve query performance
 - [x] Element.text word wrap of object literals
@@ -21,11 +23,11 @@
 - [ ] `Ouput format` used in two places on sparql page
 - [ ] replace error elements with paragraph elements.
 - [ ] Command line query should not be submitted
-- [ ] Add port as command-line parameter for Server.py 
+- [ ] Add port as command-line parameter for Server.py
 - [ ] Fine tune cache maxsize
-- [ ] Back reloads page and loses reference position 
+- [ ] Back reloads page and loses reference position
 
-# To Do
+## Fine Tune Features
 
 - [x] Cursor on wait
 - [x] Table/subject view toggle
@@ -40,23 +42,24 @@
 - [x] Icon for fully external url lookup
 - [x] Link on subject as well
 - [x] Implement `load` in update
-- [x] Updates according to - [sparql cheat sheet] (https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf)
+- [x] Updates according to - [sparql cheat sheet] (<https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf>)
 - [x] Maintain scrolling query list
 - [x] Investigate elm-ui
 - [x] Simple styling
 - [x] add reverse cards via query - [ ] ie back links
 - [x] packaged queries through a range of ! commands
+- [ ] automatically sense non-s, p, o in subject view
+- [ ] graph view
 - [ ] improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.
-- [ ] use a decoder strategy for establishQueryType
 - [ ] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
 - [ ] find some way to sort lists
 - [ ] automatically sense non-s, p, o in subject view
 - [ ] make no info on subject view more obvious
-- [ ] consider user defined short-cuts to queries like ! commands 
+- [ ] consider user defined short-cuts to queries like ! commands
 - [ ] add load in addition to execute query icon on query history
 - [ ] show/hide query history (use n more / less) semantics
 - [ ] Improve url routing
-- [ ] Add settings - [ ] api url; allow implied external links to model
+- [ ] Add settings - api url; allow implied external links to model
 - [ ] check for in result/graph access to object uri
 - [ ] Consider doing something special with #type???
 - [ ] Save ttl in subject view
@@ -64,22 +67,24 @@
 - [ ] Dockerise server.py
 - [ ] Investigate local fuseki making federated queries.
 - [ ] Investigate fuseki deployment/embedding and tdb sync
-- [ ] graph view
 - [ ] Add limit and offset semantics in table and subject oriented list
 - [ ] csv download - [ ] filename to be input
 - [ ] Improve table (a more fully featured table)
 
-# Pending Re-factors
+## Pending Re-factors
 
 - [x] Replace Sparql.toString with PlaygroundQuery.toString
-
 - [ ] Make DisplaySelectResults flow from RdfNode rather than SelectAtom
+- [ ] use a decoder strategy for establishQueryType
+- [ ] makeRdfDict redundant call and setting of table/subject
 
-*Sparql Processing*
+### Sparql Processing
+
 - [x] Separate `Sparql` - [ ] confirm you have sparql in compatible shape - [ ] submit to end-point
 - [x] Merge `submitParametrisedQuery` and `submitQuery`
 
-*KG Response Processing*
+### KG Response Processing
 
 Transform the response into internal form(s).  Main logic is driven by functions leading to RdfDict.
+
 - [x] Separate all functions from KGresponse to ContractedForm.
