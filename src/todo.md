@@ -48,11 +48,12 @@
 - [x] Simple styling
 - [x] add reverse cards via query - [ ] ie back links
 - [x] packaged queries through a range of ! commands
-- [ ] automatically sense non-s, p, o in subject view
+- [x] automatically sense non-s, p, o in subject view
+- [x] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
 - [ ] graph view
-- [ ] improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.
-- [ ] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
+- [ ] integrate ttl validator `npm install -g turtle-validator` - as a command in load logic
 - [ ] find some way to sort lists
+- [ ] improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.
 - [ ] automatically sense non-s, p, o in subject view
 - [ ] make no info on subject view more obvious
 - [ ] consider user defined short-cuts to queries like ! commands

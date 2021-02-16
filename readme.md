@@ -14,7 +14,17 @@ In this project Server.py is a Python Flask API that intercepts Sparql commands,
 
 ## Prerequisites
 
-- Apache Jena Fuseki.  Choose the latest release from the [Maven Repository](https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-server/).  This is a Java `jar` and so needs a working Java JRE or SDK.
+- Apache Jena Fuseki.  Choose the latest release from the [Maven Repository](https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-server/).  This is a Java `jar` and so needs a working Java JRE or SDK.  The latest version as at 2021-02-16 is 3.17.0, which is used below.  Use `curl` to get a copy as below:
+
+```
+curl --output <WHERE-YOU-WANT-TO-HOLD-FUSEKI> https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-server/3.17.0/jena-fuseki-server-3.17.0.jar
+```
+
+The server can be started with the following command:
+
+```
+java -Xmx2g -jar fuseki-server.jar --tdb2 --loc <WHERE-YOU-WANT-YOUR-DATABASE> --set tdb:unionDefaultGraph=true --update <THE-NAME-OF-YOUR-DATASET>
+```
 - A Python 3.6+ environment.
 
 ## Shortcut queries
