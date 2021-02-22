@@ -77,7 +77,7 @@ type alias Model =
     { state: UIState
     , server: Server
     , urlQuery: Maybe SparqlQuery
-    , query: PlaygroundQuery
+    , query: SparqlQuery
     , queryHistory: List SparqlQuery
     , resultHistory: Dict String (ServerVars, ServerForm SelectAtom) -- key is the String of the Query
     , vars: ServerVars
@@ -115,7 +115,7 @@ type Msg
     | PingServer 
     | Pinged (Result Http.Error ())
     | ChangeQuery String
-    | SubmitQuery -- its contained in the model but isa PlaygroundQuery
+    | SubmitQuery SparqlQuery
     | SubmitQueryWhileNavigating SparqlQuery
     | GotSparqlResponse (Result Http.Error KGResponse)
     | FileRequested 
@@ -374,7 +374,7 @@ initialFn _ url elmKey =
         initialModel =  { state = Initialising
                         , server = server
                         , urlQuery = initialQuery
-                        , query =  SparqlQuery (Ask "ask {?s ?p ?o}")
+                        , query =  (Ask "ask {?s ?p ?o}")
                         , queryHistory = []
                         , vars = []
                         , results = []
@@ -460,7 +460,7 @@ update msg model =
                             let
                                 _ = Debug.log "Internal update running " a    --(Url.toString url)) 
                             in
-                                ( {model | query = SparqlQuery a}
+                                ( {model | query = a}
                                 , pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString a)]) 
                                 )
                 External url ->
@@ -483,33 +483,32 @@ update msg model =
                                 _ = Debug.log "Pinged OK with" query
 
                             in
-                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = SparqlQuery query}, Cmd.none)
+                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = query}, Cmd.none)
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
         ChangeQuery newQuery -> 
                 Debug.log ("Query "++newQuery)
-                ({model | query = SparqlQuery (establishQueryType newQuery)}, Cmd.none)
-        SubmitQuery -> 
+                ({model | query = (establishQueryType newQuery)}, Cmd.none)
+        SubmitQuery query -> 
             case model.query of
-                PlaygroundCommand cmd -> (model, Cmd.none)
-                SparqlQuery sQuery ->
-                    case sQuery of                        
-                        Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString sQuery)))}, Cmd.none)
+                        Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString model.query)))}, Cmd.none)
                         _ ->
                             let
-                                cachedResult = Dict.get  (Sparql.toString sQuery) model.resultHistory
+                                cachedResult = Dict.get  (Sparql.toString query) model.resultHistory
                             in
                             --    Debug.log ("Submitting Query " model.query
                                 case cachedResult of
                                     Nothing ->
-                                        ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString sQuery)])) -- submitQuery model.server query)
+                                        Debug.log "Not from cache :-("
+                                        ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString query)])) -- submitQuery model.server query)
                                     Just result -> 
                                         let
                                             vars = Tuple.first result
                                             table = Tuple.second result
                                         in
                                         
+                                        Debug.log "Cached :-)"
                                         ({ model | state = DisplayingSelectResult vars table
                                         , vars = vars
                                         , results = table
@@ -518,7 +517,7 @@ update msg model =
                                         }, Cmd.none)
         SubmitQueryWhileNavigating query ->
             let
-                newModel = {model | query = SparqlQuery query, state = Waiting, queryHistory = query::model.queryHistory}
+                newModel = {model | query = query, state = Waiting, queryHistory = query::model.queryHistory}
                 _ = Debug.log "query=" newModel.query
             in
                 (newModel, submitQuery newModel.server query (Http.expectJson GotSparqlResponse mainDecoder))         
@@ -549,12 +548,9 @@ update msg model =
                 , Task.perform FileLoaded (File.toString file)
                 )
         FileLoaded content ->
-            ({model | query = SparqlQuery <| establishQueryType content}, Cmd.none)
+            ({model | query = establishQueryType content}, Cmd.none)
         DownloadFile -> 
-            case model.query of
-               PlaygroundCommand cmd -> (model, Cmd.none)  -- do nothing
-               SparqlQuery query ->
-                    (model, downloadFile "query.txt" (Sparql.toString query))
+                (model, downloadFile "query.txt" (Sparql.toString model.query))
         DownloadResultsAsCSV  -> 
             let
                 headedResults = (String.join "|" model.vars) :: List.map (\r -> extractValues r
@@ -939,7 +935,7 @@ elOfQueryHistory history =
                                                 , Element.focused
                                                     [ Element.Background.color colorPalette.highlight ]
                                                 ]
-                                                { onPress = Just (SubmitQueryWhileNavigating query)
+                                                { onPress = Just (SubmitQuery query)
                                                 , label = Element.text ">"
                                                 }
                                         , paragraph [ Element.Font.size sizePalette.normal
@@ -1006,7 +1002,7 @@ elOfQueryPanel model =
                     , Element.Font.size sizePalette.input
                     ]   [ Element.Input.multiline []
                                 { onChange = ChangeQuery
-                                , text = (PlaygroundQuery.toString model.query)
+                                , text = (Sparql.toString model.query)
                                 , placeholder = Nothing
                                 , label = Element.Input.labelLeft [Element.centerY] (Element.none)
                                 , spellcheck = False
@@ -1017,7 +1013,7 @@ elOfQueryPanel model =
                                                 , Element.spacingXY 50 0 
                                                 , Element.Border.rounded 5
                                                 , Element.Background.color colorPalette.highlight
-                                                ] { onPress = Just (SubmitQuery)
+                                                ] { onPress = Just (SubmitQuery model.query)
                                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go!"
                                                                 }
                                             ]

@@ -6839,9 +6839,6 @@ var $author$project$Main$handleUrlRequest = function (req) {
 };
 var $author$project$Main$Initialising = {$: 'Initialising'};
 var $author$project$Main$Normal = {$: 'Normal'};
-var $author$project$PlaygroundQuery$SparqlQuery = function (a) {
-	return {$: 'SparqlQuery', a: a};
-};
 var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6856,8 +6853,7 @@ var $author$project$Main$initialFn = F3(
 			keyboard: $author$project$Main$Normal,
 			openPredicatesInSubject: _List_Nil,
 			predicateStyle: $author$project$Main$Terse,
-			query: $author$project$PlaygroundQuery$SparqlQuery(
-				$author$project$Sparql$Ask('ask {?s ?p ?o}')),
+			query: $author$project$Sparql$Ask('ask {?s ?p ?o}'),
 			queryHistory: _List_Nil,
 			resultHistory: $elm$core$Dict$empty,
 			results: _List_Nil,
@@ -7769,9 +7765,7 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{
-									query: $author$project$PlaygroundQuery$SparqlQuery(a)
-								}),
+								{query: a}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
 								model.key,
@@ -7835,11 +7829,7 @@ var $author$project$Main$update = F2(
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
-								{
-									keyboard: $author$project$Main$ReadyToAcceptControl,
-									query: $author$project$PlaygroundQuery$SparqlQuery(query),
-									state: $author$project$Main$Querying
-								}),
+								{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
 							$elm$core$Platform$Cmd$none);
 					}
 				} else {
@@ -7862,35 +7852,33 @@ var $author$project$Main$update = F2(
 						_Utils_update(
 							model,
 							{
-								query: $author$project$PlaygroundQuery$SparqlQuery(
-									$author$project$PlaygroundQuery$establishQueryType(newQuery))
+								query: $author$project$PlaygroundQuery$establishQueryType(newQuery)
 							}),
 						$elm$core$Platform$Cmd$none));
 			case 'SubmitQuery':
+				var query = msg.a;
 				var _v7 = model.query;
-				if (_v7.$ === 'PlaygroundCommand') {
-					var cmd = _v7.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				if (_v7.$ === 'Unrecognised') {
+					var newQuery = _v7.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								state: $author$project$Main$ApiError(
+									$elm$http$Http$BadBody(
+										'I don\'t recognise this query type ' + $author$project$Sparql$toString(model.query)))
+							}),
+						$elm$core$Platform$Cmd$none);
 				} else {
-					var sQuery = _v7.a;
-					if (sQuery.$ === 'Unrecognised') {
-						var newQuery = sQuery.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									state: $author$project$Main$ApiError(
-										$elm$http$Http$BadBody(
-											'I don\'t recognise this query type ' + $author$project$Sparql$toString(sQuery)))
-								}),
-							$elm$core$Platform$Cmd$none);
-					} else {
-						var cachedResult = A2(
-							$elm$core$Dict$get,
-							$author$project$Sparql$toString(sQuery),
-							model.resultHistory);
-						if (cachedResult.$ === 'Nothing') {
-							return _Utils_Tuple2(
+					var cachedResult = A2(
+						$elm$core$Dict$get,
+						$author$project$Sparql$toString(query),
+						model.resultHistory);
+					if (cachedResult.$ === 'Nothing') {
+						return A2(
+							$elm$core$Debug$log,
+							'Not from cache :-(',
+							_Utils_Tuple2(
 								_Utils_update(
 									model,
 									{state: $author$project$Main$Waiting}),
@@ -7905,13 +7893,16 @@ var $author$project$Main$update = F2(
 												A2(
 												$elm$url$Url$Builder$string,
 												'query',
-												$author$project$Sparql$toString(sQuery))
-											]))));
-						} else {
-							var result = cachedResult.a;
-							var vars = result.a;
-							var table = result.b;
-							return _Utils_Tuple2(
+												$author$project$Sparql$toString(query))
+											])))));
+					} else {
+						var result = cachedResult.a;
+						var vars = result.a;
+						var table = result.b;
+						return A2(
+							$elm$core$Debug$log,
+							'Cached :-)',
+							_Utils_Tuple2(
 								_Utils_update(
 									model,
 									{
@@ -7923,8 +7914,7 @@ var $author$project$Main$update = F2(
 										state: A2($author$project$Main$DisplayingSelectResult, vars, table),
 										vars: vars
 									}),
-								$elm$core$Platform$Cmd$none);
-						}
+								$elm$core$Platform$Cmd$none));
 					}
 				}
 			case 'SubmitQueryWhileNavigating':
@@ -7932,11 +7922,11 @@ var $author$project$Main$update = F2(
 				var newModel = _Utils_update(
 					model,
 					{
-						query: $author$project$PlaygroundQuery$SparqlQuery(query),
+						query: query,
 						queryHistory: A2($elm$core$List$cons, query, model.queryHistory),
 						state: $author$project$Main$Waiting
 					});
-				var _v10 = A2($elm$core$Debug$log, 'query=', newModel.query);
+				var _v9 = A2($elm$core$Debug$log, 'query=', newModel.query);
 				return _Utils_Tuple2(
 					newModel,
 					A3(
@@ -7948,8 +7938,8 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v12 = okData.status;
-					if (_v12 === 200) {
+					var _v11 = okData.status;
+					if (_v11 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8012,24 +8002,16 @@ var $author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							query: $author$project$PlaygroundQuery$SparqlQuery(
-								$author$project$PlaygroundQuery$establishQueryType(content))
+							query: $author$project$PlaygroundQuery$establishQueryType(content)
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DownloadFile':
-				var _v13 = model.query;
-				if (_v13.$ === 'PlaygroundCommand') {
-					var cmd = _v13.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				} else {
-					var query = _v13.a;
-					return _Utils_Tuple2(
-						model,
-						A2(
-							$author$project$Main$downloadFile,
-							'query.txt',
-							$author$project$Sparql$toString(query)));
-				}
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$author$project$Main$downloadFile,
+						'query.txt',
+						$author$project$Sparql$toString(model.query)));
 			case 'DownloadResultsAsCSV':
 				var headedResults = A2(
 					$elm$core$List$cons,
@@ -14936,6 +14918,9 @@ var $author$project$Main$elOfHeading = function (model) {
 					$mdgriffith$elm_ui$Element$text('Sparql Playground - ' + $author$project$Main$version))
 				])));
 };
+var $author$project$Main$SubmitQuery = function (a) {
+	return {$: 'SubmitQuery', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
 var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
 var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
@@ -15194,7 +15179,7 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 							{
 								label: $mdgriffith$elm_ui$Element$text('>'),
 								onPress: $elm$core$Maybe$Just(
-									$author$project$Main$SubmitQueryWhileNavigating(query))
+									$author$project$Main$SubmitQuery(query))
 							}),
 							A2(
 							$mdgriffith$elm_ui$Element$paragraph,
@@ -15215,7 +15200,6 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 var $author$project$Main$ChangeQuery = function (a) {
 	return {$: 'ChangeQuery', a: a};
 };
-var $author$project$Main$SubmitQuery = {$: 'SubmitQuery'};
 var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 	function (attrs, multi) {
 		return A3(
@@ -15225,25 +15209,6 @@ var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 			{label: multi.label, onChange: multi.onChange, placeholder: multi.placeholder, text: multi.text});
 	});
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
-var $author$project$PlaygroundQuery$toString = function (playQuery) {
-	if (playQuery.$ === 'SparqlQuery') {
-		var q = playQuery.a;
-		return $author$project$Sparql$toString(q);
-	} else {
-		var cmd = playQuery.a;
-		switch (cmd.$) {
-			case 'Graphs':
-				var q = cmd.a;
-				return $author$project$Sparql$toString(q);
-			case 'Ontology':
-				var q = cmd.a;
-				return $author$project$Sparql$toString(q);
-			default:
-				var q = cmd.a;
-				return $author$project$Sparql$toString(q);
-		}
-	}
-};
 var $author$project$Main$elOfQueryPanel = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$column,
@@ -15267,7 +15232,7 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 					onChange: $author$project$Main$ChangeQuery,
 					placeholder: $elm$core$Maybe$Nothing,
 					spellcheck: false,
-					text: $author$project$PlaygroundQuery$toString(model.query)
+					text: $author$project$Sparql$toString(model.query)
 				}),
 				A2(
 				$mdgriffith$elm_ui$Element$row,
@@ -15299,7 +15264,8 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 									]),
 								$mdgriffith$elm_ui$Element$text('Go!')),
-							onPress: $elm$core$Maybe$Just($author$project$Main$SubmitQuery)
+							onPress: $elm$core$Maybe$Just(
+								$author$project$Main$SubmitQuery(model.query))
 						})
 					]))
 			]));
