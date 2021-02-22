@@ -19,6 +19,8 @@
 - [x] Paragraph does not always flow at end of box - [ ] currently only observed intermittently at work version???!!!
 - [x] Increase vertical spacing on moleculeCard
 - [x] make subject header respond to `terse/verbose`
+- [ ] Should the pin be moved to a general result area off the card - to indicate 'pin' the result.
+- [ ] Back isn't using the cache results
 - [ ] extra long unwrappables in ui - [ ] like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - [ ] `Ouput format` used in two places on sparql page
 - [ ] replace error elements with paragraph elements.
@@ -50,8 +52,8 @@
 - [x] packaged queries through a range of ! commands
 - [x] automatically sense non-s, p, o in subject view
 - [x] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
-- [ ] Cache results in model
-- [ ] Introduce refresh of cached query results
+- [x] Cache results in model
+- [ ] Introduce refresh of cached query results - currently just via browser tab refresh.
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???
 - [ ] see if there is a anything useful for `bnode` in the object position when showing `Back Links`

@@ -6851,6 +6851,7 @@ var $author$project$Main$initialFn = F3(
 			currentRdfDict: $elm$core$Maybe$Nothing,
 			key: elmKey,
 			keyboard: $author$project$Main$Normal,
+			lineOfThought: _List_Nil,
 			openPredicatesInSubject: _List_Nil,
 			predicateStyle: $author$project$Main$Terse,
 			query: $author$project$Sparql$Ask('ask {?s ?p ?o}'),
@@ -8070,7 +8071,7 @@ var $author$project$Main$update = F2(
 							openPredicatesInSubject: A2($elm$core$List$cons, selected, model.openPredicatesInSubject)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'DeregisterSubjectPredicateOpen':
 				var selected = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -8078,6 +8079,45 @@ var $author$project$Main$update = F2(
 						{
 							openPredicatesInSubject: A2($elm_community$list_extra$List$Extra$remove, selected, model.openPredicatesInSubject)
 						}),
+					$elm$core$Platform$Cmd$none);
+			case 'AddQueryToLineOfThought':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							lineOfThought: A2($elm$core$List$cons, model.query, model.lineOfThought)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'DisplayFromLineOfThought':
+				var tQuery = msg.a;
+				var thought = A2(
+					$elm$core$Maybe$withDefault,
+					_Utils_Tuple2(_List_Nil, _List_Nil),
+					A2(
+						$elm$core$Dict$get,
+						$author$project$Sparql$toString(tQuery),
+						model.resultHistory));
+				var _v14 = thought;
+				var vars = _v14.a;
+				var table = _v14.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentRdfDict: A2(
+								$elm$core$Maybe$map,
+								$author$project$RdfDict$makeRdfDict,
+								A2($author$project$RdfDict$contractResult, vars, table)),
+							results: table,
+							state: A2($author$project$Main$DisplayingSelectResult, vars, table),
+							vars: vars
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{lineOfThought: _List_Nil}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -14918,17 +14958,16 @@ var $author$project$Main$elOfHeading = function (model) {
 					$mdgriffith$elm_ui$Element$text('Sparql Playground - ' + $author$project$Main$version))
 				])));
 };
-var $author$project$Main$SubmitQuery = function (a) {
-	return {$: 'SubmitQuery', a: a};
+var $author$project$Main$DisplayFromLineOfThought = function (a) {
+	return {$: 'DisplayFromLineOfThought', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
-var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
-var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
+var $author$project$Main$ResetLineOfThought = {$: 'ResetLineOfThought'};
+var $mdgriffith$elm_ui$Internal$Model$Hover = {$: 'Hover'};
 var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
 	function (a, b) {
 		return {$: 'PseudoSelector', a: a, b: b};
 	});
-var $mdgriffith$elm_ui$Internal$Flag$focus = $mdgriffith$elm_ui$Internal$Flag$flag(31);
+var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $mdgriffith$elm_ui$Internal$Model$map = F2(
@@ -15044,6 +15083,80 @@ var $mdgriffith$elm_ui$Internal$Model$unwrapDecorations = function (attrs) {
 		$mdgriffith$elm_ui$Internal$Model$Transform(transform),
 		styles);
 };
+var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$hover,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
+			$mdgriffith$elm_ui$Internal$Model$Hover,
+			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
+};
+var $author$project$Main$elOfLineOfThought = function (model) {
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_Nil,
+		A2(
+			$elm$core$List$append,
+			$elm$core$List$reverse(
+				A2(
+					$elm$core$List$indexedMap,
+					F2(
+						function (ndx, tQuery) {
+							return A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('---'),
+										A2(
+										$mdgriffith$elm_ui$Element$Input$button,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+												$mdgriffith$elm_ui$Element$mouseOver(
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
+													]))
+											]),
+										{
+											label: $mdgriffith$elm_ui$Element$text(
+												$elm$core$String$fromInt(
+													$elm$core$List$length(model.lineOfThought) - ndx)),
+											onPress: $elm$core$Maybe$Just(
+												$author$project$Main$DisplayFromLineOfThought(tQuery))
+										})
+									]));
+						}),
+					model.lineOfThought)),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text('-->'),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+							$mdgriffith$elm_ui$Element$mouseOver(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
+								]))
+						]),
+					{
+						label: $mdgriffith$elm_ui$Element$text(' Reset'),
+						onPress: $elm$core$Maybe$Just($author$project$Main$ResetLineOfThought)
+					})
+				])));
+};
+var $author$project$Main$SubmitQuery = function (a) {
+	return {$: 'SubmitQuery', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
+var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
+var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
+var $mdgriffith$elm_ui$Internal$Flag$focus = $mdgriffith$elm_ui$Internal$Flag$flag(31);
 var $mdgriffith$elm_ui$Element$focused = function (decs) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -15775,6 +15888,7 @@ var $elm$core$Dict$values = function (dict) {
 		_List_Nil,
 		dict);
 };
+var $author$project$Main$AddQueryToLineOfThought = {$: 'AddQueryToLineOfThought'};
 var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
 	return {$: 'DeregisterSubjectPredicateOpen', a: a};
 };
@@ -23732,17 +23846,6 @@ var $mdgriffith$elm_ui$Element$link = F2(
 				_List_fromArray(
 					[label])));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Hover = {$: 'Hover'};
-var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
-var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$hover,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
-			$mdgriffith$elm_ui$Internal$Model$Hover,
-			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
-};
 var $elm$core$String$right = F2(
 	function (n, string) {
 		return (n < 1) ? '' : A3(
@@ -24069,17 +24172,39 @@ var $author$project$Main$elOfSubjectMoleculeCard = F2(
 									$mdgriffith$elm_ui$Element$alignRight
 								]),
 							A2(
-								$mdgriffith$elm_ui$Element$link,
+								$mdgriffith$elm_ui$Element$row,
 								_List_Nil,
-								{
-									label: $mdgriffith$elm_ui$Element$text('Back links'),
-									url: '/index.html?query=' + backLinksQuery(
-										$author$project$Main$encodeUrlFragmentMarker(
-											A2(
-												$elm$core$Maybe$withDefault,
-												'unknown',
-												$author$project$RdfDict$makeRdfKey(subj))))
-								})),
+								_List_fromArray(
+									[
+										A2(
+										$mdgriffith$elm_ui$Element$Input$button,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$alignLeft,
+												$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+												$mdgriffith$elm_ui$Element$width(
+												$mdgriffith$elm_ui$Element$px(30))
+											]),
+										{
+											label: A2(
+												$mdgriffith$elm_ui$Element$image,
+												_List_Nil,
+												{description: 'Red Pin', src: 'red_pin.svg'}),
+											onPress: $elm$core$Maybe$Just($author$project$Main$AddQueryToLineOfThought)
+										}),
+										A2(
+										$mdgriffith$elm_ui$Element$link,
+										_List_Nil,
+										{
+											label: $mdgriffith$elm_ui$Element$text('Back links'),
+											url: '/index.html?query=' + backLinksQuery(
+												$author$project$Main$encodeUrlFragmentMarker(
+													A2(
+														$elm$core$Maybe$withDefault,
+														'unknown',
+														$author$project$RdfDict$makeRdfKey(subj))))
+										})
+									]))),
 							A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
@@ -24759,6 +24884,7 @@ var $author$project$Main$view = function (model) {
 										[
 											$author$project$Main$elOfMainPage(model),
 											$author$project$Main$elOfDownloadCsv,
+											$author$project$Main$elOfLineOfThought(model),
 											A2($author$project$Main$elOfTabularResults, vars, result)
 										])));
 						} else {
@@ -24780,6 +24906,7 @@ var $author$project$Main$view = function (model) {
 										_List_fromArray(
 											[
 												$author$project$Main$elOfMainPage(model),
+												$author$project$Main$elOfLineOfThought(model),
 												$author$project$Main$predicateStyleToggle(model.predicateStyle),
 												$author$project$Main$elOfSubjects(model)
 											])));

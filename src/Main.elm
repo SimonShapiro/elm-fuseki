@@ -42,6 +42,7 @@ import Element.Background exposing (..)
 import Element.Input exposing (..)
 import Element.Font exposing (..)
 import Element.Region exposing (..)
+import Element.Events exposing (..)
 import Dict
 import List.Extra
 import Element
@@ -50,6 +51,7 @@ import Markdown.Block as Block exposing (Block, Inline, ListItem(..), Task(..))
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
+import Element
 
 version : String
 version = "v0.1"
@@ -80,6 +82,7 @@ type alias Model =
     , query: SparqlQuery
     , queryHistory: List SparqlQuery
     , resultHistory: Dict String (ServerVars, ServerForm SelectAtom) -- key is the String of the Query
+    , lineOfThought: List SparqlQuery
     , vars: ServerVars
     , results: ServerForm SelectAtom
     , currentRdfDict: Maybe RdfDict
@@ -129,6 +132,9 @@ type Msg
     | RegisterSubjectPredicateOpen (RdfNode, RdfNode)
     | DeregisterSubjectPredicateOpen (RdfNode, RdfNode)
     | ClickedLink UrlRequest
+    | AddQueryToLineOfThought
+    | DisplayFromLineOfThought SparqlQuery
+    
 
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
@@ -379,6 +385,7 @@ initialFn _ url elmKey =
                         , vars = []
                         , results = []
                         , resultHistory = Dict.empty
+                        , lineOfThought = []
                         , currentRdfDict = Nothing
                         , keyboard = Normal
                         , resultsDisplay = Table
@@ -570,7 +577,19 @@ update msg model =
             ({model | openPredicatesInSubject = selected::model.openPredicatesInSubject}, Cmd.none)
         DeregisterSubjectPredicateOpen selected -> 
             ({model | openPredicatesInSubject = List.Extra.remove selected model.openPredicatesInSubject}, Cmd.none)
-
+        AddQueryToLineOfThought -> 
+            ({model | lineOfThought = model.query::model.lineOfThought}, Cmd.none)
+        DisplayFromLineOfThought tQuery ->
+            let 
+                thought = Dict.get (Sparql.toString tQuery) model.resultHistory |> Maybe.withDefault ([],[])
+                (vars, table) = thought
+            in
+                ({ model | state = DisplayingSelectResult vars table
+                , vars = vars
+                , results = table
+                , currentRdfDict = contractResult vars table 
+                                    |> Maybe.map makeRdfDict 
+                }, Cmd.none)
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
@@ -623,6 +642,31 @@ aka predicateStyle pred =
                 |> List.head
                 |> Maybe.withDefault pred
 
+elOfLineOfThought : Model -> Element Msg
+elOfLineOfThought model =
+    Element.row [] (List.append (List.indexedMap (\ndx tQuery -> 
+        Element.row [] 
+        [ Element.text "---"
+        , Element.Input.button 
+                        [ Element.Background.color colorPalette.button
+                        , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
+                        ]  
+                        { onPress=Just (DisplayFromLineOfThought tQuery)
+                        , label=Element.text ((String.fromInt <| (List.length model.lineOfThought) - ndx))
+                        }
+        ]) model.lineOfThought |> List.reverse)
+        [ Element.text "-->"
+        , Element.Input.button 
+                        [ Element.Background.color colorPalette.button
+                        , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
+                        ]  
+                        { onPress=Just ResetLineOfThought
+                        , label=Element.text " Reset"
+                        }
+
+        ])
+    
+
 elOfSubjects : Model -> Element Msg 
 elOfSubjects model =
     case model.currentRdfDict of
@@ -666,10 +710,19 @@ elOfSubjectMoleculeCard model mole =
             
             Uri _ ->
                 Element.column elOfCardAttributes
-                    [ Element.el [Element.Font.size sizePalette.command, Element.alignRight] 
-                        (Element.link [] {url=("/index.html?query="
-                        ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker |> backLinksQuery) 
-                        ), label=Element.text "Back links"})
+                    [ Element.el [Element.Font.size sizePalette.command, Element.alignRight]
+                        (Element.row [][ 
+                            (Element.Input.button   [ Element.alignLeft
+                                                        , Element.Background.color colorPalette.button
+                                                        , Element.width (Element.px 30)
+                                                        ]
+                                                        { onPress=Just AddQueryToLineOfThought
+                                                        , label=Element.image [] {src = "red_pin.svg", description="Red Pin"}
+                                                        })                            
+                            , (Element.link [] {url=("/index.html?query="
+                            ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker |> backLinksQuery) 
+                            ), label=Element.text "Back links"})
+                        ])
                     , Element.el [Element.Font.size sizePalette.subject] 
                         (Element.link [] {url=("/index.html?query=describe <"
                         ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker) 
@@ -1120,6 +1173,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                 Table ->
                                         Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                         , elOfDownloadCsv
+                                                        , elOfLineOfThought model -- maybe not model???
                                                         , elOfTabularResults vars result
                                                         ]
                                         |> Element.layout []
@@ -1131,6 +1185,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                     case contracted of
                                         Just a ->
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
+                                                            , elOfLineOfThought model -- maybe not model???
                                                             , predicateStyleToggle model.predicateStyle
                                                             , elOfSubjects model
                                                             ]
