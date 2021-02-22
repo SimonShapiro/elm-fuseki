@@ -79,6 +79,7 @@ type alias Model =
     , urlQuery: Maybe SparqlQuery
     , query: PlaygroundQuery
     , queryHistory: List SparqlQuery
+    , resultHistory: Dict String (ServerVars, ServerForm SelectAtom) -- key is the String of the Query
     , vars: ServerVars
     , results: ServerForm SelectAtom
     , currentRdfDict: Maybe RdfDict
@@ -377,6 +378,7 @@ initialFn _ url elmKey =
                         , queryHistory = []
                         , vars = []
                         , results = []
+                        , resultHistory = Dict.empty
                         , currentRdfDict = Nothing
                         , keyboard = Normal
                         , resultsDisplay = Table
@@ -495,8 +497,25 @@ update msg model =
                     case sQuery of                        
                         Unrecognised newQuery -> ({model | state = ApiError (Http.BadBody ("I don't recognise this query type "++(Sparql.toString sQuery)))}, Cmd.none)
                         _ ->
+                            let
+                                cachedResult = Dict.get  (Sparql.toString sQuery) model.resultHistory
+                            in
                             --    Debug.log ("Submitting Query " model.query
-                                ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString sQuery)])) -- submitQuery model.server query)
+                                case cachedResult of
+                                    Nothing ->
+                                        ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString sQuery)])) -- submitQuery model.server query)
+                                    Just result -> 
+                                        let
+                                            vars = Tuple.first result
+                                            table = Tuple.second result
+                                        in
+                                        
+                                        ({ model | state = DisplayingSelectResult vars table
+                                        , vars = vars
+                                        , results = table
+                                        , currentRdfDict = contractResult vars table 
+                                                            |> Maybe.map makeRdfDict 
+                                        }, Cmd.none)
         SubmitQueryWhileNavigating query ->
             let
                 newModel = {model | query = SparqlQuery query, state = Waiting, queryHistory = query::model.queryHistory}
@@ -512,6 +531,7 @@ update msg model =
                             ({ model | state = DisplayingSelectResult okData.vars okData.result
                              , vars = okData.vars
                              , results = okData.result
+                             , resultHistory = Dict.insert okData.query (okData.vars, okData.result) model.resultHistory
                              , currentRdfDict = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
                                                 |> Maybe.map makeRdfDict 
                              }, Cmd.none)
@@ -674,7 +694,7 @@ viewSubjectMolecule model mole =
 elOfRdfNodeValue : RdfNode -> Element Msg
 elOfRdfNodeValue node =
     let
-        leadingWhiteSpaceRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^\\s+"
+        leadingWhiteSpaceRe = Maybe.withDefault Regex.never <| Regex.fromStringWith { caseInsensitive = True, multiline = True } "^[ ,\t]+"
     in
         case node of 
             LiteralOnlyValue a -> Element.text a.value
@@ -747,20 +767,24 @@ elOfRdfNode model nodeType node =
                     elOfRdfNodeAsPredicate model node --text a.value -- makeSubjectMoleculeCard model node --text a.value  -- a is now an RdfKey and can be expanded via Model
         BlankNode a ->
             case model.currentRdfDict of
-               Nothing -> Element.text a.value
+               Nothing -> 
+                    Element.text a.value
                Just dict ->
                     let
                         related = Dict.get a.value dict
                     in
                      case related of
-                        Nothing -> Element.text a.value
+                        Nothing -> 
+                            Element.text (a.value++"bnode") -- create a decent contruct query here.  By the time you are here its too late :-(
                         Just subjectMole -> 
 --                            Debug.log ("Going after "++a.value)
                             case nodeType of
                                 Object ->
                                     (elOfSubjectMoleculeCard model subjectMole) --text a.value  -- a is now an RdfKey and can be expanded via Model
-                                Subject -> Element.text a.value
-                                Predicate -> elOfRdfNode model Predicate node
+                                Subject -> 
+                                    Element.text a.value
+                                Predicate -> 
+                                        elOfRdfNode model Predicate node
         LiteralOnlyValue a ->
             Debug.log ("Hunting the string wrapping issue "++(String.left 20 a.value)++(a.value |> String.words |> List.length |> String.fromInt))
             Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [Element.text a.value]

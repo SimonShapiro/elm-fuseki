@@ -6859,6 +6859,7 @@ var $author$project$Main$initialFn = F3(
 			query: $author$project$PlaygroundQuery$SparqlQuery(
 				$author$project$Sparql$Ask('ask {?s ?p ?o}')),
 			queryHistory: _List_Nil,
+			resultHistory: $elm$core$Dict$empty,
 			results: _List_Nil,
 			resultsDisplay: $author$project$Main$Table,
 			server: $author$project$Main$server,
@@ -7884,23 +7885,46 @@ var $author$project$Main$update = F2(
 								}),
 							$elm$core$Platform$Cmd$none);
 					} else {
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{state: $author$project$Main$Waiting}),
-							A2(
-								$elm$browser$Browser$Navigation$pushUrl,
-								model.key,
+						var cachedResult = A2(
+							$elm$core$Dict$get,
+							$author$project$Sparql$toString(sQuery),
+							model.resultHistory);
+						if (cachedResult.$ === 'Nothing') {
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{state: $author$project$Main$Waiting}),
 								A2(
-									$elm$url$Url$Builder$relative,
-									_List_Nil,
-									_List_fromArray(
-										[
-											A2(
-											$elm$url$Url$Builder$string,
-											'query',
-											$author$project$Sparql$toString(sQuery))
-										]))));
+									$elm$browser$Browser$Navigation$pushUrl,
+									model.key,
+									A2(
+										$elm$url$Url$Builder$relative,
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2(
+												$elm$url$Url$Builder$string,
+												'query',
+												$author$project$Sparql$toString(sQuery))
+											]))));
+						} else {
+							var result = cachedResult.a;
+							var vars = result.a;
+							var table = result.b;
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{
+										currentRdfDict: A2(
+											$elm$core$Maybe$map,
+											$author$project$RdfDict$makeRdfDict,
+											A2($author$project$RdfDict$contractResult, vars, table)),
+										results: table,
+										state: A2($author$project$Main$DisplayingSelectResult, vars, table),
+										vars: vars
+									}),
+								$elm$core$Platform$Cmd$none);
+						}
 					}
 				}
 			case 'SubmitQueryWhileNavigating':
@@ -7912,7 +7936,7 @@ var $author$project$Main$update = F2(
 						queryHistory: A2($elm$core$List$cons, query, model.queryHistory),
 						state: $author$project$Main$Waiting
 					});
-				var _v9 = A2($elm$core$Debug$log, 'query=', newModel.query);
+				var _v10 = A2($elm$core$Debug$log, 'query=', newModel.query);
 				return _Utils_Tuple2(
 					newModel,
 					A3(
@@ -7924,8 +7948,8 @@ var $author$project$Main$update = F2(
 				var response = msg.a;
 				if (response.$ === 'Ok') {
 					var okData = response.a;
-					var _v11 = okData.status;
-					if (_v11 === 200) {
+					var _v12 = okData.status;
+					if (_v12 === 200) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7934,6 +7958,11 @@ var $author$project$Main$update = F2(
 										$elm$core$Maybe$map,
 										$author$project$RdfDict$makeRdfDict,
 										A2($author$project$RdfDict$contractResult, okData.vars, okData.result)),
+									resultHistory: A3(
+										$elm$core$Dict$insert,
+										okData.query,
+										_Utils_Tuple2(okData.vars, okData.result),
+										model.resultHistory),
 									results: okData.result,
 									state: A2($author$project$Main$DisplayingSelectResult, okData.vars, okData.result),
 									vars: okData.vars
@@ -7988,12 +8017,12 @@ var $author$project$Main$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DownloadFile':
-				var _v12 = model.query;
-				if (_v12.$ === 'PlaygroundCommand') {
-					var cmd = _v12.a;
+				var _v13 = model.query;
+				if (_v13.$ === 'PlaygroundCommand') {
+					var cmd = _v13.a;
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var query = _v12.a;
+					var query = _v13.a;
 					return _Utils_Tuple2(
 						model,
 						A2(
@@ -23636,7 +23665,7 @@ var $author$project$Main$elOfRdfNodeValue = function (node) {
 		A2(
 			$elm$regex$Regex$fromStringWith,
 			{caseInsensitive: true, multiline: true},
-			'^\\s+'));
+			'^[ ,\t]+'));
 	switch (node.$) {
 		case 'LiteralOnlyValue':
 			var a = node.a;
@@ -23884,7 +23913,7 @@ var $author$project$Main$elOfRdfNode = F3(
 						var dict = _v4.a;
 						var related = A2($elm$core$Dict$get, a.value, dict);
 						if (related.$ === 'Nothing') {
-							return $mdgriffith$elm_ui$Element$text(a.value);
+							return $mdgriffith$elm_ui$Element$text(a.value + 'bnode');
 						} else {
 							var subjectMole = related.a;
 							switch (nodeType.$) {

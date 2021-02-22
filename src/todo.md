@@ -22,7 +22,7 @@
 - [ ] extra long unwrappables in ui - [ ] like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - [ ] `Ouput format` used in two places on sparql page
 - [ ] replace error elements with paragraph elements.
-- [ ] Command line query should not be submitted
+- [ ] Command line query should not be submitted - could be fixed with session results cache
 - [ ] Add port as command-line parameter for Server.py
 - [ ] Fine tune cache maxsize
 - [ ] Back reloads page and loses reference position
@@ -50,19 +50,22 @@
 - [x] packaged queries through a range of ! commands
 - [x] automatically sense non-s, p, o in subject view
 - [x] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
+- [ ] Cache results in model
+- [ ] Introduce refresh of cached query results
+- [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
+- [ ] Consider doing something special with #type???
+- [ ] see if there is a anything useful for `bnode` in the object position when showing `Back Links`
+- [ ] make no info on subject view more obvious - by providing access to `Back Links`
 - [ ] graph view
 - [ ] integrate ttl validator `npm install -g turtle-validator` - as a command in load logic
 - [ ] find some way to sort lists
 - [ ] improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.
-- [ ] automatically sense non-s, p, o in subject view
-- [ ] make no info on subject view more obvious
 - [ ] consider user defined short-cuts to queries like ! commands
 - [ ] add load in addition to execute query icon on query history
 - [ ] show/hide query history (use n more / less) semantics
 - [ ] Improve url routing
 - [ ] Add settings - api url; allow implied external links to model
 - [ ] check for in result/graph access to object uri
-- [ ] Consider doing something special with #type???
 - [ ] Save ttl in subject view
 - [ ] Tableview to get hyperlink logic?
 - [ ] Dockerise server.py
