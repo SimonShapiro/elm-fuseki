@@ -52,6 +52,7 @@ import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
 import Element
+import Element
 
 version : String
 version = "v0.1"
@@ -134,7 +135,7 @@ type Msg
     | ClickedLink UrlRequest
     | AddQueryToLineOfThought
     | DisplayFromLineOfThought SparqlQuery
-    
+    | ResetLineOfThought
 
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
@@ -590,6 +591,8 @@ update msg model =
                 , currentRdfDict = contractResult vars table 
                                     |> Maybe.map makeRdfDict 
                 }, Cmd.none)
+        ResetLineOfThought -> 
+            ({ model | lineOfThought = []}, Cmd.none)
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
@@ -714,6 +717,7 @@ elOfSubjectMoleculeCard model mole =
                         (Element.row [][ 
                             (Element.Input.button   [ Element.alignLeft
                                                         , Element.Background.color colorPalette.button
+                                                        , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                                         , Element.width (Element.px 30)
                                                         ]
                                                         { onPress=Just AddQueryToLineOfThought
@@ -874,6 +878,7 @@ elOfRestOfObjectList model selected obj rest =
     case (List.Extra.find (\o -> o == selected) model.openPredicatesInSubject) of
         Just _ -> Element.Input.button   [ Element.alignLeft
                                             , Element.Background.color colorPalette.button
+                                            , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                             , Element.Font.size sizePalette.command
                                             ]
                                             { onPress=Just (DeregisterSubjectPredicateOpen selected)
@@ -886,6 +891,7 @@ elOfRestOfObjectList model selected obj rest =
         Nothing -> [ elOfRdfNode model Object obj
                     , Element.Input.button [ Element.alignLeft
                                             , Element.Background.color colorPalette.button
+                                            , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                             , Element.Font.size sizePalette.command
                                             ] 
                                             { onPress=Just (RegisterSubjectPredicateOpen selected)
@@ -983,7 +989,8 @@ elOfQueryHistory history =
         ( List.map (\query ->
                 Debug.log (Sparql.toString query)
                 Element.row [spacing 10][ Element.Input.button
-                                                [ Element.Background.color colorPalette.highlight 
+                                                [ Element.Background.color colorPalette.button 
+                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                                 , Element.Border.rounded 5
                                                 , Element.focused
                                                     [ Element.Background.color colorPalette.highlight ]
@@ -1008,6 +1015,7 @@ elOfUploadQueryFromFile =
                 , Element.width Element.fill
                 , Element.Background.color colorPalette.header
                 ]   [ Element.Input.button  [ Element.Background.color colorPalette.button
+                                            , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                             , Element.Border.rounded 5
                                             , Element.height (Element.px 20)
                                             , Element.width (Element.px 100)
@@ -1015,6 +1023,7 @@ elOfUploadQueryFromFile =
                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Load Query"
                                                 }
                     , Element.Input.button  [ Element.Background.color colorPalette.button
+                                            , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                             , Element.Border.rounded 5
                                             , Element.height (Element.px 20)
                                             , Element.width (Element.px 100)
@@ -1027,7 +1036,8 @@ elOfDownloadCsv : Element Msg
 elOfDownloadCsv =
     Element.row [
                 ]
-                [ Element.Input.button [ Element.Background.color colorPalette.highlight
+                [ Element.Input.button [ Element.Background.color colorPalette.button
+                                            , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
                                             , Element.Border.rounded 5
                                             , Element.height (Element.px 20)
                                             , Element.width (Element.px 100)
@@ -1065,7 +1075,8 @@ elOfQueryPanel model =
                                                 , Element.height (Element.px 30)
                                                 , Element.spacingXY 50 0 
                                                 , Element.Border.rounded 5
-                                                , Element.Background.color colorPalette.highlight
+                                                , Element.Background.color colorPalette.button
+                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight]
                                                 ] { onPress = Just (SubmitQuery model.query)
                                                                 , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go!"
                                                                 }
@@ -1114,6 +1125,7 @@ elOfServerInput model =
                                                                         , Element.height (Element.px 20)
                                                                         , Element.Border.rounded 5
                                                                         , Element.Background.color colorPalette.button
+                                                                        , Element.mouseOver [ Element.Background.color colorPalette.highlight]
                                                                         ]   
                                                                             { onPress = Just PingServer
                                                                             , label= (Element.text "Connect")
@@ -1142,6 +1154,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                         [ Element.text "ApiError: I can't interpret the response"
                                         , Element.text err
                                         , Element.Input.button  [ Element.Background.color colorPalette.button
+                                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight]
                                                                 , Element.Border.rounded 5
                                                                 , Element.height (Element.px 20)
                                                                 , Element.width (Element.px 100)
@@ -1154,6 +1167,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                     Element.layout [] (Element.column []
                                         [ Element.text "ApiError: Oops - something went wrong! :-("
                                         , Element.Input.button  [ Element.Background.color colorPalette.button
+                                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight]
                                                                 , Element.Border.rounded 5
                                                                 , Element.height (Element.px 20)
                                                                 , Element.width (Element.px 100)
