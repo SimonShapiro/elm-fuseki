@@ -15098,48 +15098,123 @@ var $author$project$Main$elOfHeading = function (model) {
 					$mdgriffith$elm_ui$Element$text('Sparql Playground - ' + $author$project$Main$version))
 				])));
 };
+var $author$project$Main$AddQueryToLineOfThought = {$: 'AddQueryToLineOfThought'};
 var $author$project$Main$DisplayFromLineOfThought = function (a) {
 	return {$: 'DisplayFromLineOfThought', a: a};
 };
 var $author$project$Main$ResetLineOfThought = {$: 'ResetLineOfThought'};
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $mdgriffith$elm_ui$Element$image = F2(
+	function (attrs, _v0) {
+		var src = _v0.src;
+		var description = _v0.description;
+		var imageAttributes = A2(
+			$elm$core$List$filter,
+			function (a) {
+				switch (a.$) {
+					case 'Width':
+						return true;
+					case 'Height':
+						return true;
+					default:
+						return false;
+				}
+			},
+			attrs);
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.imageContainer),
+				attrs),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[
+						A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asEl,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('img'),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Internal$Model$Attr(
+									$elm$html$Html$Attributes$src(src)),
+									$mdgriffith$elm_ui$Internal$Model$Attr(
+									$elm$html$Html$Attributes$alt(description))
+								]),
+							imageAttributes),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil))
+					])));
+	});
 var $author$project$Main$elOfLineOfThought = function (model) {
 	return A2(
 		$mdgriffith$elm_ui$Element$row,
 		_List_Nil,
 		A2(
 			$elm$core$List$append,
-			$elm$core$List$reverse(
+			A2(
+				$elm$core$List$cons,
 				A2(
-					$elm$core$List$indexedMap,
-					F2(
-						function (ndx, tQuery) {
-							return A2(
-								$mdgriffith$elm_ui$Element$row,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$text('---'),
-										A2(
-										$mdgriffith$elm_ui$Element$Input$button,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
-												$mdgriffith$elm_ui$Element$mouseOver(
-												_List_fromArray(
-													[
-														$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
-													]))
-											]),
-										{
-											label: $mdgriffith$elm_ui$Element$text(
-												$elm$core$String$fromInt(
-													$elm$core$List$length(model.lineOfThought) - ndx)),
-											onPress: $elm$core$Maybe$Just(
-												$author$project$Main$DisplayFromLineOfThought(tQuery))
-										})
-									]));
-						}),
-					model.lineOfThought)),
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$alignLeft,
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+							$mdgriffith$elm_ui$Element$mouseOver(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
+								])),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(30))
+						]),
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$image,
+							_List_Nil,
+							{description: 'Red Pin', src: 'red_pin.svg'}),
+						onPress: $elm$core$Maybe$Just($author$project$Main$AddQueryToLineOfThought)
+					}),
+				$elm$core$List$reverse(
+					A2(
+						$elm$core$List$indexedMap,
+						F2(
+							function (ndx, tQuery) {
+								return A2(
+									$mdgriffith$elm_ui$Element$row,
+									_List_Nil,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$text('---'),
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+													$mdgriffith$elm_ui$Element$mouseOver(
+													_List_fromArray(
+														[
+															$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
+														]))
+												]),
+											{
+												label: $mdgriffith$elm_ui$Element$text(
+													$elm$core$String$fromInt(
+														$elm$core$List$length(model.lineOfThought) - ndx)),
+												onPress: $elm$core$Maybe$Just(
+													$author$project$Main$DisplayFromLineOfThought(tQuery))
+											})
+										]));
+							}),
+						model.lineOfThought))),
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$text('-->'),
@@ -15918,7 +15993,6 @@ var $elm$core$Dict$values = function (dict) {
 		_List_Nil,
 		dict);
 };
-var $author$project$Main$AddQueryToLineOfThought = {$: 'AddQueryToLineOfThought'};
 var $author$project$Main$DeregisterSubjectPredicateOpen = function (a) {
 	return {$: 'DeregisterSubjectPredicateOpen', a: a};
 };
@@ -23353,57 +23427,6 @@ var $author$project$Main$heading = function (_v0) {
 		children);
 };
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
-var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
-var $elm$html$Html$Attributes$src = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'src',
-		_VirtualDom_noJavaScriptOrHtmlUri(url));
-};
-var $mdgriffith$elm_ui$Element$image = F2(
-	function (attrs, _v0) {
-		var src = _v0.src;
-		var description = _v0.description;
-		var imageAttributes = A2(
-			$elm$core$List$filter,
-			function (a) {
-				switch (a.$) {
-					case 'Width':
-						return true;
-					case 'Height':
-						return true;
-					default:
-						return false;
-				}
-			},
-			attrs);
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.imageContainer),
-				attrs),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[
-						A4(
-						$mdgriffith$elm_ui$Internal$Model$element,
-						$mdgriffith$elm_ui$Internal$Model$asEl,
-						$mdgriffith$elm_ui$Internal$Model$NodeName('img'),
-						_Utils_ap(
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Internal$Model$Attr(
-									$elm$html$Html$Attributes$src(src)),
-									$mdgriffith$elm_ui$Internal$Model$Attr(
-									$elm$html$Html$Attributes$alt(description))
-								]),
-							imageAttributes),
-						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil))
-					])));
-	});
 var $mdgriffith$elm_ui$Element$Font$italic = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.italic);
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
@@ -24217,27 +24240,6 @@ var $author$project$Main$elOfSubjectMoleculeCard = F2(
 								_List_fromArray(
 									[
 										A2(
-										$mdgriffith$elm_ui$Element$Input$button,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$alignLeft,
-												$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
-												$mdgriffith$elm_ui$Element$mouseOver(
-												_List_fromArray(
-													[
-														$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
-													])),
-												$mdgriffith$elm_ui$Element$width(
-												$mdgriffith$elm_ui$Element$px(30))
-											]),
-										{
-											label: A2(
-												$mdgriffith$elm_ui$Element$image,
-												_List_Nil,
-												{description: 'Red Pin', src: 'red_pin.svg'}),
-											onPress: $elm$core$Maybe$Just($author$project$Main$AddQueryToLineOfThought)
-										}),
-										A2(
 										$mdgriffith$elm_ui$Element$link,
 										_List_Nil,
 										{
@@ -24979,6 +24981,7 @@ var $author$project$Main$view = function (model) {
 											[
 												$author$project$Main$elOfMainPage(model),
 												$author$project$Main$elOfDownloadCsv,
+												$author$project$Main$elOfLineOfThought(model),
 												A2($author$project$Main$elOfTabularResults, vars, result)
 											])));
 							}

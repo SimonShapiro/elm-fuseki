@@ -1,0 +1,152 @@
+@base <http://simon.kg.info/> .
+@prefix : <ita/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix doc: <http://localhost:8080/docs/> .
+
+: a :Case;
+    :note [
+        :on "2021-02-08";
+        :details "An heir or anyone interested in the execution of a will in Israel may bring about its execution only through a Probate court Order that is granted by the Israeli Inheritance Registrar. A Probate court Order declares the validity and the authenticity of an existing will. The Probate court Order validates the content of the will and gives it the same binding legal status as a court judgment. ";
+        :seeAlso <https://aharonilaw.com/blog/the-probate-process-in-israel/#:~:text=The%20Probate%20Process%20In%20Israel&text=Upon%20the%20death%20of%20an,a%20probate%20process%20in%20Israel.&text=A%20will%20is%20the%20expression,the%20existence%20of%20a%20will.>;
+    ];
+    :consistingOf 
+        :account1,
+        :account2,
+        :account3,
+        :account4,
+        :account5,
+        :account6,
+        :account7 ;
+    :seeAlso
+        :stJamesCorporateService ,
+        :LinkAssetServices .
+
+:account1 a :BankAccount ;
+    :at [
+        :org :BankLuemi ;
+        :contact <https://www.bankleumi.co.uk/contact-us> ;
+    ];
+    :note [
+        :on "2021-02-06" ;
+        :details "[Ita] I found an old will of my parent's, stating they have a bank account in London (Bank Leumi, on Woodstock Rd, London";
+    ] ;
+    :note [
+        :on "2021-02-06" ;
+        :details "[Simon] See new contact details on website";
+    ] .
+
+:account2 a :SharesAccount ;
+    :holdings [
+        :org "Golfdields";
+        :qty "800"^^xsd:integer;
+        :contact :stJamesCorporateService;
+        :evidence [
+            :photo doc:goldfields_div.png;
+            :circa  "2013-03";
+        ], [
+            :photo doc:goldfieldsDiv2.JPG;
+            :circa  "2013-03";
+        ];
+    ];
+    :note [
+        :on "2021-02-06";
+        :details """
+            [Ita] Gold Fields Limited, Barclays Bank PLC, Pounds 47.43, dated Sept 14, 2020, dividend for 800 shares.
+            [Simon] No evidence on the 800 quantity
+            """;
+    ] .
+
+:stJamesCorporateService a :Custodian;
+    :note [
+        :on "2012-02-07";
+        :details "This co has issued the dividends cheques for Goldfields and Sibanye.";
+    ] ;
+    :controls :account3, :account2 .
+
+:LinkAssetServices a :Custodian;
+    :note [
+        :on "2012-02-07";
+        :details "This company sent details about a cap issue for Sibanye.";
+    ], [
+        :on "2021-02-08";
+        :details "Ita is being offered a long drawn out 'estate service' at hourly rates.  They confirm Sibanye holding and also that they do not have the Goldfields Holdings.";
+    ] ;
+    :website <https://www.linkgroup.eu/get-in-touch/shareholders-in-uk-companies/> ;
+    :controls :account3.
+
+:account3 a :SharesAccount;
+    :holdings [
+        :org "Sibanye Gold";
+        :qty "800"^^xsd:integer;
+        :contact <https://www.sibanyestillwater.com/news-investors/>, :stJamesCorporateService;
+        :evidence [
+            :photo doc:sibanye.pdf;
+            :circa "2017-02-7";
+        ], [
+            :photo doc:link.pdf ;
+            :circa "2018-05-24";
+        ];
+    ] ;
+    :note [
+        :on "2012-02-06";
+        :details "In February 2020, Sibanye-Stillwater completed an internal restructuring resulting in Sibanye Gold Limited becoming a subsidiary of the new holding and listed company, Sibanye Stillwater Limited. Ticker codes on the JSE changed from SGL to SSW and the ADRs on the NYSE changed from ticker SBGL to SBSW.";
+    ], [
+        :on "2021-02-07";
+        :details "Ita found a capitalisation issue cheque for £0.37 directly from link asset services";
+    ] ,[
+        :on "2021-02-08";
+        :details "[Ita]Linked Asset Services confirm Sibanye holding abd also that they do not have the Goldfields Holdings.";
+    ] .
+
+:account4 a :CashAccount;
+    :at [
+        :org "First National Bank";
+        :branch "Bank City";
+        :accountNumber "60097060433";
+        :name "Dr Isaac Shapiro";
+        :evidence [
+            :photo doc:fnbNonResStatement.JPG;
+            :circa "2005-10";
+        ];
+    ];
+    :note [
+        :on "2012-02-06";
+        :deatils "[Ita](as appears on the last statement I found which is from 2005...) in the name of Dr Isaac Shapiro";
+    ] .
+
+:account5 a :SharesAccount;
+    :at [
+        :org "First National Bank";
+        :branch "Stock Exchange Branch";
+        :accountNumber "60097040433";
+        :accountType "Non-resident/blocked Rand";
+        :name "Dr Isaac Shapiro";
+        :evidence [
+            :photo doc:fnb_stocks.JPG;
+            :comments "[Simon] A bit unclear - so be careful with the account number";
+            :note [
+                :on "2012-6-12";
+                :details "[Simon] The photo shows handwritten company names that could be holdings";
+            ]         
+        ] ,[
+            :photo doc:FNBStockList.JPG;
+        ];
+    ].
+
+:account6 a :CashAccount;
+    :at [
+        :org "First National Bank";
+        :branch "Bank City";
+        :accountNumber "61097000742";
+        :name "Ada Shapiro";
+    ] .
+
+:account7 a :InsuranceAccount;
+    :at [
+        :org "Liberty Life";
+    ];
+    :policyNumber "43678085000", "43737569000", "43756281000", "6068870400";
+    :note [
+        :on "2012-02-02";
+        :details "[Ita] I also found old documents with policies at Liberty Life for both my parents, I do not know if these have been taken care of though I found my Mom's requests to do so";
+    ].

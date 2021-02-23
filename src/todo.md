@@ -19,7 +19,7 @@
 - [x] Paragraph does not always flow at end of box - [ ] currently only observed intermittently at work version???!!!
 - [x] Increase vertical spacing on moleculeCard
 - [x] make subject header respond to `terse/verbose`
-- [ ] Should the pin be moved to a general result area off the card - to indicate 'pin' the result.
+- [x] Move pin to a general result area off the card - to indicate 'pin' the result.
 - [ ] Back isn't using the cache results
 - [ ] extra long unwrappables in ui - [ ] like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - [ ] `Ouput format` used in two places on sparql page

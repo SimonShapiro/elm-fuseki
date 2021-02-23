@@ -1,0 +1,68 @@
+\begin{frame}[fragile]{A Sparql 1.1 Playground}
+\protect\hypertarget{a-sparql-1.1-playground}{}
+
+\includegraphics{2021-02-14-11-16-29.png} This project is an experiment
+into an Elm-based front-end to a Sparql 1.1 compliant endpoint. It is
+thoroughly tested against Jena Fuseki over the rest API.
+
+The design philosophy recognizes that in general \texttt{select} queries
+return tabular data, while \texttt{construct} queries return graph data
+in the shape of \texttt{subject}, \texttt{predicate}, \texttt{object}
+triples.
+
+For the purpose of the UI, the graph results are pivoted in such a way
+that all \texttt{predicate/objects} for a \texttt{subject} are gathered
+onto a `card'. The reverse of the `card' (\texttt{Back\ Links}) shows
+all places where the \texttt{subject} of the `card' appears in the
+\texttt{object} position in other triples.
+
+\begin{block}{Overall Layout}
+
+\includegraphics{docs/architecture.png}
+
+In this project Server.py is a Python Flask API that intercepts Sparql
+commands, forwards them to the endpoint and prepares the results for the
+front end.
+
+\end{block}
+
+\begin{block}{Prerequisites}
+
+\begin{itemize}
+\tightlist
+\item
+  Apache Jena Fuseki. Choose the latest release from the
+  \href{https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-server/}{Maven
+  Repository}. This is a Java \texttt{jar} and so needs a working Java
+  JRE or SDK. The latest version as at 2021-02-16 is 3.17.0, which is
+  used below. Use \texttt{curl} to get a copy as below:
+\end{itemize}
+
+\begin{verbatim}
+curl --output <WHERE-YOU-WANT-TO-HOLD-FUSEKI> https://repo1.maven.org/maven2/org/apache/jena/jena-fuseki-server/3.17.0/jena-fuseki-server-3.17.0.jar
+\end{verbatim}
+
+The server can be started with the following command:
+
+\begin{verbatim}
+java -Xmx2g -jar fuseki-server.jar --tdb2 --loc <WHERE-YOU-WANT-YOUR-DATABASE> --set tdb:unionDefaultGraph=true --update <THE-NAME-OF-YOUR-DATASET>
+\end{verbatim}
+
+\begin{itemize}
+\tightlist
+\item
+  A Python 3.6+ environment.
+\end{itemize}
+
+\end{block}
+
+\begin{block}{Shortcut queries}
+
+There are a standard set of queries which I use a lot to investigate a
+Knowledge Graph. These start with \texttt{!} and convert to the full
+query in the query window. For example, \texttt{!size} converts to
+\texttt{select\ (count(*)\ as\ ?count)\ \{?s,\ ?p\ ?o\}}.
+
+\end{block}
+
+\end{frame}

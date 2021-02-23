@@ -1,16 +1,38 @@
-base <https://simonshapiro.github.io/ttlStore/>
+base <http://simon.kg.info/>
 prefix : <annotations.ttl#>
 prefix oa: <http://www.w3.org/ns/oa#>
 prefix dc: <http://purl.org/dc/terms/>
+prefix md: <http://net.daringfireball.markdown>
 
-: a :AnnotationList .
+oa:Annotation a :Subject .
 
-:001 a oa:Annotation;
+:56c62351-a9e5-4e8e-b4ef-352d2190e0f7 a oa:Annotation;
     oa:bodyValue "A great guide to the sparql language.  Short pdf";
     oa:hasTarget <https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf>;
     dc:created "2021-01-28" .
 
-:002 a oa:Annotation;
-    oa:bodyValue "A great guide to !the sparql language.  Mauris quis leo in nunc hendrerit faucibus. Nam convallis ipsum in rhoncus finibus. Aenean malesuada, libero id facilisis maximus, turpis lacus dictum lorem, vitae condimentum dui turpis non quam. Fusce convallis justo nec nisl pulvinar, at efficitur nulla tincidunt. Sed laoreet elementum imperdiet. Sed accumsan, lacus non tincidunt porta, neque magna venenatis libero, eu porttitor magna tortor non lectus. Vivamus condimentum, nibh non feugiat posuere, quam felis pretium augue, ac egestas augue sapien vel est. Sed non scelerisque magna. Vestibulum feugiat lectus a risus dignissim efficitur. Aliquam ut auctor metus, vitae aliquam ipsum."@en ;
-    oa:hasTarget <https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf>;
-    dc:created "2021-02-05" .
+:SummerIdea a :HolidayPlan ;
+    :details "A collection of notes and ideas for the Summer Holidays".
+
+:0b799e35-7356-4513-bfce-f4fbeab1cb20 a oa:Annotation, :SummerIdea;
+    dc:created "2021-02-13 10:52:52";
+    oa:hasTarget <https://www.yescapa.co.uk/how-it-works/>;
+    oa:bodyValue "For the Summer holiday, consider a motorhome.  This is like AirBnB for motorhomes" .
+
+:3fb517b9-e2e9-4b81-a14b-637f85668a6b a oa:Annotation;
+    dc:created "2021-02-13 17:58:19";
+    oa:hasTarget <file:///Users/simonshapiro/Downloads/109388_360439.pdf>;
+    :note [ :quote "The logical structure of such facts is that of the declarative speech act, in which language users collectively grant a person or object particular social powers. Social institutions arise because people can impose so-called status functions, involving particular rights and obligations, on individuals or objects. Thus, they can impose value on pieces of paper or metal by accepting them as money. More specifically, these institutions are brought about by constitutive rules of the form “X counts as Y in context C”; in the context of soccer, getting the ball in the opposite team’s net counts as a goal. Put differently, soccer is not an independently existing activity guided by regulative rules; it is actually constituted by its rules.";
+    :discussion "For example, 'Bitcoin counts as a a mechanism of exchange in transactions'"] .
+
+:fb19b5c4-6989-4265-8aba-1f6b0a64ce80 a :SummerIdea;
+    :website <https://www.sleeper.scot/accommodation/> ;
+    :note [ :details    """
+                            ## How about a *sleeper train* to Scotland
+                            
+                            - Get details
+                            - Book tickets
+
+                            ![](http://192.168.1.157:8080/docs/architecture.png)
+                        """^^md:
+    ].

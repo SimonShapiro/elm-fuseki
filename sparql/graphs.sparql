@@ -1,0 +1,4 @@
+select distinct ?g (count(*) as ?count) 
+{graph ?g {?s ?p ?o}} 
+group by ?g 
+order by desc(?count)

@@ -647,25 +647,33 @@ aka predicateStyle pred =
 
 elOfLineOfThought : Model -> Element Msg
 elOfLineOfThought model =
-    Element.row [] (List.append (List.indexedMap (\ndx tQuery -> 
-        Element.row [] 
-        [ Element.text "---"
-        , Element.Input.button 
-                        [ Element.Background.color colorPalette.button
-                        , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
-                        ]  
-                        { onPress=Just (DisplayFromLineOfThought tQuery)
-                        , label=Element.text ((String.fromInt <| (List.length model.lineOfThought) - ndx))
-                        }
-        ]) model.lineOfThought |> List.reverse)
-        [ Element.text "-->"
-        , Element.Input.button 
-                        [ Element.Background.color colorPalette.button
-                        , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
-                        ]  
-                        { onPress=Just ResetLineOfThought
-                        , label=Element.text " Reset"
-                        }
+    Element.row [] (List.append ((Element.Input.button  
+                                    [ Element.alignLeft
+                                    , Element.Background.color colorPalette.button
+                                    , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
+                                    , Element.width (Element.px 30)
+                                    ]
+                                    { onPress=Just AddQueryToLineOfThought
+                                    , label=Element.image [] {src = "red_pin.svg", description="Red Pin"}
+                                    })::(List.indexedMap (\ndx tQuery -> 
+                                    Element.row [] 
+                                    [ Element.text "---"
+                                    , Element.Input.button 
+                                                    [ Element.Background.color colorPalette.button
+                                                    , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
+                                                    ]  
+                                                    { onPress=Just (DisplayFromLineOfThought tQuery)
+                                                    , label=Element.text ((String.fromInt <| (List.length model.lineOfThought) - ndx))
+                                                    }
+                                    ]) model.lineOfThought |> List.reverse))
+                                    [ Element.text "-->"
+                                    , Element.Input.button 
+                                                    [ Element.Background.color colorPalette.button
+                                                    , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
+                                                    ]  
+                                                    { onPress=Just ResetLineOfThought
+                                                    , label=Element.text " Reset"
+                                                    }
 
         ])
     
@@ -715,15 +723,7 @@ elOfSubjectMoleculeCard model mole =
                 Element.column elOfCardAttributes
                     [ Element.el [Element.Font.size sizePalette.command, Element.alignRight]
                         (Element.row [][ 
-                            (Element.Input.button   [ Element.alignLeft
-                                                        , Element.Background.color colorPalette.button
-                                                        , Element.mouseOver [ Element.Background.color colorPalette.highlight] 
-                                                        , Element.width (Element.px 30)
-                                                        ]
-                                                        { onPress=Just AddQueryToLineOfThought
-                                                        , label=Element.image [] {src = "red_pin.svg", description="Red Pin"}
-                                                        })                            
-                            , (Element.link [] {url=("/index.html?query="
+                            (Element.link [] {url=("/index.html?query="
                             ++ (makeRdfKey subj |> Maybe.withDefault "unknown" |> encodeUrlFragmentMarker |> backLinksQuery) 
                             ), label=Element.text "Back links"})
                         ])
@@ -1207,6 +1207,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                         Nothing ->
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                         , elOfDownloadCsv
+                                                        , elOfLineOfThought model -- maybe not model???
                                                         , elOfTabularResults vars result
                                             ]
                                             |> Element.layout []
