@@ -586,6 +586,7 @@ update msg model =
                 (vars, table) = thought
             in
                 ({ model | state = DisplayingSelectResult vars table
+                , query = tQuery
                 , vars = vars
                 , results = table
                 , currentRdfDict = contractResult vars table 

@@ -20,6 +20,7 @@
 - [x] Increase vertical spacing on moleculeCard
 - [x] make subject header respond to `terse/verbose`
 - [x] Move pin to a general result area off the card - to indicate 'pin' the result.
+- [x] query in editor on use of line of thought
 - [ ] Back isn't using the cache results
 - [ ] extra long unwrappables in ui - [ ] like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - [ ] `Ouput format` used in two places on sparql page

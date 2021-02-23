@@ -8108,6 +8108,7 @@ var $author$project$Main$update = F2(
 								$elm$core$Maybe$map,
 								$author$project$RdfDict$makeRdfDict,
 								A2($author$project$RdfDict$contractResult, vars, table)),
+							query: tQuery,
 							results: table,
 							state: A2($author$project$Main$DisplayingSelectResult, vars, table),
 							vars: vars
