@@ -54,7 +54,7 @@
 - [x] automatically sense non-s, p, o in subject view
 - [x] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
 - [x] Cache results in model
-- [ ] Introduce refresh of cached query results - currently just via browser tab refresh.
+- [x] Introduce refresh of cached query results - currently just via browser tab refresh.
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???
 - [ ] see if there is a anything useful for `bnode` in the object position when showing `Back Links`

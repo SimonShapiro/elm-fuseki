@@ -8114,11 +8114,17 @@ var $author$project$Main$update = F2(
 							vars: vars
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'ResetLineOfThought':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{lineOfThought: _List_Nil}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{lineOfThought: _List_Nil, resultHistory: $elm$core$Dict$empty}),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -15404,6 +15410,7 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 var $author$project$Main$ChangeQuery = function (a) {
 	return {$: 'ChangeQuery', a: a};
 };
+var $author$project$Main$ClearCaches = {$: 'ClearCaches'};
 var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 	function (attrs, multi) {
 		return A3(
@@ -15442,7 +15449,8 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 				$mdgriffith$elm_ui$Element$row,
 				_List_fromArray(
 					[
-						A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0)
+						A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0),
+						A2($mdgriffith$elm_ui$Element$spacingXY, 3, 0)
 					]),
 				_List_fromArray(
 					[
@@ -15472,9 +15480,37 @@ var $author$project$Main$elOfQueryPanel = function (model) {
 										$mdgriffith$elm_ui$Element$Font$center,
 										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 									]),
-								$mdgriffith$elm_ui$Element$text('Go!')),
+								$mdgriffith$elm_ui$Element$text('Go')),
 							onPress: $elm$core$Maybe$Just(
 								$author$project$Main$SubmitQuery(model.query))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px(150)),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(30)),
+								A2($mdgriffith$elm_ui$Element$spacingXY, 50, 0),
+								$mdgriffith$elm_ui$Element$Border$rounded(5),
+								$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.button),
+								$mdgriffith$elm_ui$Element$mouseOver(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$Background$color($author$project$Main$colorPalette.highlight)
+									]))
+							]),
+						{
+							label: A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$Font$center,
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								$mdgriffith$elm_ui$Element$text('ClearCaches')),
+							onPress: $elm$core$Maybe$Just($author$project$Main$ClearCaches)
 						})
 					]))
 			]));

@@ -53,6 +53,7 @@ import Markdown.Parser
 import Markdown.Renderer
 import Element
 import Element
+import Element
 
 version : String
 version = "v0.1"
@@ -136,6 +137,7 @@ type Msg
     | AddQueryToLineOfThought
     | DisplayFromLineOfThought SparqlQuery
     | ResetLineOfThought
+    | ClearCaches
 
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
@@ -594,6 +596,8 @@ update msg model =
                 }, Cmd.none)
         ResetLineOfThought -> 
             ({ model | lineOfThought = []}, Cmd.none)
+        ClearCaches -> 
+            ({ model | lineOfThought = [], resultHistory = Dict.empty}, Cmd.none)
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
@@ -1071,15 +1075,25 @@ elOfQueryPanel model =
                                 , label = Element.Input.labelLeft [Element.centerY] (Element.none)
                                 , spellcheck = False
                                 }
-                        , Element.row   [Element.paddingXY 8 0]  [ Element.none 
+                        , Element.row   [Element.paddingXY 8 0, Element.spacingXY 3 0]  
+                                                [ Element.none 
                                                 , Element.Input.button  [ Element.width (Element.px 60)
-                                                , Element.height (Element.px 30)
-                                                , Element.spacingXY 50 0 
-                                                , Element.Border.rounded 5
-                                                , Element.Background.color colorPalette.button
-                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight]
-                                                ] { onPress = Just (SubmitQuery model.query)
-                                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go!"
+                                                                , Element.height (Element.px 30)
+                                                                , Element.spacingXY 50 0 
+                                                                , Element.Border.rounded 5
+                                                                , Element.Background.color colorPalette.button
+                                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight]
+                                                                ] { onPress = Just (SubmitQuery model.query)
+                                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "Go"
+                                                                }
+                                                , Element.Input.button  [ Element.width (Element.px 150)
+                                                                , Element.height (Element.px 30)
+                                                                , Element.spacingXY 50 0 
+                                                                , Element.Border.rounded 5
+                                                                , Element.Background.color colorPalette.button
+                                                                , Element.mouseOver [ Element.Background.color colorPalette.highlight]
+                                                                ] { onPress = Just (ClearCaches)
+                                                                , label = Element.el [ Element.Font.center, Element.width Element.fill ] <| Element.text "ClearCaches"
                                                                 }
                                             ]
                         ]
