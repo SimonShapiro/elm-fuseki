@@ -62,7 +62,7 @@ lookupCommand dict cmd =
 
 shriekCommands: CommandDict
 shriekCommands =    [ ("!graphs", Select "select distinct ?graph (count(*) as ?count) {graph ?graph {?s ?p ?o}} group by ?graph")
-                    , ("!ontology", Select """construct {?domain <hasProperty> ?predicate} {
+                    , ("!ontology", Construct """construct {?domain <hasProperty> ?predicate} {
                                     ?s ?predicate ?o.
                                     ?s a ?domain .
                                     } 

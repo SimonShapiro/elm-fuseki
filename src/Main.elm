@@ -537,13 +537,26 @@ update msg model =
                     case okData.status of
                         200 ->
                             -- could transform to graph here
-                            ({ model | state = DisplayingSelectResult okData.vars okData.result
-                             , vars = okData.vars
-                             , results = okData.result
-                             , resultHistory = Dict.insert okData.query (okData.vars, okData.result) model.resultHistory
-                             , currentRdfDict = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
-                                                |> Maybe.map makeRdfDict 
-                             }, Cmd.none)
+                            let
+                                resultHistory = case establishQueryType okData.query of
+                                                    Load _ -> Dict.empty
+                                                    Insert _ -> Dict.empty
+                                                    Drop _ -> Dict.empty
+                                                    _ -> Dict.insert okData.query (okData.vars, okData.result) model.resultHistory
+                                lineOfThought = case establishQueryType okData.query of
+                                                    Load _ -> []
+                                                    Insert _ -> []
+                                                    Drop _ -> []
+                                                    _ -> model.lineOfThought 
+                            in
+                                    ({ model | state = DisplayingSelectResult okData.vars okData.result
+                                    , vars = okData.vars
+                                    , results = okData.result
+                                    , resultHistory = resultHistory
+                                    , lineOfThought = lineOfThought
+                                    , currentRdfDict = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
+                                                        |> Maybe.map makeRdfDict 
+                                    }, Cmd.none)
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
                 Err e -> 

@@ -6034,7 +6034,7 @@ var $author$project$PlaygroundQuery$shriekCommands = $elm$core$Dict$fromList(
 			$author$project$Sparql$Select('select distinct ?graph (count(*) as ?count) {graph ?graph {?s ?p ?o}} group by ?graph')),
 			_Utils_Tuple2(
 			'!ontology',
-			$author$project$Sparql$Select('construct {?domain <hasProperty> ?predicate} {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } \n                                        ')),
+			$author$project$Sparql$Construct('construct {?domain <hasProperty> ?predicate} {\n                                    ?s ?predicate ?o.\n                                    ?s a ?domain .\n                                    } \n                                        ')),
 			_Utils_Tuple2(
 			'!size',
 			$author$project$Sparql$Select('select (count(*) as ?count) {?s ?p ?o}')),
@@ -7941,6 +7941,36 @@ var $author$project$Main$update = F2(
 					var okData = response.a;
 					var _v11 = okData.status;
 					if (_v11 === 200) {
+						var resultHistory = function () {
+							var _v13 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
+							switch (_v13.$) {
+								case 'Load':
+									return $elm$core$Dict$empty;
+								case 'Insert':
+									return $elm$core$Dict$empty;
+								case 'Drop':
+									return $elm$core$Dict$empty;
+								default:
+									return A3(
+										$elm$core$Dict$insert,
+										okData.query,
+										_Utils_Tuple2(okData.vars, okData.result),
+										model.resultHistory);
+							}
+						}();
+						var lineOfThought = function () {
+							var _v12 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
+							switch (_v12.$) {
+								case 'Load':
+									return _List_Nil;
+								case 'Insert':
+									return _List_Nil;
+								case 'Drop':
+									return _List_Nil;
+								default:
+									return model.lineOfThought;
+							}
+						}();
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7949,11 +7979,8 @@ var $author$project$Main$update = F2(
 										$elm$core$Maybe$map,
 										$author$project$RdfDict$makeRdfDict,
 										A2($author$project$RdfDict$contractResult, okData.vars, okData.result)),
-									resultHistory: A3(
-										$elm$core$Dict$insert,
-										okData.query,
-										_Utils_Tuple2(okData.vars, okData.result),
-										model.resultHistory),
+									lineOfThought: lineOfThought,
+									resultHistory: resultHistory,
 									results: okData.result,
 									state: A2($author$project$Main$DisplayingSelectResult, okData.vars, okData.result),
 									vars: okData.vars
@@ -8097,9 +8124,9 @@ var $author$project$Main$update = F2(
 						$elm$core$Dict$get,
 						$author$project$Sparql$toString(tQuery),
 						model.resultHistory));
-				var _v14 = thought;
-				var vars = _v14.a;
-				var table = _v14.b;
+				var _v16 = thought;
+				var vars = _v16.a;
+				var table = _v16.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
