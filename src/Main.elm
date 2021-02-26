@@ -830,7 +830,7 @@ elOfRdfNode model nodeType node =
                                         , Element.mouseOver [Element.Font.color colorPalette.lowlight]
                                         ] 
                                         { url=("/index.html?query=describe <"++(encodeUrlFragmentMarker a.value)++">")
-                                        , label=Element.text <| urlTextAbbreviator <| a.value  
+                                        , label=Element.text <| aka model.predicateStyle <| urlTextAbbreviator <| a.value  
                                         }
                                     , Element.newTabLink [] {url=a.value, label = Element.image [] { src = "www-12px.svg", description = "" }}])
                 Subject -> Element.text (aka model.predicateStyle a.value) -- a.value

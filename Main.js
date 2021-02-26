@@ -24070,7 +24070,10 @@ var $author$project$Main$elOfRdfNode = F3(
 												]),
 											{
 												label: $mdgriffith$elm_ui$Element$text(
-													$author$project$Main$urlTextAbbreviator(a.value)),
+													A2(
+														$author$project$Main$aka,
+														model.predicateStyle,
+														$author$project$Main$urlTextAbbreviator(a.value))),
 												url: '/index.html?query=describe <' + ($author$project$Main$encodeUrlFragmentMarker(a.value) + '>')
 											}),
 											A2(

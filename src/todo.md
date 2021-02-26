@@ -21,7 +21,7 @@
 - [x] make subject header respond to `terse/verbose`
 - [x] Move pin to a general result area off the card - to indicate 'pin' the result.
 - [x] query in editor on use of line of thought
-- [ ] Back isn't using the cache results
+- [x] Back isn't using the cache results
 - [ ] extra long unwrappables in ui - [ ] like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - [ ] `Ouput format` used in two places on sparql page
 - [ ] replace error elements with paragraph elements.
@@ -55,6 +55,9 @@
 - [x] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
 - [x] Cache results in model
 - [x] Introduce refresh of cached query results - automatic on `drop`, `load`, and `insert`
+- [ ] Improve shape of query history by using `Element.paragraph`
+- [ ] Allow `Terse` on object position url's
+- [ ] Add settings - api url; allow implied external links to model
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???
 - [ ] see if there is a anything useful for `bnode` in the object position when showing `Back Links`
@@ -67,7 +70,6 @@
 - [ ] add load in addition to execute query icon on query history
 - [ ] show/hide query history (use n more / less) semantics
 - [ ] Improve url routing
-- [ ] Add settings - api url; allow implied external links to model
 - [ ] check for in result/graph access to object uri
 - [ ] Save ttl in subject view
 - [ ] Tableview to get hyperlink logic?
