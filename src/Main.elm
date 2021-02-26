@@ -54,6 +54,7 @@ import Markdown.Renderer
 import Element
 import Element
 import Element
+import Element
 
 version : String
 version = "v0.1"
@@ -1013,13 +1014,16 @@ elOfQueryHistory history =
                                                 , Element.focused
                                                     [ Element.Background.color colorPalette.highlight ]
                                                 ]
-                                                { onPress = Just (SubmitQuery query)
-                                                , label = Element.text ">"
+                                                { onPress = Just (FileLoaded (Sparql.toString query))
+                                                , label = Element.text "^"
                                                 }
-                                        , paragraph [ Element.Font.size sizePalette.normal
+                                        , Element.textColumn [ Element.Font.size sizePalette.normal
                                                     , Element.Border.dotted
+                                                    , Element.Border.widthEach {bottom=1, top=0, left=0, right=0}
                                                     ] 
-                                                        [ Element.text <| Sparql.toString query]
+                                                    (List.map(\line ->
+                                                        Element.paragraph [] [Element.text line]
+                                                    ) (query |> Sparql.toString |> String.split "\n")) --    [ Element.text <| Sparql.toString query]
                                         ]
             ) history)
 

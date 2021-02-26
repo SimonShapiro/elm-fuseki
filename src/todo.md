@@ -55,8 +55,8 @@
 - [x] render markdown literals [http://net.daringfireball.markdown, which conforms to public.plain-text. The encoding should always be UTF-8.](https://daringfireball.net/linked/2011/08/05/markdown-uti)
 - [x] Cache results in model
 - [x] Introduce refresh of cached query results - automatic on `drop`, `load`, and `insert`
-- [ ] Improve shape of query history by using `Element.paragraph`
-- [ ] Allow `Terse` on object position url's
+- [x] Improve shape of query history by using `Element.textColumn`
+- [x] Allow `Terse` on object position url's
 - [ ] Add settings - api url; allow implied external links to model
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???

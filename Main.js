@@ -15269,9 +15269,6 @@ var $author$project$Main$elOfLineOfThought = function (model) {
 					})
 				])));
 };
-var $author$project$Main$SubmitQuery = function (a) {
-	return {$: 'SubmitQuery', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
 var $mdgriffith$elm_ui$Element$Border$dotted = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$borderStyle, $mdgriffith$elm_ui$Internal$Style$classes.borderDotted);
 var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
@@ -15372,6 +15369,35 @@ var $mdgriffith$elm_ui$Element$textColumn = F2(
 				attrs),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
+	var bottom = _v0.bottom;
+	var top = _v0.top;
+	var left = _v0.left;
+	var right = _v0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
+};
 var $author$project$Main$elOfQueryHistory = function (history) {
 	return A2(
 		$mdgriffith$elm_ui$Element$textColumn,
@@ -15414,22 +15440,35 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 										]))
 								]),
 							{
-								label: $mdgriffith$elm_ui$Element$text('>'),
+								label: $mdgriffith$elm_ui$Element$text('^'),
 								onPress: $elm$core$Maybe$Just(
-									$author$project$Main$SubmitQuery(query))
+									$author$project$Main$FileLoaded(
+										$author$project$Sparql$toString(query)))
 							}),
 							A2(
-							$mdgriffith$elm_ui$Element$paragraph,
+							$mdgriffith$elm_ui$Element$textColumn,
 							_List_fromArray(
 								[
 									$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.normal),
-									$mdgriffith$elm_ui$Element$Border$dotted
+									$mdgriffith$elm_ui$Element$Border$dotted,
+									$mdgriffith$elm_ui$Element$Border$widthEach(
+									{bottom: 1, left: 0, right: 0, top: 0})
 								]),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text(
-									$author$project$Sparql$toString(query))
-								]))
+							A2(
+								$elm$core$List$map,
+								function (line) {
+									return A2(
+										$mdgriffith$elm_ui$Element$paragraph,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$text(line)
+											]));
+								},
+								A2(
+									$elm$core$String$split,
+									'\n',
+									$author$project$Sparql$toString(query))))
 						]));
 			},
 			history));
@@ -15438,6 +15477,9 @@ var $author$project$Main$ChangeQuery = function (a) {
 	return {$: 'ChangeQuery', a: a};
 };
 var $author$project$Main$ClearCaches = {$: 'ClearCaches'};
+var $author$project$Main$SubmitQuery = function (a) {
+	return {$: 'SubmitQuery', a: a};
+};
 var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 	function (attrs, multi) {
 		return A3(
@@ -23339,35 +23381,6 @@ var $mdgriffith$elm_ui$Element$transparent = function (on) {
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
 		$mdgriffith$elm_ui$Internal$Flag$transparency,
 		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'visible', 0.0));
-};
-var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
-	function (x, y) {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
-var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
-	var bottom = _v0.bottom;
-	var top = _v0.top;
-	var left = _v0.left;
-	var right = _v0.right;
-	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
-			top,
-			right,
-			bottom,
-			left));
 };
 var $mdgriffith$elm_ui$Element$Input$defaultCheckbox = function (checked) {
 	return A2(
