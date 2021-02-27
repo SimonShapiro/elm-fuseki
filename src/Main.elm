@@ -34,6 +34,7 @@ import String
 import Sparql exposing (..)
 import PlaygroundQuery exposing (..)
 import RdfDict exposing (..)
+import GraphDisplay exposing (..)
 import List.Extra exposing (uncons, groupWhile)
 
 import Element exposing (..)
@@ -51,10 +52,6 @@ import Markdown.Block as Block exposing (Block, Inline, ListItem(..), Task(..))
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
-import Element
-import Element
-import Element
-import Element
 
 version : String
 version = "v0.1"
@@ -67,7 +64,6 @@ type Cardinality
     | ZeroOrOne 
     | ZeroToMany 
     | OneToMany 
-
 
 type UIState 
     = Initialising 
@@ -1233,6 +1229,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                             , elOfLineOfThought model -- maybe not model???
                                                             , predicateStyleToggle model.predicateStyle
+                                                            , convertRdfDict2CommunityGraph a |> GraphDisplay.init |> GraphDisplay.view |> Element.html 
                                                             , elOfSubjects model
                                                             ]
                                             |> Element.layout []
