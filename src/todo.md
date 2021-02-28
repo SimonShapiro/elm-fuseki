@@ -57,12 +57,12 @@
 - [x] Introduce refresh of cached query results - automatic on `drop`, `load`, and `insert`
 - [x] Improve shape of query history by using `Element.textColumn`
 - [x] Allow `Terse` on object position url's
+- [ ] graph view
 - [ ] Add settings - api url; allow implied external links to model
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???
 - [ ] see if there is a anything useful for `bnode` in the object position when showing `Back Links`
 - [ ] make no info on subject view more obvious - by providing access to `Back Links`
-- [ ] graph view
 - [ ] integrate ttl validator `npm install -g turtle-validator` - as a command in load logic
 - [ ] find some way to sort lists
 - [ ] improved text on back link predicates this involves a split and rejoin function which needs to be applied at display time only.  At this point we will need to distinguish modes on the moleculeCard.

@@ -52,6 +52,7 @@ import Markdown.Block as Block exposing (Block, Inline, ListItem(..), Task(..))
 import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
+import Element
 
 version : String
 version = "v0.1"
@@ -88,6 +89,7 @@ type alias Model =
     , keyboard: KeyboardMode
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
+    , graphDisplay: GraphDisplay
     , openPredicatesInSubject: OpenPredicatesInSubject
     , key: Key
     }
@@ -97,6 +99,10 @@ type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
 type KeyboardMode
     = Normal
     | ReadyToAcceptControl
+
+type GraphDisplay
+    = On
+    | Off
 
 type ResultsDisplay
     = Table
@@ -135,6 +141,7 @@ type Msg
     | DisplayFromLineOfThought SparqlQuery
     | ResetLineOfThought
     | ClearCaches
+    | ToggleGraph GraphDisplay
 
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
@@ -390,6 +397,7 @@ initialFn _ url elmKey =
                         , keyboard = Normal
                         , resultsDisplay = Table
                         , predicateStyle = Terse
+                        , graphDisplay = Off
                         , openPredicatesInSubject = []
                         , key = elmKey
                         }
@@ -586,6 +594,10 @@ update msg model =
             case predicateStyle of
                Verbose -> ({model | predicateStyle = Verbose}, Cmd.none)
                Terse -> ({model | predicateStyle = Terse}, Cmd.none)
+        ToggleGraph graphDisplay ->
+            case graphDisplay of
+               On -> ({model | graphDisplay = On}, Cmd.none)
+               Off -> ({model | graphDisplay = Off}, Cmd.none)
         RegisterSubjectPredicateOpen selected -> 
             ({model | openPredicatesInSubject = selected::model.openPredicatesInSubject}, Cmd.none)
         DeregisterSubjectPredicateOpen selected -> 
@@ -934,6 +946,19 @@ predicateStyleToggle selected =
                                             ]
                                 }
 
+graphToggle : GraphDisplay -> Element Msg
+graphToggle selected =
+    Element.Input.radioRow  [ Element.padding 0
+                            , Element.spacing 10
+                            , Element.Font.size sizePalette.command
+                            ]   { onChange = ToggleGraph
+                                , selected = Just selected
+                                , label = Element.Input.labelLeft [Element.Font.size sizePalette.command] (Element.text "Graph Display")
+                                , options = [ Element.Input.option On (Element.text "On")
+                                            , Element.Input.option Off (Element.text "Off")
+                                            ]
+                                }
+
 downloadFile : String -> String -> Cmd msg
 downloadFile fileName query =
   Download.string fileName "text" query
@@ -1229,7 +1254,10 @@ view model = { title = "Sparql Query Playground - 0.0"
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                             , elOfLineOfThought model -- maybe not model???
                                                             , predicateStyleToggle model.predicateStyle
-                                                            , convertRdfDict2CommunityGraph a |> GraphDisplay.init |> GraphDisplay.view |> Element.html 
+                                                            , graphToggle model.graphDisplay
+                                                            , case model.graphDisplay of
+                                                                On -> convertRdfDict2CommunityGraph a |> GraphDisplay.init |> GraphDisplay.view |> Element.html 
+                                                                Off -> Element.none
                                                             , elOfSubjects model
                                                             ]
                                             |> Element.layout []

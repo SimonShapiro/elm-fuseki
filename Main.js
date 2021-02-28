@@ -6839,6 +6839,7 @@ var $author$project$Main$handleUrlRequest = function (req) {
 };
 var $author$project$Main$Initialising = {$: 'Initialising'};
 var $author$project$Main$Normal = {$: 'Normal'};
+var $author$project$Main$Off = {$: 'Off'};
 var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6849,6 +6850,7 @@ var $author$project$Main$initialFn = F3(
 		var initialQuery = $author$project$Main$parseUrlForIndexQuery(url);
 		var initialModel = {
 			currentRdfDict: $elm$core$Maybe$Nothing,
+			graphDisplay: $author$project$Main$Off,
 			key: elmKey,
 			keyboard: $author$project$Main$Normal,
 			lineOfThought: _List_Nil,
@@ -6893,6 +6895,7 @@ var $author$project$Main$FileSelected = function (a) {
 var $author$project$Main$GotSparqlResponse = function (a) {
 	return {$: 'GotSparqlResponse', a: a};
 };
+var $author$project$Main$On = {$: 'On'};
 var $author$project$Main$Pinging = {$: 'Pinging'};
 var $author$project$Main$Querying = {$: 'Querying'};
 var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
@@ -8089,6 +8092,21 @@ var $author$project$Main$update = F2(
 							{predicateStyle: $author$project$Main$Terse}),
 						$elm$core$Platform$Cmd$none);
 				}
+			case 'ToggleGraph':
+				var graphDisplay = msg.a;
+				if (graphDisplay.$ === 'On') {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{graphDisplay: $author$project$Main$On}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{graphDisplay: $author$project$Main$Off}),
+						$elm$core$Platform$Cmd$none);
+				}
 			case 'RegisterSubjectPredicateOpen':
 				var selected = msg.a;
 				return _Utils_Tuple2(
@@ -8124,9 +8142,9 @@ var $author$project$Main$update = F2(
 						$elm$core$Dict$get,
 						$author$project$Sparql$toString(tQuery),
 						model.resultHistory));
-				var _v16 = thought;
-				var vars = _v16.a;
-				var table = _v16.b;
+				var _v17 = thought;
+				var vars = _v17.a;
+				var table = _v17.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -24992,6 +25010,41 @@ var $author$project$Main$elOfTabularResults = F2(
 				]),
 			{columns: columns, data: data});
 	});
+var $author$project$Main$ToggleGraph = function (a) {
+	return {$: 'ToggleGraph', a: a};
+};
+var $author$project$Main$graphToggle = function (selected) {
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$radioRow,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$padding(0),
+				$mdgriffith$elm_ui$Element$spacing(10),
+				$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
+			]),
+		{
+			label: A2(
+				$mdgriffith$elm_ui$Element$Input$labelLeft,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Font$size($author$project$Main$sizePalette.command)
+					]),
+				$mdgriffith$elm_ui$Element$text('Graph Display')),
+			onChange: $author$project$Main$ToggleGraph,
+			options: _List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$option,
+					$author$project$Main$On,
+					$mdgriffith$elm_ui$Element$text('On')),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$option,
+					$author$project$Main$Off,
+					$mdgriffith$elm_ui$Element$text('Off'))
+				]),
+			selected: $elm$core$Maybe$Just(selected)
+		});
+};
 var $author$project$GraphDisplay$CustomNode = F2(
 	function (rank, name) {
 		return {name: name, rank: rank};
@@ -27810,10 +27863,18 @@ var $author$project$Main$view = function (model) {
 												$author$project$Main$elOfMainPage(model),
 												$author$project$Main$elOfLineOfThought(model),
 												$author$project$Main$predicateStyleToggle(model.predicateStyle),
-												$mdgriffith$elm_ui$Element$html(
-												$author$project$GraphDisplay$view(
-													$author$project$GraphDisplay$init(
-														$author$project$Main$convertRdfDict2CommunityGraph(a)))),
+												$author$project$Main$graphToggle(model.graphDisplay),
+												function () {
+												var _v4 = model.graphDisplay;
+												if (_v4.$ === 'On') {
+													return $mdgriffith$elm_ui$Element$html(
+														$author$project$GraphDisplay$view(
+															$author$project$GraphDisplay$init(
+																$author$project$Main$convertRdfDict2CommunityGraph(a))));
+												} else {
+													return $mdgriffith$elm_ui$Element$none;
+												}
+											}(),
 												$author$project$Main$elOfSubjects(model)
 											])));
 							} else {
