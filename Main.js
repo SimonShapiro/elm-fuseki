@@ -26520,6 +26520,16 @@ var $gampleman$elm_visualization$Force$entity = F2(
 		};
 	});
 var $author$project$GraphDisplay$h = 504;
+var $gampleman$elm_visualization$Force$iterations = F2(
+	function (iters, _v0) {
+		var config = _v0.a;
+		return $gampleman$elm_visualization$Force$State(
+			_Utils_update(
+				config,
+				{
+					alphaDecay: 1 - A2($elm$core$Basics$pow, config.minAlpha, 1 / iters)
+				}));
+	});
 var $gampleman$elm_visualization$Force$ManyBody = F2(
 	function (a, b) {
 		return {$: 'ManyBody', a: a, b: b};
@@ -26680,7 +26690,10 @@ var $author$project$GraphDisplay$init = function (inGraph) {
 		graph,
 		A2(
 			$gampleman$elm_visualization$Force$computeSimulation,
-			$gampleman$elm_visualization$Force$simulation(forces),
+			A2(
+				$gampleman$elm_visualization$Force$iterations,
+				1000,
+				$gampleman$elm_visualization$Force$simulation(forces)),
 			A2(
 				$elm$core$List$map,
 				function ($) {

@@ -84,7 +84,7 @@ init inGraph =
     in
     Graph.nodes graph
         |> List.map .label
-        |> Force.computeSimulation (Force.simulation forces)
+        |> Force.computeSimulation (Force.simulation forces |> Force.iterations 1000)
         |> updateGraphWithList graph
 
 
