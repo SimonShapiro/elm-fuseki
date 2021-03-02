@@ -43,8 +43,8 @@ convertMoleculeGraph : Graph (SubjectMolecule RdfNode) String -> Graph String ()
 convertMoleculeGraph g =
     (Graph.mapNodes (\n -> RdfDict.rdfNodeToMaybeString (Tuple.first n) |> Maybe.withDefault "unknown") g)
     |> Graph.mapEdges (\e -> ())
-init : Graph (SubjectMolecule RdfNode) String -> Graph Entity ()
-init inGraph =
+init : Int -> Graph (SubjectMolecule RdfNode) String -> Graph Entity ()
+init maxIterations inGraph =
     let
         graph =
             Graph.mapContexts
@@ -84,7 +84,7 @@ init inGraph =
     in
     Graph.nodes graph
         |> List.map .label
-        |> Force.computeSimulation (Force.simulation forces |> Force.iterations 1000)
+        |> Force.computeSimulation (Force.simulation forces |> Force.iterations maxIterations)
         |> updateGraphWithList graph
 
 

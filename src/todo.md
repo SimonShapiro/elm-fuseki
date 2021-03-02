@@ -58,6 +58,7 @@
 - [x] Improve shape of query history by using `Element.textColumn`
 - [x] Allow `Terse` on object position url's
 - [ ] graph view
+- [ ] parameterize graph control attributes
 - [ ] Add settings - api url; allow implied external links to model
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???

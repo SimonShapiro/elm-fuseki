@@ -6851,6 +6851,7 @@ var $author$project$Main$initialFn = F3(
 		var initialModel = {
 			currentRdfDict: $elm$core$Maybe$Nothing,
 			graphDisplay: $author$project$Main$Off,
+			graphMaxIterations: 10000,
 			key: elmKey,
 			keyboard: $author$project$Main$Normal,
 			lineOfThought: _List_Nil,
@@ -26640,67 +26641,68 @@ var $author$project$GraphDisplay$updateGraphWithList = function () {
 			}));
 }();
 var $author$project$GraphDisplay$w = 990;
-var $author$project$GraphDisplay$init = function (inGraph) {
-	var graph = A2(
-		$elm_community$graph$Graph$mapContexts,
-		function (ctx) {
-			var node = ctx.node;
-			var incoming = ctx.incoming;
-			var outgoing = ctx.outgoing;
-			return {
-				incoming: incoming,
-				node: {
-					id: node.id,
-					label: A2(
-						$gampleman$elm_visualization$Force$entity,
-						node.id,
-						A2(
-							$author$project$GraphDisplay$CustomNode,
-							$elm_community$intdict$IntDict$size(incoming) + $elm_community$intdict$IntDict$size(outgoing),
-							node.label))
-				},
-				outgoing: outgoing
-			};
-		},
-		$author$project$GraphDisplay$convertMoleculeGraph(inGraph));
-	var links = A2(
-		$elm$core$List$map,
-		function (_v0) {
-			var from = _v0.from;
-			var to = _v0.to;
-			return {distance: 30, source: from, strength: $elm$core$Maybe$Nothing, target: to};
-		},
-		$elm_community$graph$Graph$edges(graph));
-	var forces = _List_fromArray(
-		[
-			A2($gampleman$elm_visualization$Force$customLinks, 1, links),
+var $author$project$GraphDisplay$init = F2(
+	function (maxIterations, inGraph) {
+		var graph = A2(
+			$elm_community$graph$Graph$mapContexts,
+			function (ctx) {
+				var node = ctx.node;
+				var incoming = ctx.incoming;
+				var outgoing = ctx.outgoing;
+				return {
+					incoming: incoming,
+					node: {
+						id: node.id,
+						label: A2(
+							$gampleman$elm_visualization$Force$entity,
+							node.id,
+							A2(
+								$author$project$GraphDisplay$CustomNode,
+								$elm_community$intdict$IntDict$size(incoming) + $elm_community$intdict$IntDict$size(outgoing),
+								node.label))
+					},
+					outgoing: outgoing
+				};
+			},
+			$author$project$GraphDisplay$convertMoleculeGraph(inGraph));
+		var links = A2(
+			$elm$core$List$map,
+			function (_v0) {
+				var from = _v0.from;
+				var to = _v0.to;
+				return {distance: 30, source: from, strength: $elm$core$Maybe$Nothing, target: to};
+			},
+			$elm_community$graph$Graph$edges(graph));
+		var forces = _List_fromArray(
+			[
+				A2($gampleman$elm_visualization$Force$customLinks, 1, links),
+				A2(
+				$gampleman$elm_visualization$Force$manyBodyStrength,
+				-30,
+				A2(
+					$elm$core$List$map,
+					function ($) {
+						return $.id;
+					},
+					$elm_community$graph$Graph$nodes(graph))),
+				A2($gampleman$elm_visualization$Force$center, $author$project$GraphDisplay$w / 2, $author$project$GraphDisplay$h / 2)
+			]);
+		return A2(
+			$author$project$GraphDisplay$updateGraphWithList,
+			graph,
 			A2(
-			$gampleman$elm_visualization$Force$manyBodyStrength,
-			-30,
-			A2(
-				$elm$core$List$map,
-				function ($) {
-					return $.id;
-				},
-				$elm_community$graph$Graph$nodes(graph))),
-			A2($gampleman$elm_visualization$Force$center, $author$project$GraphDisplay$w / 2, $author$project$GraphDisplay$h / 2)
-		]);
-	return A2(
-		$author$project$GraphDisplay$updateGraphWithList,
-		graph,
-		A2(
-			$gampleman$elm_visualization$Force$computeSimulation,
-			A2(
-				$gampleman$elm_visualization$Force$iterations,
-				1000,
-				$gampleman$elm_visualization$Force$simulation(forces)),
-			A2(
-				$elm$core$List$map,
-				function ($) {
-					return $.label;
-				},
-				$elm_community$graph$Graph$nodes(graph))));
-};
+				$gampleman$elm_visualization$Force$computeSimulation,
+				A2(
+					$gampleman$elm_visualization$Force$iterations,
+					maxIterations,
+					$gampleman$elm_visualization$Force$simulation(forces)),
+				A2(
+					$elm$core$List$map,
+					function ($) {
+						return $.label;
+					},
+					$elm_community$graph$Graph$nodes(graph))));
+	});
 var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
 		return {$: 'OnlyDynamic', a: a, b: b};
@@ -27882,7 +27884,9 @@ var $author$project$Main$view = function (model) {
 												if (_v4.$ === 'On') {
 													return $mdgriffith$elm_ui$Element$html(
 														$author$project$GraphDisplay$view(
-															$author$project$GraphDisplay$init(
+															A2(
+																$author$project$GraphDisplay$init,
+																model.graphMaxIterations,
 																$author$project$Main$convertRdfDict2CommunityGraph(a))));
 												} else {
 													return $mdgriffith$elm_ui$Element$none;

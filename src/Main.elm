@@ -90,6 +90,7 @@ type alias Model =
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
     , graphDisplay: GraphDisplay
+    , graphMaxIterations: Int
     , openPredicatesInSubject: OpenPredicatesInSubject
     , key: Key
     }
@@ -398,6 +399,7 @@ initialFn _ url elmKey =
                         , resultsDisplay = Table
                         , predicateStyle = Terse
                         , graphDisplay = Off
+                        , graphMaxIterations = 10000
                         , openPredicatesInSubject = []
                         , key = elmKey
                         }
@@ -1256,7 +1258,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                             , predicateStyleToggle model.predicateStyle
                                                             , graphToggle model.graphDisplay
                                                             , case model.graphDisplay of
-                                                                On -> convertRdfDict2CommunityGraph a |> GraphDisplay.init |> GraphDisplay.view |> Element.html 
+                                                                On -> convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
                                                                 Off -> Element.none
                                                             , elOfSubjects model
                                                             ]
