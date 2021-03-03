@@ -59,6 +59,7 @@
 - [x] Allow `Terse` on object position url's
 - [ ] graph view
 - [ ] parameterize graph control attributes
+- [ ] output graph in graphviz .DOT format
 - [ ] Add settings - api url; allow implied external links to model
 - [ ] Replace raw id's in ?s and ?o with prefLabel, if available.
 - [ ] Consider doing something special with #type???

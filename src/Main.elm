@@ -1,4 +1,4 @@
-module Main exposing(..)
+port module Main exposing(..)
 
 import Browser exposing (..)
 import Html exposing(Html, div, text, input, button, h1, h2, h4, span, ul, li, b, p, hr, br, table, tr, th, td, small)
@@ -9,8 +9,8 @@ import Browser.Events exposing (onKeyDown)
 import Browser.Navigation exposing (pushUrl, replaceUrl, load, Key)
 import Http
 import Html.Events exposing (on)
-import Json.Decode exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, map7, list, int, decodeString, at, andThen)
-
+import Json.Decode as JD exposing (Decoder, Error, errorToString, field, string, map, map2, map3, map4, map5, map6, map7, list, int, decodeString, at, andThen)
+import Json.Encode as JE exposing (..)
 import File exposing (File)
 import File.Select as Select
 import File.Download as Download
@@ -27,7 +27,8 @@ import Task exposing (succeed)
 import Regex exposing (Regex)
 import Html exposing (select)
 
-import Graph
+import Graph exposing (..)
+import Graph.DOT exposing (..)
 import Json.Decode exposing (index)
 import String
 
@@ -53,6 +54,7 @@ import Markdown.Html
 import Markdown.Parser
 import Markdown.Renderer
 import Element
+import RdfDict
 
 version : String
 version = "v0.1"
@@ -153,6 +155,8 @@ type alias KGResponse =  -- a copy of the query is available in the api
     , vars: ServerVars
     , result: ServerForm SelectAtom
     }
+
+port setStorage : Value -> Cmd msg
 
 renderer : Markdown.Renderer.Renderer (Element msg)
 renderer =
@@ -380,13 +384,14 @@ server = "http://localhost:port"
 -- startWith = Model Initialising server "" Normal Table Terse [] 
 
 
-initialFn : flags -> Url -> Key -> (Model, (Cmd Msg))
-initialFn _ url elmKey =
+initialFn : String -> Url -> Key -> (Model, (Cmd Msg))
+initialFn serverFlag url elmKey =
     let
+        _ = Debug.log ("Received from browser"++serverFlag)
         initialQuery = parseUrlForIndexQuery url
         initialModel : Model
         initialModel =  { state = Initialising
-                        , server = server
+                        , server = serverFlag
                         , urlQuery = initialQuery
                         , query =  (Ask "ask {?s ?p ?o}")
                         , queryHistory = []
@@ -493,14 +498,14 @@ update msg model =
                     case model.urlQuery of
                         Nothing ->
                             Debug.log "Pinged OK - no initial query"
-                            ({model | state = Querying, keyboard = ReadyToAcceptControl}, Cmd.none)
+                            ({model | state = Querying, keyboard = ReadyToAcceptControl}, setStorage (JE.string model.server))
                         Just query -> 
                             let
                                 command = submitQuery model.server query (Http.expectJson GotSparqlResponse mainDecoder)
                                 _ = Debug.log "Pinged OK with" query
 
                             in
-                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = query}, Cmd.none)
+                                ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = query}, setStorage (JE.string model.server))
                 Err e -> 
                     Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
@@ -1258,7 +1263,10 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                             , predicateStyleToggle model.predicateStyle
                                                             , graphToggle model.graphDisplay
                                                             , case model.graphDisplay of
-                                                                On -> convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
+                                                                On ->
+                                                                    Debug.log (convertRdfDict2CommunityGraph a |>  Graph.DOT.output (\n -> RdfDict.rdfNodeToMaybeString (Tuple.first n) |> Maybe.withDefault "unknown" |> aka model.predicateStyle |> Just) 
+                                                                                                                                    (\e -> Just( aka model.predicateStyle e) ))
+                                                                    convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
                                                                 Off -> Element.none
                                                             , elOfSubjects model
                                                             ]
@@ -1277,25 +1285,25 @@ view model = { title = "Sparql Query Playground - 0.0"
 selectAtomDecoder : Decoder SelectAtom
 selectAtomDecoder = 
     map5 SelectAtom
-        (field "key" string)
-        (field "value" string )
-        (field "aType" string )
-        (field "language" string )
-        (field "datatype" string )
+        (field "key" JD.string)
+        (field "value" JD.string )
+        (field "aType" JD.string )
+        (field "language" JD.string )
+        (field "datatype" JD.string )
 
 mainDecoder : Decoder KGResponse
 mainDecoder =
      map7 KGResponse
-        (field "server" string)
-        (field "status" int)
-        (field "reason" string)
-        (field "queryType" string)
-        (field "query" string)
-        (field "vars" (list string))
-        (field "result" (list (list selectAtomDecoder)))    
+        (field "server" JD.string)
+        (field "status" JD.int)
+        (field "reason" JD.string)
+        (field "queryType" JD.string)
+        (field "query" JD.string)
+        (field "vars" (JD.list JD.string))
+        (field "result" (JD.list (JD.list selectAtomDecoder)))    
 -- Main
 
-main : Program () Model Msg
+main : Program String Model Msg
 main =
   Browser.application
     { init = initialFn

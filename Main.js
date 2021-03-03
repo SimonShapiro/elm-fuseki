@@ -6844,9 +6844,8 @@ var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$server = 'http://localhost:port';
 var $author$project$Main$initialFn = F3(
-	function (_v0, url, elmKey) {
+	function (serverFlag, url, elmKey) {
 		var initialQuery = $author$project$Main$parseUrlForIndexQuery(url);
 		var initialModel = {
 			currentRdfDict: $elm$core$Maybe$Nothing,
@@ -6862,13 +6861,15 @@ var $author$project$Main$initialFn = F3(
 			resultHistory: $elm$core$Dict$empty,
 			results: _List_Nil,
 			resultsDisplay: $author$project$Main$Table,
-			server: $author$project$Main$server,
+			server: serverFlag,
 			state: $author$project$Main$Initialising,
 			urlQuery: initialQuery,
 			vars: _List_Nil
 		};
+		var _v0 = $elm$core$Debug$log('Received from browser' + serverFlag);
 		return _Utils_Tuple2(initialModel, $elm$core$Platform$Cmd$none);
 	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Main$subscriptions = function (_v0) {
@@ -7281,7 +7282,6 @@ var $author$project$RdfDict$SelectAtom = F5(
 		return {aType: aType, datatype: datatype, key: key, language: language, value: value};
 	});
 var $elm$json$Json$Decode$map5 = _Json_map5;
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Main$selectAtomDecoder = A6(
 	$elm$json$Json$Decode$map5,
 	$author$project$RdfDict$SelectAtom,
@@ -7632,6 +7632,8 @@ var $elm_community$list_extra$List$Extra$remove = F2(
 		}
 	});
 var $elm$browser$Browser$Navigation$replaceUrl = _Browser_replaceUrl;
+var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$core$Basics$identity);
+var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
 		return {$: 'QueryParameter', a: a, b: b};
@@ -7822,7 +7824,8 @@ var $author$project$Main$update = F2(
 								_Utils_update(
 									model,
 									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
-								$elm$core$Platform$Cmd$none));
+								$author$project$Main$setStorage(
+									$elm$json$Json$Encode$string(model.server))));
 					} else {
 						var query = _v5.a;
 						var command = A3(
@@ -7835,7 +7838,8 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{keyboard: $author$project$Main$ReadyToAcceptControl, query: query, state: $author$project$Main$Querying}),
-							$elm$core$Platform$Cmd$none);
+							$author$project$Main$setStorage(
+								$elm$json$Json$Encode$string(model.server)));
 					}
 				} else {
 					var e = result.a;
@@ -8175,6 +8179,19 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Main$BackToQuery = {$: 'BackToQuery'};
+var $author$project$Main$aka = F2(
+	function (predicateStyle, pred) {
+		if (predicateStyle.$ === 'Verbose') {
+			return pred;
+		} else {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				pred,
+				$elm$core$List$head(
+					$elm$core$List$reverse(
+						A2($elm$core$String$split, '/', pred))));
+		}
+	});
 var $mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
 	return {$: 'Attr', a: a};
 };
@@ -8312,7 +8329,6 @@ var $mdgriffith$elm_ui$Internal$Flag$alignBottom = $mdgriffith$elm_ui$Internal$F
 var $mdgriffith$elm_ui$Internal$Flag$alignRight = $mdgriffith$elm_ui$Internal$Flag$flag(40);
 var $mdgriffith$elm_ui$Internal$Flag$centerX = $mdgriffith$elm_ui$Internal$Flag$flag(42);
 var $mdgriffith$elm_ui$Internal$Flag$centerY = $mdgriffith$elm_ui$Internal$Flag$flag(43);
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -16488,19 +16504,6 @@ var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
 	return {$: 'RegisterSubjectPredicateOpen', a: a};
 };
 var $author$project$Main$Subject = {$: 'Subject'};
-var $author$project$Main$aka = F2(
-	function (predicateStyle, pred) {
-		if (predicateStyle.$ === 'Verbose') {
-			return pred;
-		} else {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				pred,
-				$elm$core$List$head(
-					$elm$core$List$reverse(
-						A2($elm$core$String$split, '/', pred))));
-		}
-	});
 var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
 var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
 var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
@@ -26908,6 +26911,127 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
+var $elm_community$graph$Graph$DOT$Styles = F4(
+	function (rankdir, graph, node, edge) {
+		return {edge: edge, graph: graph, node: node, rankdir: rankdir};
+	});
+var $elm_community$graph$Graph$DOT$TB = {$: 'TB'};
+var $elm_community$graph$Graph$DOT$defaultStyles = A4($elm_community$graph$Graph$DOT$Styles, $elm_community$graph$Graph$DOT$TB, '', '', '');
+var $elm$core$Dict$isEmpty = function (dict) {
+	if (dict.$ === 'RBEmpty_elm_builtin') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$List$sortWith = _List_sortWith;
+var $elm_community$graph$Graph$DOT$outputWithStylesAndAttributes = F4(
+	function (styles, nodeAttrs, edgeAttrs, graph) {
+		var rankDirToString = function (r) {
+			switch (r.$) {
+				case 'TB':
+					return 'TB';
+				case 'LR':
+					return 'LR';
+				case 'BT':
+					return 'BT';
+				default:
+					return 'RL';
+			}
+		};
+		var nodes = $elm_community$graph$Graph$nodes(graph);
+		var encode = A2(
+			$elm$core$Basics$composeR,
+			$elm$json$Json$Encode$string,
+			$elm$json$Json$Encode$encode(0));
+		var edges = function () {
+			var compareEdge = F2(
+				function (a, b) {
+					var _v1 = A2($elm$core$Basics$compare, a.from, b.from);
+					switch (_v1.$) {
+						case 'LT':
+							return $elm$core$Basics$LT;
+						case 'GT':
+							return $elm$core$Basics$GT;
+						default:
+							return A2($elm$core$Basics$compare, a.to, b.to);
+					}
+				});
+			return A2(
+				$elm$core$List$sortWith,
+				compareEdge,
+				$elm_community$graph$Graph$edges(graph));
+		}();
+		var attrAssocs = A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Dict$toList,
+			A2(
+				$elm$core$Basics$composeR,
+				$elm$core$List$map(
+					function (_v0) {
+						var k = _v0.a;
+						var v = _v0.b;
+						return k + ('=' + encode(v));
+					}),
+				$elm$core$String$join(', ')));
+		var makeAttrs = function (d) {
+			return $elm$core$Dict$isEmpty(d) ? '' : (' [' + (attrAssocs(d) + ']'));
+		};
+		var edge = function (e) {
+			return '  ' + ($elm$core$String$fromInt(e.from) + (' -> ' + ($elm$core$String$fromInt(e.to) + makeAttrs(
+				edgeAttrs(e.label)))));
+		};
+		var edgesString = A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$map, edge, edges));
+		var node = function (n) {
+			return '  ' + ($elm$core$String$fromInt(n.id) + makeAttrs(
+				nodeAttrs(n.label)));
+		};
+		var nodesString = A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$map, node, nodes));
+		return A2(
+			$elm$core$String$join,
+			'\n',
+			_List_fromArray(
+				[
+					'digraph G {',
+					'  rankdir=' + rankDirToString(styles.rankdir),
+					'  graph [' + (styles.graph + ']'),
+					'  node [' + (styles.node + ']'),
+					'  edge [' + (styles.edge + ']'),
+					'',
+					edgesString,
+					'',
+					nodesString,
+					'}'
+				]));
+	});
+var $elm$core$Dict$singleton = F2(
+	function (key, value) {
+		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+	});
+var $elm_community$graph$Graph$DOT$outputWithStyles = F4(
+	function (styles, mapNode, mapEdge, graph) {
+		var labelOnly = function (maybeLabel) {
+			if (maybeLabel.$ === 'Nothing') {
+				return $elm$core$Dict$empty;
+			} else {
+				var l = maybeLabel.a;
+				return A2($elm$core$Dict$singleton, 'label', l);
+			}
+		};
+		return A4(
+			$elm_community$graph$Graph$DOT$outputWithStylesAndAttributes,
+			styles,
+			A2($elm$core$Basics$composeL, labelOnly, mapNode),
+			A2($elm$core$Basics$composeL, labelOnly, mapEdge),
+			graph);
+	});
+var $elm_community$graph$Graph$DOT$output = $elm_community$graph$Graph$DOT$outputWithStyles($elm_community$graph$Graph$DOT$defaultStyles);
 var $author$project$Main$ChangePredicateStyle = function (a) {
 	return {$: 'ChangePredicateStyle', a: a};
 };
@@ -27887,7 +28011,27 @@ var $author$project$Main$view = function (model) {
 															A2(
 																$author$project$GraphDisplay$init,
 																model.graphMaxIterations,
-																$author$project$Main$convertRdfDict2CommunityGraph(a))));
+																A3(
+																	$elm$core$Debug$log,
+																	A3(
+																		$elm_community$graph$Graph$DOT$output,
+																		function (n) {
+																			return $elm$core$Maybe$Just(
+																				A2(
+																					$author$project$Main$aka,
+																					model.predicateStyle,
+																					A2(
+																						$elm$core$Maybe$withDefault,
+																						'unknown',
+																						$author$project$RdfDict$rdfNodeToMaybeString(n.a))));
+																		},
+																		function (e) {
+																			return $elm$core$Maybe$Just(
+																				A2($author$project$Main$aka, model.predicateStyle, e));
+																		},
+																		$author$project$Main$convertRdfDict2CommunityGraph(a)),
+																	$author$project$Main$convertRdfDict2CommunityGraph,
+																	a))));
 												} else {
 													return $mdgriffith$elm_ui$Element$none;
 												}
@@ -27920,5 +28064,4 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$initialFn, onUrlChange: $author$project$Main$handleUrlChange, onUrlRequest: $author$project$Main$handleUrlRequest, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)(0)}});}(this));
