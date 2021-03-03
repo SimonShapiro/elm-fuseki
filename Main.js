@@ -4993,6 +4993,10 @@ var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString
 
 	return _Utils_Tuple3(newOffset, row, col);
 });
+var $elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
@@ -5096,10 +5100,6 @@ var $elm$json$Json$Decode$OneOf = function (a) {
 };
 var $elm$core$Basics$False = {$: 'False'};
 var $elm$core$Basics$add = _Basics_add;
-var $elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
 var $elm$core$Basics$append = _Utils_append;
@@ -6844,8 +6844,17 @@ var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Main$server = 'http://localhost:port';
 var $author$project$Main$initialFn = F3(
-	function (serverFlag, url, elmKey) {
+	function (maybeServer, url, elmKey) {
+		var serverFlag = function () {
+			if (maybeServer.$ === 'Nothing') {
+				return $author$project$Main$server;
+			} else {
+				var s = maybeServer.a;
+				return s;
+			}
+		}();
 		var initialQuery = $author$project$Main$parseUrlForIndexQuery(url);
 		var initialModel = {
 			currentRdfDict: $elm$core$Maybe$Nothing,
@@ -6869,6 +6878,8 @@ var $author$project$Main$initialFn = F3(
 		var _v0 = $elm$core$Debug$log('Received from browser' + serverFlag);
 		return _Utils_Tuple2(initialModel, $elm$core$Platform$Cmd$none);
 	});
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
@@ -28064,4 +28075,10 @@ var $author$project$Main$view = function (model) {
 };
 var $author$project$Main$main = $elm$browser$Browser$application(
 	{init: $author$project$Main$initialFn, onUrlChange: $author$project$Main$handleUrlChange, onUrlRequest: $author$project$Main$handleUrlRequest, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
-_Platform_export({'Main':{'init':$author$project$Main$main($elm$json$Json$Decode$string)(0)}});}(this));
+_Platform_export({'Main':{'init':$author$project$Main$main(
+	$elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, $elm$json$Json$Decode$string)
+			])))(0)}});}(this));

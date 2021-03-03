@@ -384,9 +384,12 @@ server = "http://localhost:port"
 -- startWith = Model Initialising server "" Normal Table Terse [] 
 
 
-initialFn : String -> Url -> Key -> (Model, (Cmd Msg))
-initialFn serverFlag url elmKey =
+initialFn : (Maybe String ) -> Url -> Key -> (Model, (Cmd Msg))
+initialFn maybeServer url elmKey =
     let
+        serverFlag = case maybeServer of
+                        Nothing -> server
+                        Just s -> s
         _ = Debug.log ("Received from browser"++serverFlag)
         initialQuery = parseUrlForIndexQuery url
         initialModel : Model
@@ -1303,7 +1306,7 @@ mainDecoder =
         (field "result" (JD.list (JD.list selectAtomDecoder)))    
 -- Main
 
-main : Program String Model Msg
+main : Program (Maybe String ) Model Msg
 main =
   Browser.application
     { init = initialFn
