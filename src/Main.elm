@@ -56,12 +56,54 @@ import Markdown.Renderer
 import Element
 import RdfDict
 
+import Dagre 
+
+dagreOptions = 
+    { rankDir = Dagre.TB
+    , align = Nothing
+    }
+
+emptyDagre = Dagre.UnplacedDagreGraph dagreOptions [] []
+
+convertCommunityGraphToDagreWithoutLayout : Graph  (SubjectMolecule RdfNode) String -> (List Dagre.UnplacedNode, List Dagre.UnplacedEdge)
+convertCommunityGraphToDagreWithoutLayout g = 
+    let
+        edges = List.map (\e -> {from = e.from, to=e.to, label=e.label}) (Graph.edges g)
+        nodes = List.map (\n ->     { id = n.id
+                                    , label= RdfDict.rdfNodeToMaybeString (Tuple.first n.label) |> Maybe.withDefault "unknown"
+                                    , width = 100
+                                    , height = 80
+                                     }) (Graph.nodes g)
+    in
+        (nodes, edges)
+
+convertDagreWithoutLayoutToJson : (List Dagre.UnplacedNode, List Dagre.UnplacedEdge) -> JE.Value
+convertDagreWithoutLayoutToJson dagre = 
+    let
+        jsonNodes = JE.list (\n -> JE.object    [ ("id", JE.int n.id)
+                                                , ("label", JE.string n.label) 
+                                                , ("width", JE.int n.width)
+                                                , ("height", JE.int n.height)
+                                                ]) (Tuple.first dagre)
+        jsonEdges = JE.list (\e -> JE.object    [ ("from", JE.int e.from)
+                                                , ("to", JE.int e.to)
+                                                , ("label", JE.string e.label)
+                                                ]) (Tuple.second dagre)
+    in
+        JE.object   [ ("action", JE.string "LayoutGraph")
+                    , ("nodes", jsonNodes)
+                    , ("edges", jsonEdges)
+                    ]
+
+rdfDictToJsonValue = convertRdfDict2CommunityGraph >> convertCommunityGraphToDagreWithoutLayout >> convertDagreWithoutLayoutToJson
+
 version : String
 version = "v0.1"
 type alias Document msg =
     { title : String
     , body : List (Html msg)
     }
+
 type Cardinality 
     = OneToOne 
     | ZeroOrOne 
@@ -157,6 +199,7 @@ type alias KGResponse =  -- a copy of the query is available in the api
     }
 
 port setStorage : Value -> Cmd msg
+port sendActionRequestToWorker : Value -> Cmd msg
 
 renderer : Markdown.Renderer.Renderer (Element msg)
 renderer =
@@ -562,16 +605,20 @@ update msg model =
                                                     Load _ -> []
                                                     Insert _ -> []
                                                     Drop _ -> []
-                                                    _ -> model.lineOfThought 
+                                                    _ -> model.lineOfThought
+                                contracted = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
+                                                        |> Maybe.map makeRdfDict 
+                                cmd = case contracted of
+                                    Just a -> rdfDictToJsonValue a |> sendActionRequestToWorker
+                                    _ -> Cmd.none
                             in
                                     ({ model | state = DisplayingSelectResult okData.vars okData.result
                                     , vars = okData.vars
                                     , results = okData.result
                                     , resultHistory = resultHistory
                                     , lineOfThought = lineOfThought
-                                    , currentRdfDict = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
-                                                        |> Maybe.map makeRdfDict 
-                                    }, Cmd.none)
+                                    , currentRdfDict = contracted
+                                    }, cmd)
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
                 Err e -> 
@@ -607,6 +654,7 @@ update msg model =
         ToggleGraph graphDisplay ->
             case graphDisplay of
                On -> ({model | graphDisplay = On}, Cmd.none)
+            -- On -> ({model | graphDisplay = On}, )
                Off -> ({model | graphDisplay = Off}, Cmd.none)
         RegisterSubjectPredicateOpen selected -> 
             ({model | openPredicatesInSubject = selected::model.openPredicatesInSubject}, Cmd.none)
@@ -1269,7 +1317,9 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                                 On ->
                                                                     Debug.log (convertRdfDict2CommunityGraph a |>  Graph.DOT.output (\n -> RdfDict.rdfNodeToMaybeString (Tuple.first n) |> Maybe.withDefault "unknown" |> aka model.predicateStyle |> Just) 
                                                                                                                                     (\e -> Just( aka model.predicateStyle e) ))
-                                                                    convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
+ --                                                                   convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
+--                                                                    rdfDictToJsonValue a |> sendActionRequestToWorker
+                                                                    Element.none 
                                                                 Off -> Element.none
                                                             , elOfSubjects model
                                                             ]
@@ -1284,7 +1334,6 @@ view model = { title = "Sparql Query Playground - 0.0"
             )}
 
 -- Decoders
-
 selectAtomDecoder : Decoder SelectAtom
 selectAtomDecoder = 
     map5 SelectAtom

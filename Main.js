@@ -7608,6 +7608,564 @@ var $author$project$Main$pingServer = function (newServer) {
 		});
 };
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
+var $elm_community$intdict$IntDict$foldl = F3(
+	function (f, acc, dict) {
+		foldl:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldl, f, acc, i.left),
+						$temp$dict = i.right;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldl;
+			}
+		}
+	});
+var $elm_community$graph$Graph$unGraph = function (graph) {
+	var rep = graph.a;
+	return rep;
+};
+var $elm_community$graph$Graph$edges = function (graph) {
+	var flippedFoldl = F3(
+		function (f, dict, list) {
+			return A3($elm_community$intdict$IntDict$foldl, f, list, dict);
+		});
+	var prependEdges = F2(
+		function (node1, ctx) {
+			return A2(
+				flippedFoldl,
+				F2(
+					function (node2, e) {
+						return $elm$core$List$cons(
+							{from: node1, label: e, to: node2});
+					}),
+				ctx.outgoing);
+		});
+	return A3(
+		flippedFoldl,
+		prependEdges,
+		$elm_community$graph$Graph$unGraph(graph),
+		_List_Nil);
+};
+var $elm_community$intdict$IntDict$foldr = F3(
+	function (f, acc, dict) {
+		foldr:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldr, f, acc, i.right),
+						$temp$dict = i.left;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldr;
+			}
+		}
+	});
+var $elm_community$intdict$IntDict$values = function (dict) {
+	return A3(
+		$elm_community$intdict$IntDict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm_community$graph$Graph$nodes = A2(
+	$elm$core$Basics$composeR,
+	$elm_community$graph$Graph$unGraph,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm_community$intdict$IntDict$values,
+		$elm$core$List$map(
+			function ($) {
+				return $.node;
+			})));
+var $author$project$RdfDict$rdfNodeToMaybeString = function (node) {
+	switch (node.$) {
+		case 'Uri':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'BlankNode':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'LiteralOnlyValue':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'LiteralValueAndDataType':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		case 'LiteralValueAndLanguageString':
+			var a = node.a;
+			return $elm$core$Maybe$Just(a.value);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Main$convertCommunityGraphToDagreWithoutLayout = function (g) {
+	var nodes = A2(
+		$elm$core$List$map,
+		function (n) {
+			return {
+				height: 80,
+				id: n.id,
+				label: A2(
+					$elm$core$Maybe$withDefault,
+					'unknown',
+					$author$project$RdfDict$rdfNodeToMaybeString(n.label.a)),
+				width: 100
+			};
+		},
+		$elm_community$graph$Graph$nodes(g));
+	var edges = A2(
+		$elm$core$List$map,
+		function (e) {
+			return {from: e.from, label: e.label, to: e.to};
+		},
+		$elm_community$graph$Graph$edges(g));
+	return _Utils_Tuple2(nodes, edges);
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Main$convertDagreWithoutLayoutToJson = function (dagre) {
+	var jsonNodes = A2(
+		$elm$json$Json$Encode$list,
+		function (n) {
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'id',
+						$elm$json$Json$Encode$int(n.id)),
+						_Utils_Tuple2(
+						'label',
+						$elm$json$Json$Encode$string(n.label)),
+						_Utils_Tuple2(
+						'width',
+						$elm$json$Json$Encode$int(n.width)),
+						_Utils_Tuple2(
+						'height',
+						$elm$json$Json$Encode$int(n.height))
+					]));
+		},
+		dagre.a);
+	var jsonEdges = A2(
+		$elm$json$Json$Encode$list,
+		function (e) {
+			return $elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'from',
+						$elm$json$Json$Encode$int(e.from)),
+						_Utils_Tuple2(
+						'to',
+						$elm$json$Json$Encode$int(e.to)),
+						_Utils_Tuple2(
+						'label',
+						$elm$json$Json$Encode$string(e.label))
+					]));
+		},
+		dagre.b);
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'action',
+				$elm$json$Json$Encode$string('LayoutGraph')),
+				_Utils_Tuple2('nodes', jsonNodes),
+				_Utils_Tuple2('edges', jsonEdges)
+			]));
+};
+var $elm_community$graph$Graph$Edge = F3(
+	function (from, to, label) {
+		return {from: from, label: label, to: to};
+	});
+var $elm_community$graph$Graph$Node = F2(
+	function (id, label) {
+		return {id: id, label: label};
+	});
+var $elm_community$graph$Graph$Graph = function (a) {
+	return {$: 'Graph', a: a};
+};
+var $elm_community$graph$Graph$NodeContext = F3(
+	function (node, incoming, outgoing) {
+		return {incoming: incoming, node: node, outgoing: outgoing};
+	});
+var $elm_community$intdict$IntDict$Empty = {$: 'Empty'};
+var $elm_community$intdict$IntDict$empty = $elm_community$intdict$IntDict$Empty;
+var $elm_community$intdict$IntDict$Inner = function (a) {
+	return {$: 'Inner', a: a};
+};
+var $elm_community$intdict$IntDict$size = function (dict) {
+	switch (dict.$) {
+		case 'Empty':
+			return 0;
+		case 'Leaf':
+			return 1;
+		default:
+			var i = dict.a;
+			return i.size;
+	}
+};
+var $elm_community$intdict$IntDict$inner = F3(
+	function (p, l, r) {
+		var _v0 = _Utils_Tuple2(l, r);
+		if (_v0.a.$ === 'Empty') {
+			var _v1 = _v0.a;
+			return r;
+		} else {
+			if (_v0.b.$ === 'Empty') {
+				var _v2 = _v0.b;
+				return l;
+			} else {
+				return $elm_community$intdict$IntDict$Inner(
+					{
+						left: l,
+						prefix: p,
+						right: r,
+						size: $elm_community$intdict$IntDict$size(l) + $elm_community$intdict$IntDict$size(r)
+					});
+			}
+		}
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$complement = _Bitwise_complement;
+var $elm$core$Bitwise$or = _Bitwise_or;
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm_community$intdict$IntDict$highestBitSet = function (n) {
+	var shiftOr = F2(
+		function (i, shift) {
+			return i | (i >>> shift);
+		});
+	var n1 = A2(shiftOr, n, 1);
+	var n2 = A2(shiftOr, n1, 2);
+	var n3 = A2(shiftOr, n2, 4);
+	var n4 = A2(shiftOr, n3, 8);
+	var n5 = A2(shiftOr, n4, 16);
+	return n5 & (~(n5 >>> 1));
+};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm_community$intdict$IntDict$signBit = $elm_community$intdict$IntDict$highestBitSet(-1);
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm_community$intdict$IntDict$isBranchingBitSet = function (p) {
+	return A2(
+		$elm$core$Basics$composeR,
+		$elm$core$Bitwise$xor($elm_community$intdict$IntDict$signBit),
+		A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Bitwise$and(p.branchingBit),
+			$elm$core$Basics$neq(0)));
+};
+var $elm_community$intdict$IntDict$higherBitMask = function (branchingBit) {
+	return branchingBit ^ (~(branchingBit - 1));
+};
+var $elm_community$intdict$IntDict$lcp = F2(
+	function (x, y) {
+		var branchingBit = $elm_community$intdict$IntDict$highestBitSet(x ^ y);
+		var mask = $elm_community$intdict$IntDict$higherBitMask(branchingBit);
+		var prefixBits = x & mask;
+		return {branchingBit: branchingBit, prefixBits: prefixBits};
+	});
+var $elm_community$intdict$IntDict$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $elm_community$intdict$IntDict$leaf = F2(
+	function (k, v) {
+		return $elm_community$intdict$IntDict$Leaf(
+			{key: k, value: v});
+	});
+var $elm_community$intdict$IntDict$prefixMatches = F2(
+	function (p, n) {
+		return _Utils_eq(
+			n & $elm_community$intdict$IntDict$higherBitMask(p.branchingBit),
+			p.prefixBits);
+	});
+var $elm_community$intdict$IntDict$update = F3(
+	function (key, alter, dict) {
+		var join = F2(
+			function (_v2, _v3) {
+				var k1 = _v2.a;
+				var l = _v2.b;
+				var k2 = _v3.a;
+				var r = _v3.b;
+				var prefix = A2($elm_community$intdict$IntDict$lcp, k1, k2);
+				return A2($elm_community$intdict$IntDict$isBranchingBitSet, prefix, k2) ? A3($elm_community$intdict$IntDict$inner, prefix, l, r) : A3($elm_community$intdict$IntDict$inner, prefix, r, l);
+			});
+		var alteredNode = function (mv) {
+			var _v1 = alter(mv);
+			if (_v1.$ === 'Just') {
+				var v = _v1.a;
+				return A2($elm_community$intdict$IntDict$leaf, key, v);
+			} else {
+				return $elm_community$intdict$IntDict$empty;
+			}
+		};
+		switch (dict.$) {
+			case 'Empty':
+				return alteredNode($elm$core$Maybe$Nothing);
+			case 'Leaf':
+				var l = dict.a;
+				return _Utils_eq(l.key, key) ? alteredNode(
+					$elm$core$Maybe$Just(l.value)) : A2(
+					join,
+					_Utils_Tuple2(
+						key,
+						alteredNode($elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(l.key, dict));
+			default:
+				var i = dict.a;
+				return A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key) ? (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key) ? A3(
+					$elm_community$intdict$IntDict$inner,
+					i.prefix,
+					i.left,
+					A3($elm_community$intdict$IntDict$update, key, alter, i.right)) : A3(
+					$elm_community$intdict$IntDict$inner,
+					i.prefix,
+					A3($elm_community$intdict$IntDict$update, key, alter, i.left),
+					i.right)) : A2(
+					join,
+					_Utils_Tuple2(
+						key,
+						alteredNode($elm$core$Maybe$Nothing)),
+					_Utils_Tuple2(i.prefix.prefixBits, dict));
+		}
+	});
+var $elm_community$intdict$IntDict$insert = F3(
+	function (key, value, dict) {
+		return A3(
+			$elm_community$intdict$IntDict$update,
+			key,
+			$elm$core$Basics$always(
+				$elm$core$Maybe$Just(value)),
+			dict);
+	});
+var $elm$core$Basics$not = _Basics_not;
+var $elm_community$intdict$IntDict$get = F2(
+	function (key, dict) {
+		get:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return $elm$core$Maybe$Nothing;
+				case 'Leaf':
+					var l = dict.a;
+					return _Utils_eq(l.key, key) ? $elm$core$Maybe$Just(l.value) : $elm$core$Maybe$Nothing;
+				default:
+					var i = dict.a;
+					if (!A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key)) {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						if (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key)) {
+							var $temp$key = key,
+								$temp$dict = i.right;
+							key = $temp$key;
+							dict = $temp$dict;
+							continue get;
+						} else {
+							var $temp$key = key,
+								$temp$dict = i.left;
+							key = $temp$key;
+							dict = $temp$dict;
+							continue get;
+						}
+					}
+			}
+		}
+	});
+var $elm_community$intdict$IntDict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm_community$intdict$IntDict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm_community$graph$Graph$fromNodesAndEdges = F2(
+	function (nodes_, edges_) {
+		var nodeRep = A3(
+			$elm$core$List$foldl,
+			function (n) {
+				return A2(
+					$elm_community$intdict$IntDict$insert,
+					n.id,
+					A3($elm_community$graph$Graph$NodeContext, n, $elm_community$intdict$IntDict$empty, $elm_community$intdict$IntDict$empty));
+			},
+			$elm_community$intdict$IntDict$empty,
+			nodes_);
+		var addEdge = F2(
+			function (edge, rep) {
+				var updateOutgoing = function (ctx) {
+					return _Utils_update(
+						ctx,
+						{
+							outgoing: A3($elm_community$intdict$IntDict$insert, edge.to, edge.label, ctx.outgoing)
+						});
+				};
+				var updateIncoming = function (ctx) {
+					return _Utils_update(
+						ctx,
+						{
+							incoming: A3($elm_community$intdict$IntDict$insert, edge.from, edge.label, ctx.incoming)
+						});
+				};
+				return A3(
+					$elm_community$intdict$IntDict$update,
+					edge.to,
+					$elm$core$Maybe$map(updateIncoming),
+					A3(
+						$elm_community$intdict$IntDict$update,
+						edge.from,
+						$elm$core$Maybe$map(updateOutgoing),
+						rep));
+			});
+		var addEdgeIfValid = F2(
+			function (edge, rep) {
+				return (A2($elm_community$intdict$IntDict$member, edge.from, rep) && A2($elm_community$intdict$IntDict$member, edge.to, rep)) ? A2(addEdge, edge, rep) : rep;
+			});
+		return $elm_community$graph$Graph$Graph(
+			A3($elm$core$List$foldl, addEdgeIfValid, nodeRep, edges_));
+	});
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $elm_community$maybe_extra$Maybe$Extra$cons = F2(
+	function (item, list) {
+		if (item.$ === 'Just') {
+			var v = item.a;
+			return A2($elm$core$List$cons, v, list);
+		} else {
+			return list;
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$values = A2($elm$core$List$foldr, $elm_community$maybe_extra$Maybe$Extra$cons, _List_Nil);
+var $author$project$Main$convertRdfDict2CommunityGraph = function (d) {
+	var _v0 = $elm$core$List$unzip(
+		$elm$core$Dict$toList(d));
+	var index = _v0.a;
+	var values = _v0.b;
+	var reverseDict = $elm$core$Dict$fromList(
+		A2(
+			$elm$core$List$map,
+			function (_v4) {
+				var x = _v4.a;
+				var y = _v4.b;
+				return _Utils_Tuple2(y, x);
+			},
+			A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, index)));
+	var edges = $elm$core$List$concat(
+		A2(
+			$elm$core$List$map,
+			function (_v2) {
+				var k = _v2.a;
+				var node = _v2.b;
+				var spo = node.b;
+				var id = A2(
+					$elm$core$Maybe$withDefault,
+					-1,
+					A2($elm$core$Dict$get, k, reverseDict));
+				return $elm$core$List$concat(
+					A2(
+						$elm$core$List$map,
+						function (_v3) {
+							var p = _v3.a;
+							var po = _v3.b;
+							return A2(
+								$elm$core$List$map,
+								function (e) {
+									return A3(
+										$elm_community$graph$Graph$Edge,
+										id,
+										e,
+										A2(
+											$elm$core$Maybe$withDefault,
+											'???',
+											$author$project$RdfDict$rdfNodeToMaybeString(p)));
+								},
+								$elm_community$maybe_extra$Maybe$Extra$values(
+									A2(
+										$elm$core$List$map,
+										function (o) {
+											return A2(
+												$elm$core$Dict$get,
+												A2(
+													$elm$core$Maybe$withDefault,
+													'???',
+													$author$project$RdfDict$rdfNodeToMaybeString(o)),
+												reverseDict);
+										},
+										po)));
+						},
+						spo));
+			},
+			$elm$core$Dict$toList(d)));
+	var nodes = A2(
+		$elm$core$List$map,
+		function (_v1) {
+			var x = _v1.a;
+			var y = _v1.b;
+			return A2($elm_community$graph$Graph$Node, x, y);
+		},
+		A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, values));
+	return A6(
+		$elm$core$Debug$log,
+		'Inside conversion' + $elm$core$String$fromInt(
+			$elm$core$List$length(values)),
+		$elm$core$Debug$log,
+		'Building graph of ' + ($elm$core$String$fromInt(
+			$elm$core$List$length(nodes)) + (':' + $elm$core$String$fromInt(
+			$elm$core$List$length(edges)))),
+		$elm_community$graph$Graph$fromNodesAndEdges,
+		nodes,
+		edges);
+};
+var $author$project$Main$rdfDictToJsonValue = A2(
+	$elm$core$Basics$composeR,
+	$author$project$Main$convertRdfDict2CommunityGraph,
+	A2($elm$core$Basics$composeR, $author$project$Main$convertCommunityGraphToDagreWithoutLayout, $author$project$Main$convertDagreWithoutLayoutToJson));
 var $elm$url$Url$Builder$toQueryPair = function (_v0) {
 	var key = _v0.a;
 	var value = _v0.b;
@@ -7643,8 +8201,8 @@ var $elm_community$list_extra$List$Extra$remove = F2(
 		}
 	});
 var $elm$browser$Browser$Navigation$replaceUrl = _Browser_replaceUrl;
+var $author$project$Main$sendActionRequestToWorker = _Platform_outgoingPort('sendActionRequestToWorker', $elm$core$Basics$identity);
 var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$core$Basics$identity);
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
 		return {$: 'QueryParameter', a: a, b: b};
@@ -7961,8 +8519,8 @@ var $author$project$Main$update = F2(
 					var _v11 = okData.status;
 					if (_v11 === 200) {
 						var resultHistory = function () {
-							var _v13 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
-							switch (_v13.$) {
+							var _v14 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
+							switch (_v14.$) {
 								case 'Load':
 									return $elm$core$Dict$empty;
 								case 'Insert':
@@ -7978,8 +8536,8 @@ var $author$project$Main$update = F2(
 							}
 						}();
 						var lineOfThought = function () {
-							var _v12 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
-							switch (_v12.$) {
+							var _v13 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
+							switch (_v13.$) {
 								case 'Load':
 									return _List_Nil;
 								case 'Insert':
@@ -7990,21 +8548,31 @@ var $author$project$Main$update = F2(
 									return model.lineOfThought;
 							}
 						}();
+						var contracted = A2(
+							$elm$core$Maybe$map,
+							$author$project$RdfDict$makeRdfDict,
+							A2($author$project$RdfDict$contractResult, okData.vars, okData.result));
+						var cmd = function () {
+							if (contracted.$ === 'Just') {
+								var a = contracted.a;
+								return $author$project$Main$sendActionRequestToWorker(
+									$author$project$Main$rdfDictToJsonValue(a));
+							} else {
+								return $elm$core$Platform$Cmd$none;
+							}
+						}();
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
 								{
-									currentRdfDict: A2(
-										$elm$core$Maybe$map,
-										$author$project$RdfDict$makeRdfDict,
-										A2($author$project$RdfDict$contractResult, okData.vars, okData.result)),
+									currentRdfDict: contracted,
 									lineOfThought: lineOfThought,
 									resultHistory: resultHistory,
 									results: okData.result,
 									state: A2($author$project$Main$DisplayingSelectResult, okData.vars, okData.result),
 									vars: okData.vars
 								}),
-							$elm$core$Platform$Cmd$none);
+							cmd);
 					} else {
 						return _Utils_Tuple2(
 							_Utils_update(
@@ -8158,9 +8726,9 @@ var $author$project$Main$update = F2(
 						$elm$core$Dict$get,
 						$author$project$Sparql$toString(tQuery),
 						model.resultHistory));
-				var _v17 = thought;
-				var vars = _v17.a;
-				var table = _v17.b;
+				var _v18 = thought;
+				var vars = _v18.a;
+				var table = _v18.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -10753,28 +11321,6 @@ var $mdgriffith$elm_ui$Internal$Model$staticRoot = function (opts) {
 				_List_Nil);
 	}
 };
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
 var $elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -10842,9 +11388,6 @@ var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $mdgriffith$elm_ui$Internal$Model$renderProps = F3(
 	function (force, _v0, existing) {
 		var key = _v0.a;
@@ -11844,9 +12387,7 @@ var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 	return _VirtualDom_keyedNode(
 		_VirtualDom_noScript(tag));
 };
-var $elm$core$Basics$not = _Basics_not;
 var $elm$html$Html$p = _VirtualDom_node('p');
-var $elm$core$Bitwise$and = _Bitwise_and;
 var $mdgriffith$elm_ui$Internal$Flag$present = F2(
 	function (myFlag, _v0) {
 		var fieldOne = _v0.a;
@@ -12215,7 +12756,6 @@ var $mdgriffith$elm_ui$Internal$Flag$Field = F2(
 	function (a, b) {
 		return {$: 'Field', a: a, b: b};
 	});
-var $elm$core$Bitwise$or = _Bitwise_or;
 var $mdgriffith$elm_ui$Internal$Flag$add = F2(
 	function (myFlag, _v0) {
 		var one = _v0.a;
@@ -13846,367 +14386,6 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $elm_community$graph$Graph$Edge = F3(
-	function (from, to, label) {
-		return {from: from, label: label, to: to};
-	});
-var $elm_community$graph$Graph$Node = F2(
-	function (id, label) {
-		return {id: id, label: label};
-	});
-var $elm_community$graph$Graph$Graph = function (a) {
-	return {$: 'Graph', a: a};
-};
-var $elm_community$graph$Graph$NodeContext = F3(
-	function (node, incoming, outgoing) {
-		return {incoming: incoming, node: node, outgoing: outgoing};
-	});
-var $elm_community$intdict$IntDict$Empty = {$: 'Empty'};
-var $elm_community$intdict$IntDict$empty = $elm_community$intdict$IntDict$Empty;
-var $elm_community$intdict$IntDict$Inner = function (a) {
-	return {$: 'Inner', a: a};
-};
-var $elm_community$intdict$IntDict$size = function (dict) {
-	switch (dict.$) {
-		case 'Empty':
-			return 0;
-		case 'Leaf':
-			return 1;
-		default:
-			var i = dict.a;
-			return i.size;
-	}
-};
-var $elm_community$intdict$IntDict$inner = F3(
-	function (p, l, r) {
-		var _v0 = _Utils_Tuple2(l, r);
-		if (_v0.a.$ === 'Empty') {
-			var _v1 = _v0.a;
-			return r;
-		} else {
-			if (_v0.b.$ === 'Empty') {
-				var _v2 = _v0.b;
-				return l;
-			} else {
-				return $elm_community$intdict$IntDict$Inner(
-					{
-						left: l,
-						prefix: p,
-						right: r,
-						size: $elm_community$intdict$IntDict$size(l) + $elm_community$intdict$IntDict$size(r)
-					});
-			}
-		}
-	});
-var $elm$core$Bitwise$complement = _Bitwise_complement;
-var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var $elm_community$intdict$IntDict$highestBitSet = function (n) {
-	var shiftOr = F2(
-		function (i, shift) {
-			return i | (i >>> shift);
-		});
-	var n1 = A2(shiftOr, n, 1);
-	var n2 = A2(shiftOr, n1, 2);
-	var n3 = A2(shiftOr, n2, 4);
-	var n4 = A2(shiftOr, n3, 8);
-	var n5 = A2(shiftOr, n4, 16);
-	return n5 & (~(n5 >>> 1));
-};
-var $elm_community$intdict$IntDict$signBit = $elm_community$intdict$IntDict$highestBitSet(-1);
-var $elm$core$Bitwise$xor = _Bitwise_xor;
-var $elm_community$intdict$IntDict$isBranchingBitSet = function (p) {
-	return A2(
-		$elm$core$Basics$composeR,
-		$elm$core$Bitwise$xor($elm_community$intdict$IntDict$signBit),
-		A2(
-			$elm$core$Basics$composeR,
-			$elm$core$Bitwise$and(p.branchingBit),
-			$elm$core$Basics$neq(0)));
-};
-var $elm_community$intdict$IntDict$higherBitMask = function (branchingBit) {
-	return branchingBit ^ (~(branchingBit - 1));
-};
-var $elm_community$intdict$IntDict$lcp = F2(
-	function (x, y) {
-		var branchingBit = $elm_community$intdict$IntDict$highestBitSet(x ^ y);
-		var mask = $elm_community$intdict$IntDict$higherBitMask(branchingBit);
-		var prefixBits = x & mask;
-		return {branchingBit: branchingBit, prefixBits: prefixBits};
-	});
-var $elm_community$intdict$IntDict$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
-var $elm_community$intdict$IntDict$leaf = F2(
-	function (k, v) {
-		return $elm_community$intdict$IntDict$Leaf(
-			{key: k, value: v});
-	});
-var $elm_community$intdict$IntDict$prefixMatches = F2(
-	function (p, n) {
-		return _Utils_eq(
-			n & $elm_community$intdict$IntDict$higherBitMask(p.branchingBit),
-			p.prefixBits);
-	});
-var $elm_community$intdict$IntDict$update = F3(
-	function (key, alter, dict) {
-		var join = F2(
-			function (_v2, _v3) {
-				var k1 = _v2.a;
-				var l = _v2.b;
-				var k2 = _v3.a;
-				var r = _v3.b;
-				var prefix = A2($elm_community$intdict$IntDict$lcp, k1, k2);
-				return A2($elm_community$intdict$IntDict$isBranchingBitSet, prefix, k2) ? A3($elm_community$intdict$IntDict$inner, prefix, l, r) : A3($elm_community$intdict$IntDict$inner, prefix, r, l);
-			});
-		var alteredNode = function (mv) {
-			var _v1 = alter(mv);
-			if (_v1.$ === 'Just') {
-				var v = _v1.a;
-				return A2($elm_community$intdict$IntDict$leaf, key, v);
-			} else {
-				return $elm_community$intdict$IntDict$empty;
-			}
-		};
-		switch (dict.$) {
-			case 'Empty':
-				return alteredNode($elm$core$Maybe$Nothing);
-			case 'Leaf':
-				var l = dict.a;
-				return _Utils_eq(l.key, key) ? alteredNode(
-					$elm$core$Maybe$Just(l.value)) : A2(
-					join,
-					_Utils_Tuple2(
-						key,
-						alteredNode($elm$core$Maybe$Nothing)),
-					_Utils_Tuple2(l.key, dict));
-			default:
-				var i = dict.a;
-				return A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key) ? (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key) ? A3(
-					$elm_community$intdict$IntDict$inner,
-					i.prefix,
-					i.left,
-					A3($elm_community$intdict$IntDict$update, key, alter, i.right)) : A3(
-					$elm_community$intdict$IntDict$inner,
-					i.prefix,
-					A3($elm_community$intdict$IntDict$update, key, alter, i.left),
-					i.right)) : A2(
-					join,
-					_Utils_Tuple2(
-						key,
-						alteredNode($elm$core$Maybe$Nothing)),
-					_Utils_Tuple2(i.prefix.prefixBits, dict));
-		}
-	});
-var $elm_community$intdict$IntDict$insert = F3(
-	function (key, value, dict) {
-		return A3(
-			$elm_community$intdict$IntDict$update,
-			key,
-			$elm$core$Basics$always(
-				$elm$core$Maybe$Just(value)),
-			dict);
-	});
-var $elm_community$intdict$IntDict$get = F2(
-	function (key, dict) {
-		get:
-		while (true) {
-			switch (dict.$) {
-				case 'Empty':
-					return $elm$core$Maybe$Nothing;
-				case 'Leaf':
-					var l = dict.a;
-					return _Utils_eq(l.key, key) ? $elm$core$Maybe$Just(l.value) : $elm$core$Maybe$Nothing;
-				default:
-					var i = dict.a;
-					if (!A2($elm_community$intdict$IntDict$prefixMatches, i.prefix, key)) {
-						return $elm$core$Maybe$Nothing;
-					} else {
-						if (A2($elm_community$intdict$IntDict$isBranchingBitSet, i.prefix, key)) {
-							var $temp$key = key,
-								$temp$dict = i.right;
-							key = $temp$key;
-							dict = $temp$dict;
-							continue get;
-						} else {
-							var $temp$key = key,
-								$temp$dict = i.left;
-							key = $temp$key;
-							dict = $temp$dict;
-							continue get;
-						}
-					}
-			}
-		}
-	});
-var $elm_community$intdict$IntDict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm_community$intdict$IntDict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
-	});
-var $elm_community$graph$Graph$fromNodesAndEdges = F2(
-	function (nodes_, edges_) {
-		var nodeRep = A3(
-			$elm$core$List$foldl,
-			function (n) {
-				return A2(
-					$elm_community$intdict$IntDict$insert,
-					n.id,
-					A3($elm_community$graph$Graph$NodeContext, n, $elm_community$intdict$IntDict$empty, $elm_community$intdict$IntDict$empty));
-			},
-			$elm_community$intdict$IntDict$empty,
-			nodes_);
-		var addEdge = F2(
-			function (edge, rep) {
-				var updateOutgoing = function (ctx) {
-					return _Utils_update(
-						ctx,
-						{
-							outgoing: A3($elm_community$intdict$IntDict$insert, edge.to, edge.label, ctx.outgoing)
-						});
-				};
-				var updateIncoming = function (ctx) {
-					return _Utils_update(
-						ctx,
-						{
-							incoming: A3($elm_community$intdict$IntDict$insert, edge.from, edge.label, ctx.incoming)
-						});
-				};
-				return A3(
-					$elm_community$intdict$IntDict$update,
-					edge.to,
-					$elm$core$Maybe$map(updateIncoming),
-					A3(
-						$elm_community$intdict$IntDict$update,
-						edge.from,
-						$elm$core$Maybe$map(updateOutgoing),
-						rep));
-			});
-		var addEdgeIfValid = F2(
-			function (edge, rep) {
-				return (A2($elm_community$intdict$IntDict$member, edge.from, rep) && A2($elm_community$intdict$IntDict$member, edge.to, rep)) ? A2(addEdge, edge, rep) : rep;
-			});
-		return $elm_community$graph$Graph$Graph(
-			A3($elm$core$List$foldl, addEdgeIfValid, nodeRep, edges_));
-	});
-var $elm$core$Tuple$pair = F2(
-	function (a, b) {
-		return _Utils_Tuple2(a, b);
-	});
-var $author$project$RdfDict$rdfNodeToMaybeString = function (node) {
-	switch (node.$) {
-		case 'Uri':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'BlankNode':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'LiteralOnlyValue':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'LiteralValueAndDataType':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'LiteralValueAndLanguageString':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		default:
-			return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm_community$maybe_extra$Maybe$Extra$cons = F2(
-	function (item, list) {
-		if (item.$ === 'Just') {
-			var v = item.a;
-			return A2($elm$core$List$cons, v, list);
-		} else {
-			return list;
-		}
-	});
-var $elm_community$maybe_extra$Maybe$Extra$values = A2($elm$core$List$foldr, $elm_community$maybe_extra$Maybe$Extra$cons, _List_Nil);
-var $author$project$Main$convertRdfDict2CommunityGraph = function (d) {
-	var _v0 = $elm$core$List$unzip(
-		$elm$core$Dict$toList(d));
-	var index = _v0.a;
-	var values = _v0.b;
-	var reverseDict = $elm$core$Dict$fromList(
-		A2(
-			$elm$core$List$map,
-			function (_v4) {
-				var x = _v4.a;
-				var y = _v4.b;
-				return _Utils_Tuple2(y, x);
-			},
-			A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, index)));
-	var edges = $elm$core$List$concat(
-		A2(
-			$elm$core$List$map,
-			function (_v2) {
-				var k = _v2.a;
-				var node = _v2.b;
-				var spo = node.b;
-				var id = A2(
-					$elm$core$Maybe$withDefault,
-					-1,
-					A2($elm$core$Dict$get, k, reverseDict));
-				return $elm$core$List$concat(
-					A2(
-						$elm$core$List$map,
-						function (_v3) {
-							var p = _v3.a;
-							var po = _v3.b;
-							return A2(
-								$elm$core$List$map,
-								function (e) {
-									return A3(
-										$elm_community$graph$Graph$Edge,
-										id,
-										e,
-										A2(
-											$elm$core$Maybe$withDefault,
-											'???',
-											$author$project$RdfDict$rdfNodeToMaybeString(p)));
-								},
-								$elm_community$maybe_extra$Maybe$Extra$values(
-									A2(
-										$elm$core$List$map,
-										function (o) {
-											return A2(
-												$elm$core$Dict$get,
-												A2(
-													$elm$core$Maybe$withDefault,
-													'???',
-													$author$project$RdfDict$rdfNodeToMaybeString(o)),
-												reverseDict);
-										},
-										po)));
-						},
-						spo));
-			},
-			$elm$core$Dict$toList(d)));
-	var nodes = A2(
-		$elm$core$List$map,
-		function (_v1) {
-			var x = _v1.a;
-			var y = _v1.b;
-			return A2($elm_community$graph$Graph$Node, x, y);
-		},
-		A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, values));
-	return A6(
-		$elm$core$Debug$log,
-		'Inside conversion' + $elm$core$String$fromInt(
-			$elm$core$List$length(values)),
-		$elm$core$Debug$log,
-		'Building graph of ' + ($elm$core$String$fromInt(
-			$elm$core$List$length(nodes)) + (':' + $elm$core$String$fromInt(
-			$elm$core$List$length(edges)))),
-		$elm_community$graph$Graph$fromNodesAndEdges,
-		nodes,
-		edges);
-};
 var $author$project$Main$DownloadResultsAsCSV = {$: 'DownloadResultsAsCSV'};
 var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
 var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
@@ -25060,1663 +25239,6 @@ var $author$project$Main$graphToggle = function (selected) {
 			selected: $elm$core$Maybe$Just(selected)
 		});
 };
-var $author$project$GraphDisplay$CustomNode = F2(
-	function (rank, name) {
-		return {name: name, rank: rank};
-	});
-var $gampleman$elm_visualization$Force$Center = F2(
-	function (a, b) {
-		return {$: 'Center', a: a, b: b};
-	});
-var $gampleman$elm_visualization$Force$center = $gampleman$elm_visualization$Force$Center;
-var $gampleman$elm_visualization$Force$isCompleted = function (_v0) {
-	var alpha = _v0.a.alpha;
-	var minAlpha = _v0.a.minAlpha;
-	return _Utils_cmp(alpha, minAlpha) < 1;
-};
-var $gampleman$elm_visualization$Force$State = function (a) {
-	return {$: 'State', a: a};
-};
-var $elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2($elm$core$Dict$map, func, left),
-				A2($elm$core$Dict$map, func, right));
-		}
-	});
-var $gampleman$elm_visualization$Force$nTimes = F3(
-	function (fn, times, input) {
-		nTimes:
-		while (true) {
-			if (times <= 0) {
-				return input;
-			} else {
-				var $temp$fn = fn,
-					$temp$times = times - 1,
-					$temp$input = fn(input);
-				fn = $temp$fn;
-				times = $temp$times;
-				input = $temp$input;
-				continue nTimes;
-			}
-		}
-	});
-var $elm$core$Dict$sizeHelp = F2(
-	function (n, dict) {
-		sizeHelp:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return n;
-			} else {
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$n = A2($elm$core$Dict$sizeHelp, n + 1, right),
-					$temp$dict = left;
-				n = $temp$n;
-				dict = $temp$dict;
-				continue sizeHelp;
-			}
-		}
-	});
-var $elm$core$Dict$size = function (dict) {
-	return A2($elm$core$Dict$sizeHelp, 0, dict);
-};
-var $elm$core$Basics$sqrt = _Basics_sqrt;
-var $ianmackenzie$elm_geometry$BoundingBox2d$maxX = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.maxX;
-};
-var $ianmackenzie$elm_geometry$BoundingBox2d$maxY = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.maxY;
-};
-var $ianmackenzie$elm_geometry$BoundingBox2d$minX = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.minX;
-};
-var $ianmackenzie$elm_geometry$BoundingBox2d$minY = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.minY;
-};
-var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
-	return {$: 'Quantity', a: a};
-};
-var $ianmackenzie$elm_units$Quantity$minus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x - y);
-	});
-var $ianmackenzie$elm_geometry$BoundingBox2d$dimensions = function (boundingBox) {
-	return _Utils_Tuple2(
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox2d$minX(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox2d$maxX(boundingBox)),
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox2d$minY(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox2d$maxY(boundingBox)));
-};
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
-var $ianmackenzie$elm_geometry$Point2d$distanceFrom = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		var deltaY = p2.y - p1.y;
-		var deltaX = p2.x - p1.x;
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(deltaX),
-			$elm$core$Basics$abs(deltaY));
-		if (!largestComponent) {
-			return $ianmackenzie$elm_units$Quantity$zero;
-		} else {
-			var scaledY = deltaY / largestComponent;
-			var scaledX = deltaX / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-			return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
-		}
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Vector2d = function (a) {
-	return {$: 'Vector2d', a: a};
-};
-var $ianmackenzie$elm_geometry$Vector2d$from = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
-			{x: p2.x - p1.x, y: p2.y - p1.y});
-	});
-var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
-	var numPixels = _v0.a;
-	return numPixels;
-};
-var $ianmackenzie$elm_units_prefixed$Units$Pixels$inPixels = $ianmackenzie$elm_units$Pixels$inPixels;
-var $elm$core$Basics$isNaN = _Basics_isNaN;
-var $ianmackenzie$elm_geometry$Vector2d$length = function (_v0) {
-	var v = _v0.a;
-	var largestComponent = A2(
-		$elm$core$Basics$max,
-		$elm$core$Basics$abs(v.x),
-		$elm$core$Basics$abs(v.y));
-	if (!largestComponent) {
-		return $ianmackenzie$elm_units$Quantity$zero;
-	} else {
-		var scaledY = v.y / largestComponent;
-		var scaledX = v.x / largestComponent;
-		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-		return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
-	}
-};
-var $ianmackenzie$elm_geometry$Vector2d$plus = F2(
-	function (_v0, _v1) {
-		var v2 = _v0.a;
-		var v1 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
-			{x: v1.x + v2.x, y: v1.y + v2.y});
-	});
-var $ianmackenzie$elm_units$Quantity$ratio = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return x / y;
-	});
-var $ianmackenzie$elm_units_prefixed$Units$Quantity$ratio = $ianmackenzie$elm_units$Quantity$ratio;
-var $ianmackenzie$elm_geometry$Vector2d$scaleBy = F2(
-	function (k, _v0) {
-		var v = _v0.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
-			{x: k * v.x, y: k * v.y});
-	});
-var $ianmackenzie$elm_geometry$Vector2d$sumHelp = F3(
-	function (sumX, sumY, vectors) {
-		sumHelp:
-		while (true) {
-			if (vectors.b) {
-				var x = vectors.a.a.x;
-				var y = vectors.a.a.y;
-				var rest = vectors.b;
-				var $temp$sumX = sumX + x,
-					$temp$sumY = sumY + y,
-					$temp$vectors = rest;
-				sumX = $temp$sumX;
-				sumY = $temp$sumY;
-				vectors = $temp$vectors;
-				continue sumHelp;
-			} else {
-				return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
-					{x: sumX, y: sumY});
-			}
-		}
-	});
-var $ianmackenzie$elm_geometry$Vector2d$sum = function (vectors) {
-	return A3($ianmackenzie$elm_geometry$Vector2d$sumHelp, 0, 0, vectors);
-};
-var $ianmackenzie$elm_geometry$Vector2d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
-	{x: 0, y: 0});
-var $gampleman$elm_visualization$Force$ManyBody$applyForce = F4(
-	function (alpha, theta, qtree, vertex) {
-		var isFarAway = function (treePart) {
-			var distance = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, vertex.position, treePart.aggregate.position);
-			var _v2 = $ianmackenzie$elm_geometry$BoundingBox2d$dimensions(treePart.boundingBox);
-			var width = _v2.a;
-			return _Utils_cmp(
-				A2($ianmackenzie$elm_units_prefixed$Units$Quantity$ratio, width, distance),
-				theta) < 0;
-		};
-		var calculateVelocity = F2(
-			function (target, source) {
-				var delta = A2($ianmackenzie$elm_geometry$Vector2d$from, target.position, source.position);
-				var len = $ianmackenzie$elm_units_prefixed$Units$Pixels$inPixels(
-					$ianmackenzie$elm_geometry$Vector2d$length(delta));
-				var weight = (source.strength * alpha) / A2($elm$core$Basics$pow, len, 2);
-				return $elm$core$Basics$isNaN(weight) ? $ianmackenzie$elm_geometry$Vector2d$zero : A2($ianmackenzie$elm_geometry$Vector2d$scaleBy, weight, delta);
-			});
-		var useAggregate = function (treePart) {
-			return A2(calculateVelocity, vertex, treePart.aggregate);
-		};
-		switch (qtree.$) {
-			case 'Empty':
-				return $ianmackenzie$elm_geometry$Vector2d$zero;
-			case 'Leaf':
-				var leaf = qtree.a;
-				if (isFarAway(leaf)) {
-					return useAggregate(leaf);
-				} else {
-					var applyForceFromPoint = F2(
-						function (point, accum) {
-							return _Utils_eq(point.key, vertex.key) ? accum : A2(
-								$ianmackenzie$elm_geometry$Vector2d$plus,
-								A2(calculateVelocity, vertex, point),
-								accum);
-						});
-					var _v1 = leaf.children;
-					var first = _v1.a;
-					var rest = _v1.b;
-					return A3(
-						$elm$core$List$foldl,
-						applyForceFromPoint,
-						$ianmackenzie$elm_geometry$Vector2d$zero,
-						A2($elm$core$List$cons, first, rest));
-				}
-			default:
-				var node = qtree.a;
-				if (isFarAway(node)) {
-					return useAggregate(node);
-				} else {
-					var helper = function (tree) {
-						return A4($gampleman$elm_visualization$Force$ManyBody$applyForce, alpha, theta, tree, vertex);
-					};
-					return $ianmackenzie$elm_geometry$Vector2d$sum(
-						_List_fromArray(
-							[
-								helper(node.nw),
-								helper(node.ne),
-								helper(node.se),
-								helper(node.sw)
-							]));
-				}
-		}
-	});
-var $ianmackenzie$elm_geometry$Point2d$coordinates = function (_v0) {
-	var p = _v0.a;
-	return _Utils_Tuple2(
-		$ianmackenzie$elm_units$Quantity$Quantity(p.x),
-		$ianmackenzie$elm_units$Quantity$Quantity(p.y));
-};
-var $ianmackenzie$elm_units$Quantity$divideBy = F2(
-	function (divisor, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
-	});
-var $ianmackenzie$elm_units_prefixed$Units$Quantity$divideBy = $ianmackenzie$elm_units$Quantity$divideBy;
-var $ianmackenzie$elm_units$Quantity$plus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
-	});
-var $ianmackenzie$elm_units_prefixed$Units$Quantity$plus = $ianmackenzie$elm_units$Quantity$plus;
-var $ianmackenzie$elm_geometry$Geometry$Types$Point2d = function (a) {
-	return {$: 'Point2d', a: a};
-};
-var $ianmackenzie$elm_geometry$Point2d$xy = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: x, y: y});
-	});
-var $gampleman$elm_visualization$Force$ManyBody$constructSuperPoint = F2(
-	function (first, rest) {
-		var initialStrength = first.strength;
-		var initialPoint = $ianmackenzie$elm_geometry$Point2d$coordinates(first.position);
-		var folder = F2(
-			function (point, _v3) {
-				var _v4 = _v3.a;
-				var accumX = _v4.a;
-				var accumY = _v4.b;
-				var strength = _v3.b;
-				var size = _v3.c;
-				var _v2 = $ianmackenzie$elm_geometry$Point2d$coordinates(point.position);
-				var x = _v2.a;
-				var y = _v2.b;
-				return _Utils_Tuple3(
-					_Utils_Tuple2(
-						A2($ianmackenzie$elm_units_prefixed$Units$Quantity$plus, x, accumX),
-						A2($ianmackenzie$elm_units_prefixed$Units$Quantity$plus, y, accumY)),
-					strength + point.strength,
-					size + 1);
-			});
-		var _v0 = A3(
-			$elm$core$List$foldl,
-			folder,
-			_Utils_Tuple3(initialPoint, initialStrength, 1),
-			rest);
-		var _v1 = _v0.a;
-		var totalX = _v1.a;
-		var totalY = _v1.b;
-		var totalStrength = _v0.b;
-		var totalSize = _v0.c;
-		return {
-			position: A2(
-				$ianmackenzie$elm_geometry$Point2d$xy,
-				A2($ianmackenzie$elm_units_prefixed$Units$Quantity$divideBy, totalSize, totalX),
-				A2($ianmackenzie$elm_units_prefixed$Units$Quantity$divideBy, totalSize, totalY)),
-			strength: totalStrength
-		};
-	});
-var $gampleman$elm_visualization$Force$ManyBody$config = {
-	combineAggregates: $gampleman$elm_visualization$Force$ManyBody$constructSuperPoint,
-	combineVertices: $gampleman$elm_visualization$Force$ManyBody$constructSuperPoint,
-	toPoint: function ($) {
-		return $.position;
-	}
-};
-var $gampleman$elm_visualization$Force$QuadTree$Empty = {$: 'Empty'};
-var $gampleman$elm_visualization$Force$QuadTree$empty = $gampleman$elm_visualization$Force$QuadTree$Empty;
-var $gampleman$elm_visualization$Force$QuadTree$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
-var $gampleman$elm_visualization$Force$QuadTree$Node = function (a) {
-	return {$: 'Node', a: a};
-};
-var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return _Utils_cmp(x, y) > -1;
-	});
-var $ianmackenzie$elm_units$Quantity$lessThanOrEqualTo = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return _Utils_cmp(x, y) < 1;
-	});
-var $ianmackenzie$elm_geometry$Point2d$xCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
-};
-var $ianmackenzie$elm_geometry$Point2d$yCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
-};
-var $ianmackenzie$elm_geometry$BoundingBox2d$contains = F2(
-	function (point, boundingBox) {
-		return A2(
-			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-			$ianmackenzie$elm_geometry$BoundingBox2d$minX(boundingBox),
-			$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)) && (A2(
-			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-			$ianmackenzie$elm_geometry$BoundingBox2d$maxX(boundingBox),
-			$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)) && (A2(
-			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-			$ianmackenzie$elm_geometry$BoundingBox2d$minY(boundingBox),
-			$ianmackenzie$elm_geometry$Point2d$yCoordinate(point)) && A2(
-			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-			$ianmackenzie$elm_geometry$BoundingBox2d$maxY(boundingBox),
-			$ianmackenzie$elm_geometry$Point2d$yCoordinate(point))));
-	});
-var $ianmackenzie$elm_geometry$BoundingBox2d$extrema = function (_v0) {
-	var boundingBoxExtrema = _v0.a;
-	return boundingBoxExtrema;
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox2d = function (a) {
-	return {$: 'BoundingBox2d', a: a};
-};
-var $ianmackenzie$elm_units$Quantity$max = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$max, x, y));
-	});
-var $ianmackenzie$elm_units$Quantity$min = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$min, x, y));
-	});
-var $ianmackenzie$elm_geometry$BoundingBox2d$fromExtrema = function (given) {
-	return (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, given.maxX, given.minX) && A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, given.maxY, given.minY)) ? $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox2d(given) : $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox2d(
-		{
-			maxX: A2($ianmackenzie$elm_units$Quantity$max, given.minX, given.maxX),
-			maxY: A2($ianmackenzie$elm_units$Quantity$max, given.minY, given.maxY),
-			minX: A2($ianmackenzie$elm_units$Quantity$min, given.minX, given.maxX),
-			minY: A2($ianmackenzie$elm_units$Quantity$min, given.minY, given.maxY)
-		});
-};
-var $ianmackenzie$elm_units_prefixed$Units$Quantity$minus = $ianmackenzie$elm_units$Quantity$minus;
-var $gampleman$elm_visualization$Force$QuadTree$NE = {$: 'NE'};
-var $gampleman$elm_visualization$Force$QuadTree$NW = {$: 'NW'};
-var $gampleman$elm_visualization$Force$QuadTree$SE = {$: 'SE'};
-var $gampleman$elm_visualization$Force$QuadTree$SW = {$: 'SW'};
-var $ianmackenzie$elm_units$Quantity$interpolateFrom = F3(
-	function (_v0, _v1, parameter) {
-		var start = _v0.a;
-		var end = _v1.a;
-		return (parameter <= 0.5) ? $ianmackenzie$elm_units$Quantity$Quantity(start + (parameter * (end - start))) : $ianmackenzie$elm_units$Quantity$Quantity(end + ((1 - parameter) * (start - end)));
-	});
-var $ianmackenzie$elm_geometry$BoundingBox2d$midX = function (_v0) {
-	var boundingBox = _v0.a;
-	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minX, boundingBox.maxX, 0.5);
-};
-var $ianmackenzie$elm_geometry$BoundingBox2d$midY = function (_v0) {
-	var boundingBox = _v0.a;
-	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minY, boundingBox.maxY, 0.5);
-};
-var $ianmackenzie$elm_geometry$BoundingBox2d$centerPoint = function (boundingBox) {
-	return A2(
-		$ianmackenzie$elm_geometry$Point2d$xy,
-		$ianmackenzie$elm_geometry$BoundingBox2d$midX(boundingBox),
-		$ianmackenzie$elm_geometry$BoundingBox2d$midY(boundingBox));
-};
-var $ianmackenzie$elm_units_prefixed$Units$Quantity$greaterThanOrEqualTo = $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo;
-var $gampleman$elm_visualization$Force$QuadTree$quadrant = F2(
-	function (boundingBox, point) {
-		var _v0 = $ianmackenzie$elm_geometry$Point2d$coordinates(point);
-		var x = _v0.a;
-		var y = _v0.b;
-		var _v1 = $ianmackenzie$elm_geometry$Point2d$coordinates(
-			$ianmackenzie$elm_geometry$BoundingBox2d$centerPoint(boundingBox));
-		var midX = _v1.a;
-		var midY = _v1.b;
-		var _v2 = $ianmackenzie$elm_geometry$BoundingBox2d$extrema(boundingBox);
-		var minX = _v2.minX;
-		var minY = _v2.minY;
-		var maxX = _v2.maxX;
-		var maxY = _v2.maxY;
-		return A2($ianmackenzie$elm_units_prefixed$Units$Quantity$greaterThanOrEqualTo, midY, y) ? (A2($ianmackenzie$elm_units_prefixed$Units$Quantity$greaterThanOrEqualTo, midX, x) ? $gampleman$elm_visualization$Force$QuadTree$NE : $gampleman$elm_visualization$Force$QuadTree$NW) : (A2($ianmackenzie$elm_units_prefixed$Units$Quantity$greaterThanOrEqualTo, midX, x) ? $gampleman$elm_visualization$Force$QuadTree$SE : $gampleman$elm_visualization$Force$QuadTree$SW);
-	});
-var $ianmackenzie$elm_geometry$BoundingBox2d$singleton = function (point) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox2d(
-		{
-			maxX: $ianmackenzie$elm_geometry$Point2d$xCoordinate(point),
-			maxY: $ianmackenzie$elm_geometry$Point2d$yCoordinate(point),
-			minX: $ianmackenzie$elm_geometry$Point2d$xCoordinate(point),
-			minY: $ianmackenzie$elm_geometry$Point2d$yCoordinate(point)
-		});
-};
-var $gampleman$elm_visualization$Force$QuadTree$singleton = F2(
-	function (toPoint, vertex) {
-		return $gampleman$elm_visualization$Force$QuadTree$Leaf(
-			{
-				aggregate: _Utils_Tuple0,
-				boundingBox: $ianmackenzie$elm_geometry$BoundingBox2d$singleton(
-					toPoint(vertex)),
-				children: _Utils_Tuple2(vertex, _List_Nil)
-			});
-	});
-var $ianmackenzie$elm_geometry$BoundingBox2d$union = F2(
-	function (firstBox, secondBox) {
-		var b2 = $ianmackenzie$elm_geometry$BoundingBox2d$extrema(secondBox);
-		var b1 = $ianmackenzie$elm_geometry$BoundingBox2d$extrema(firstBox);
-		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox2d(
-			{
-				maxX: A2($ianmackenzie$elm_units$Quantity$max, b1.maxX, b2.maxX),
-				maxY: A2($ianmackenzie$elm_units$Quantity$max, b1.maxY, b2.maxY),
-				minX: A2($ianmackenzie$elm_units$Quantity$min, b1.minX, b2.minX),
-				minY: A2($ianmackenzie$elm_units$Quantity$min, b1.minY, b2.minY)
-			});
-	});
-var $gampleman$elm_visualization$Force$QuadTree$insertBy = F3(
-	function (toPoint, vertex, qtree) {
-		switch (qtree.$) {
-			case 'Empty':
-				return $gampleman$elm_visualization$Force$QuadTree$Leaf(
-					{
-						aggregate: _Utils_Tuple0,
-						boundingBox: $ianmackenzie$elm_geometry$BoundingBox2d$singleton(
-							toPoint(vertex)),
-						children: _Utils_Tuple2(vertex, _List_Nil)
-					});
-			case 'Leaf':
-				var leaf = qtree.a;
-				var maxSize = 32;
-				var _v1 = leaf.children;
-				var first = _v1.a;
-				var rest = _v1.b;
-				var newSize = 2 + $elm$core$List$length(rest);
-				if (_Utils_cmp(newSize, maxSize) > -1) {
-					var initial = $gampleman$elm_visualization$Force$QuadTree$Node(
-						{
-							aggregate: _Utils_Tuple0,
-							boundingBox: A2(
-								$ianmackenzie$elm_geometry$BoundingBox2d$union,
-								leaf.boundingBox,
-								$ianmackenzie$elm_geometry$BoundingBox2d$singleton(
-									toPoint(vertex))),
-							ne: $gampleman$elm_visualization$Force$QuadTree$Empty,
-							nw: $gampleman$elm_visualization$Force$QuadTree$Empty,
-							se: $gampleman$elm_visualization$Force$QuadTree$Empty,
-							sw: $gampleman$elm_visualization$Force$QuadTree$Empty
-						});
-					return A3(
-						$elm$core$List$foldl,
-						$gampleman$elm_visualization$Force$QuadTree$insertBy(toPoint),
-						initial,
-						A2($elm$core$List$cons, first, rest));
-				} else {
-					return $gampleman$elm_visualization$Force$QuadTree$Leaf(
-						{
-							aggregate: _Utils_Tuple0,
-							boundingBox: A2(
-								$ianmackenzie$elm_geometry$BoundingBox2d$union,
-								leaf.boundingBox,
-								$ianmackenzie$elm_geometry$BoundingBox2d$singleton(
-									toPoint(vertex))),
-							children: _Utils_Tuple2(
-								vertex,
-								A2($elm$core$List$cons, first, rest))
-						});
-				}
-			default:
-				var node = qtree.a;
-				var point = toPoint(vertex);
-				if (A2($ianmackenzie$elm_geometry$BoundingBox2d$contains, point, node.boundingBox)) {
-					var _v2 = A2($gampleman$elm_visualization$Force$QuadTree$quadrant, node.boundingBox, point);
-					switch (_v2.$) {
-						case 'NE':
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: node.aggregate,
-									boundingBox: node.boundingBox,
-									ne: A3($gampleman$elm_visualization$Force$QuadTree$insertBy, toPoint, vertex, node.ne),
-									nw: node.nw,
-									se: node.se,
-									sw: node.sw
-								});
-						case 'SE':
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: node.aggregate,
-									boundingBox: node.boundingBox,
-									ne: node.ne,
-									nw: node.nw,
-									se: A3($gampleman$elm_visualization$Force$QuadTree$insertBy, toPoint, vertex, node.se),
-									sw: node.sw
-								});
-						case 'NW':
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: node.aggregate,
-									boundingBox: node.boundingBox,
-									ne: node.ne,
-									nw: A3($gampleman$elm_visualization$Force$QuadTree$insertBy, toPoint, vertex, node.nw),
-									se: node.se,
-									sw: node.sw
-								});
-						default:
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: node.aggregate,
-									boundingBox: node.boundingBox,
-									ne: node.ne,
-									nw: node.nw,
-									se: node.se,
-									sw: A3($gampleman$elm_visualization$Force$QuadTree$insertBy, toPoint, vertex, node.sw)
-								});
-					}
-				} else {
-					var _v3 = $ianmackenzie$elm_geometry$BoundingBox2d$extrema(node.boundingBox);
-					var minX = _v3.minX;
-					var minY = _v3.minY;
-					var maxX = _v3.maxX;
-					var maxY = _v3.maxY;
-					var _v4 = $ianmackenzie$elm_geometry$BoundingBox2d$dimensions(node.boundingBox);
-					var width = _v4.a;
-					var height = _v4.b;
-					var _v5 = A2($gampleman$elm_visualization$Force$QuadTree$quadrant, node.boundingBox, point);
-					switch (_v5.$) {
-						case 'NE':
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: _Utils_Tuple0,
-									boundingBox: $ianmackenzie$elm_geometry$BoundingBox2d$fromExtrema(
-										{
-											maxX: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$plus, width, maxX),
-											maxY: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$plus, height, maxY),
-											minX: minX,
-											minY: minY
-										}),
-									ne: A2($gampleman$elm_visualization$Force$QuadTree$singleton, toPoint, vertex),
-									nw: $gampleman$elm_visualization$Force$QuadTree$Empty,
-									se: $gampleman$elm_visualization$Force$QuadTree$Empty,
-									sw: qtree
-								});
-						case 'SE':
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: _Utils_Tuple0,
-									boundingBox: $ianmackenzie$elm_geometry$BoundingBox2d$fromExtrema(
-										{
-											maxX: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$plus, width, maxX),
-											maxY: maxY,
-											minX: minX,
-											minY: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$minus, height, minY)
-										}),
-									ne: $gampleman$elm_visualization$Force$QuadTree$Empty,
-									nw: qtree,
-									se: A2($gampleman$elm_visualization$Force$QuadTree$singleton, toPoint, vertex),
-									sw: $gampleman$elm_visualization$Force$QuadTree$Empty
-								});
-						case 'NW':
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: _Utils_Tuple0,
-									boundingBox: $ianmackenzie$elm_geometry$BoundingBox2d$fromExtrema(
-										{
-											maxX: maxX,
-											maxY: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$plus, height, maxY),
-											minX: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$minus, width, minX),
-											minY: minY
-										}),
-									ne: $gampleman$elm_visualization$Force$QuadTree$Empty,
-									nw: A2($gampleman$elm_visualization$Force$QuadTree$singleton, toPoint, vertex),
-									se: qtree,
-									sw: $gampleman$elm_visualization$Force$QuadTree$Empty
-								});
-						default:
-							return $gampleman$elm_visualization$Force$QuadTree$Node(
-								{
-									aggregate: _Utils_Tuple0,
-									boundingBox: $ianmackenzie$elm_geometry$BoundingBox2d$fromExtrema(
-										{
-											maxX: maxX,
-											maxY: maxY,
-											minX: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$minus, width, minX),
-											minY: A2($ianmackenzie$elm_units_prefixed$Units$Quantity$minus, height, minY)
-										}),
-									ne: qtree,
-									nw: $gampleman$elm_visualization$Force$QuadTree$Empty,
-									se: $gampleman$elm_visualization$Force$QuadTree$Empty,
-									sw: A2($gampleman$elm_visualization$Force$QuadTree$singleton, toPoint, vertex)
-								});
-					}
-				}
-		}
-	});
-var $gampleman$elm_visualization$Force$QuadTree$fromList = function (toPoint) {
-	return A2(
-		$elm$core$List$foldl,
-		$gampleman$elm_visualization$Force$QuadTree$insertBy(toPoint),
-		$gampleman$elm_visualization$Force$QuadTree$empty);
-};
-var $gampleman$elm_visualization$Force$QuadTree$getAggregate = function (qtree) {
-	switch (qtree.$) {
-		case 'Empty':
-			return $elm$core$Maybe$Nothing;
-		case 'Leaf':
-			var aggregate = qtree.a.aggregate;
-			return $elm$core$Maybe$Just(aggregate);
-		default:
-			var aggregate = qtree.a.aggregate;
-			return $elm$core$Maybe$Just(aggregate);
-	}
-};
-var $gampleman$elm_visualization$Force$QuadTree$performAggregate = F2(
-	function (config, vanillaQuadTree) {
-		var combineAggregates = config.combineAggregates;
-		var combineVertices = config.combineVertices;
-		switch (vanillaQuadTree.$) {
-			case 'Empty':
-				return $gampleman$elm_visualization$Force$QuadTree$Empty;
-			case 'Leaf':
-				var leaf = vanillaQuadTree.a;
-				var _v1 = leaf.children;
-				var first = _v1.a;
-				var rest = _v1.b;
-				return $gampleman$elm_visualization$Force$QuadTree$Leaf(
-					{
-						aggregate: A2(combineVertices, first, rest),
-						boundingBox: leaf.boundingBox,
-						children: _Utils_Tuple2(first, rest)
-					});
-			default:
-				var node = vanillaQuadTree.a;
-				var newSw = A2($gampleman$elm_visualization$Force$QuadTree$performAggregate, config, node.sw);
-				var newSe = A2($gampleman$elm_visualization$Force$QuadTree$performAggregate, config, node.se);
-				var newNw = A2($gampleman$elm_visualization$Force$QuadTree$performAggregate, config, node.nw);
-				var newNe = A2($gampleman$elm_visualization$Force$QuadTree$performAggregate, config, node.ne);
-				var subresults = A2(
-					$elm$core$List$filterMap,
-					$gampleman$elm_visualization$Force$QuadTree$getAggregate,
-					_List_fromArray(
-						[newNw, newSw, newNe, newSe]));
-				if (!subresults.b) {
-					return $gampleman$elm_visualization$Force$QuadTree$Empty;
-				} else {
-					var x = subresults.a;
-					var xs = subresults.b;
-					return $gampleman$elm_visualization$Force$QuadTree$Node(
-						{
-							aggregate: A2(combineAggregates, x, xs),
-							boundingBox: node.boundingBox,
-							ne: newNe,
-							nw: newNw,
-							se: newSe,
-							sw: newSw
-						});
-				}
-		}
-	});
-var $gampleman$elm_visualization$Force$ManyBody$manyBody = F3(
-	function (alpha, theta, vertices) {
-		var withAggregates = A2(
-			$gampleman$elm_visualization$Force$QuadTree$performAggregate,
-			$gampleman$elm_visualization$Force$ManyBody$config,
-			A2(
-				$gampleman$elm_visualization$Force$QuadTree$fromList,
-				function ($) {
-					return $.position;
-				},
-				vertices));
-		var updateVertex = function (vertex) {
-			return _Utils_update(
-				vertex,
-				{
-					velocity: A2(
-						$ianmackenzie$elm_geometry$Vector2d$plus,
-						vertex.velocity,
-						A4($gampleman$elm_visualization$Force$ManyBody$applyForce, alpha, theta, withAggregates, vertex))
-				});
-		};
-		return A2($elm$core$List$map, updateVertex, vertices);
-	});
-var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
-	function (x, y) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: x, y: y});
-	});
-var $ianmackenzie$elm_geometry$Vector2d$toPixels = function (_v0) {
-	var vectorComponents = _v0.a;
-	return vectorComponents;
-};
-var $gampleman$elm_visualization$Force$ManyBody$wrapper = F4(
-	function (alpha, theta, strengths, points) {
-		var vertices = A2(
-			$elm$core$List$map,
-			function (_v1) {
-				var key = _v1.a;
-				var point = _v1.b;
-				var x = point.x;
-				var y = point.y;
-				var strength = A2(
-					$elm$core$Maybe$withDefault,
-					0,
-					A2($elm$core$Dict$get, key, strengths));
-				return {
-					key: key,
-					position: A2($ianmackenzie$elm_geometry$Point2d$pixels, x, y),
-					strength: strength,
-					velocity: $ianmackenzie$elm_geometry$Vector2d$zero
-				};
-			},
-			$elm$core$Dict$toList(points));
-		var updater = F2(
-			function (newVertex, maybePoint) {
-				if (maybePoint.$ === 'Nothing') {
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var point = maybePoint.a;
-					var dv = $ianmackenzie$elm_geometry$Vector2d$toPixels(newVertex.velocity);
-					return $elm$core$Maybe$Just(
-						_Utils_update(
-							point,
-							{vx: point.vx + dv.x, vy: point.vy + dv.y}));
-				}
-			});
-		var newVertices = A3($gampleman$elm_visualization$Force$ManyBody$manyBody, alpha, theta, vertices);
-		var folder = F2(
-			function (newVertex, pointsDict) {
-				return A3(
-					$elm$core$Dict$update,
-					newVertex.key,
-					updater(newVertex),
-					pointsDict);
-			});
-		return A3($elm$core$List$foldl, folder, points, newVertices);
-	});
-var $gampleman$elm_visualization$Force$applyForce = F3(
-	function (alpha, force, entities) {
-		switch (force.$) {
-			case 'Center':
-				var x = force.a;
-				var y = force.b;
-				var n = $elm$core$Dict$size(entities);
-				var _v1 = A3(
-					$elm$core$Dict$foldr,
-					F3(
-						function (_v2, ent, _v3) {
-							var sx0 = _v3.a;
-							var sy0 = _v3.b;
-							return _Utils_Tuple2(sx0 + ent.x, sy0 + ent.y);
-						}),
-					_Utils_Tuple2(0, 0),
-					entities);
-				var sumx = _v1.a;
-				var sumy = _v1.b;
-				var sx = (sumx / n) - x;
-				var sy = (sumy / n) - y;
-				return A2(
-					$elm$core$Dict$map,
-					F2(
-						function (_v4, ent) {
-							return _Utils_update(
-								ent,
-								{x: ent.x - sx, y: ent.y - sy});
-						}),
-					entities);
-			case 'Collision':
-				var _float = force.a;
-				var collisionParamidDict = force.b;
-				return entities;
-			case 'Links':
-				var iters = force.a;
-				var lnks = force.b;
-				return A3(
-					$gampleman$elm_visualization$Force$nTimes,
-					function (entitiesList) {
-						return A3(
-							$elm$core$List$foldl,
-							F2(
-								function (_v5, ents) {
-									var source = _v5.source;
-									var target = _v5.target;
-									var distance = _v5.distance;
-									var strength = _v5.strength;
-									var bias = _v5.bias;
-									var _v6 = _Utils_Tuple2(
-										A2($elm$core$Dict$get, source, ents),
-										A2($elm$core$Dict$get, target, ents));
-									if ((_v6.a.$ === 'Just') && (_v6.b.$ === 'Just')) {
-										var sourceNode = _v6.a.a;
-										var targetNode = _v6.b.a;
-										var y = ((targetNode.y + targetNode.vy) - sourceNode.y) - sourceNode.vy;
-										var x = ((targetNode.x + targetNode.vx) - sourceNode.x) - sourceNode.vx;
-										var d = $elm$core$Basics$sqrt(
-											A2($elm$core$Basics$pow, x, 2) + A2($elm$core$Basics$pow, y, 2));
-										var l = (((d - distance) / d) * alpha) * strength;
-										return A3(
-											$elm$core$Dict$update,
-											source,
-											$elm$core$Maybe$map(
-												function (tn) {
-													return _Utils_update(
-														tn,
-														{vx: tn.vx + ((x * l) * (1 - bias)), vy: tn.vy + ((y * l) * (1 - bias))});
-												}),
-											A3(
-												$elm$core$Dict$update,
-												target,
-												$elm$core$Maybe$map(
-													function (sn) {
-														return _Utils_update(
-															sn,
-															{vx: sn.vx - ((x * l) * bias), vy: sn.vy - ((y * l) * bias)});
-													}),
-												ents));
-									} else {
-										var otherwise = _v6;
-										return ents;
-									}
-								}),
-							entitiesList,
-							lnks);
-					},
-					iters,
-					entities);
-			case 'ManyBody':
-				var theta = force.a;
-				var entityStrengths = force.b;
-				return A4($gampleman$elm_visualization$Force$ManyBody$wrapper, alpha, theta, entityStrengths, entities);
-			case 'X':
-				var directionalParamidDict = force.a;
-				return entities;
-			default:
-				var directionalParamidDict = force.a;
-				return entities;
-		}
-	});
-var $gampleman$elm_visualization$Force$tick = F2(
-	function (_v0, nodes) {
-		var state = _v0.a;
-		var updateEntity = function (ent) {
-			return _Utils_update(
-				ent,
-				{vx: ent.vx * state.velocityDecay, vy: ent.vy * state.velocityDecay, x: ent.x + (ent.vx * state.velocityDecay), y: ent.y + (ent.vy * state.velocityDecay)});
-		};
-		var dictNodes = A3(
-			$elm$core$List$foldl,
-			function (node) {
-				return A2($elm$core$Dict$insert, node.id, node);
-			},
-			$elm$core$Dict$empty,
-			nodes);
-		var alpha = state.alpha + ((state.alphaTarget - state.alpha) * state.alphaDecay);
-		var newNodes = A3(
-			$elm$core$List$foldl,
-			$gampleman$elm_visualization$Force$applyForce(alpha),
-			dictNodes,
-			state.forces);
-		return _Utils_Tuple2(
-			$gampleman$elm_visualization$Force$State(
-				_Utils_update(
-					state,
-					{alpha: alpha})),
-			A2(
-				$elm$core$List$map,
-				updateEntity,
-				$elm$core$Dict$values(newNodes)));
-	});
-var $gampleman$elm_visualization$Force$computeSimulation = F2(
-	function (state, entities) {
-		computeSimulation:
-		while (true) {
-			if ($gampleman$elm_visualization$Force$isCompleted(state)) {
-				return entities;
-			} else {
-				var _v0 = A2($gampleman$elm_visualization$Force$tick, state, entities);
-				var newState = _v0.a;
-				var newEntities = _v0.b;
-				var $temp$state = newState,
-					$temp$entities = newEntities;
-				state = $temp$state;
-				entities = $temp$entities;
-				continue computeSimulation;
-			}
-		}
-	});
-var $elm_community$graph$Graph$empty = $elm_community$graph$Graph$Graph($elm_community$intdict$IntDict$empty);
-var $elm_community$graph$Graph$unGraph = function (graph) {
-	var rep = graph.a;
-	return rep;
-};
-var $elm_community$graph$Graph$get = function (nodeId) {
-	return A2(
-		$elm$core$Basics$composeR,
-		$elm_community$graph$Graph$unGraph,
-		$elm_community$intdict$IntDict$get(nodeId));
-};
-var $elm_community$intdict$IntDict$findMax = function (dict) {
-	findMax:
-	while (true) {
-		switch (dict.$) {
-			case 'Empty':
-				return $elm$core$Maybe$Nothing;
-			case 'Leaf':
-				var l = dict.a;
-				return $elm$core$Maybe$Just(
-					_Utils_Tuple2(l.key, l.value));
-			default:
-				var i = dict.a;
-				var $temp$dict = i.right;
-				dict = $temp$dict;
-				continue findMax;
-		}
-	}
-};
-var $elm_community$intdict$IntDict$findMin = function (dict) {
-	findMin:
-	while (true) {
-		switch (dict.$) {
-			case 'Empty':
-				return $elm$core$Maybe$Nothing;
-			case 'Leaf':
-				var l = dict.a;
-				return $elm$core$Maybe$Just(
-					_Utils_Tuple2(l.key, l.value));
-			default:
-				var i = dict.a;
-				var $temp$dict = i.left;
-				dict = $temp$dict;
-				continue findMin;
-		}
-	}
-};
-var $elm_community$graph$Graph$nodeIdRange = function (graph) {
-	return A2(
-		$elm$core$Maybe$andThen,
-		function (_v0) {
-			var min = _v0.a;
-			return A2(
-				$elm$core$Maybe$andThen,
-				function (_v1) {
-					var max = _v1.a;
-					return $elm$core$Maybe$Just(
-						_Utils_Tuple2(min, max));
-				},
-				$elm_community$intdict$IntDict$findMax(
-					$elm_community$graph$Graph$unGraph(graph)));
-		},
-		$elm_community$intdict$IntDict$findMin(
-			$elm_community$graph$Graph$unGraph(graph)));
-};
-var $elm_community$intdict$IntDict$foldl = F3(
-	function (f, acc, dict) {
-		foldl:
-		while (true) {
-			switch (dict.$) {
-				case 'Empty':
-					return acc;
-				case 'Leaf':
-					var l = dict.a;
-					return A3(f, l.key, l.value, acc);
-				default:
-					var i = dict.a;
-					var $temp$f = f,
-						$temp$acc = A3($elm_community$intdict$IntDict$foldl, f, acc, i.left),
-						$temp$dict = i.right;
-					f = $temp$f;
-					acc = $temp$acc;
-					dict = $temp$dict;
-					continue foldl;
-			}
-		}
-	});
-var $elm_community$graph$Graph$applyEdgeDiff = F3(
-	function (nodeId, diff, graphRep) {
-		var updateOutgoingEdge = F2(
-			function (upd, node) {
-				return _Utils_update(
-					node,
-					{
-						outgoing: A3($elm_community$intdict$IntDict$update, nodeId, upd, node.outgoing)
-					});
-			});
-		var updateIncomingEdge = F2(
-			function (upd, node) {
-				return _Utils_update(
-					node,
-					{
-						incoming: A3($elm_community$intdict$IntDict$update, nodeId, upd, node.incoming)
-					});
-			});
-		var flippedFoldl = F3(
-			function (f, dict, acc) {
-				return A3($elm_community$intdict$IntDict$foldl, f, acc, dict);
-			});
-		var edgeUpdateToMaybe = function (edgeUpdate) {
-			if (edgeUpdate.$ === 'Insert') {
-				var lbl = edgeUpdate.a;
-				return $elm$core$Maybe$Just(lbl);
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		};
-		var updateAdjacency = F3(
-			function (updateEdge, updatedId, edgeUpdate) {
-				var updateLbl = updateEdge(
-					$elm$core$Basics$always(
-						edgeUpdateToMaybe(edgeUpdate)));
-				return A2(
-					$elm_community$intdict$IntDict$update,
-					updatedId,
-					$elm$core$Maybe$map(updateLbl));
-			});
-		return A3(
-			flippedFoldl,
-			updateAdjacency(updateOutgoingEdge),
-			diff.outgoing,
-			A3(
-				flippedFoldl,
-				updateAdjacency(updateIncomingEdge),
-				diff.incoming,
-				graphRep));
-	});
-var $elm_community$graph$Graph$Insert = function (a) {
-	return {$: 'Insert', a: a};
-};
-var $elm_community$graph$Graph$Remove = function (a) {
-	return {$: 'Remove', a: a};
-};
-var $elm_community$graph$Graph$crashHack = function (msg) {
-	crashHack:
-	while (true) {
-		var $temp$msg = msg;
-		msg = $temp$msg;
-		continue crashHack;
-	}
-};
-var $elm_community$graph$Graph$emptyDiff = {incoming: $elm_community$intdict$IntDict$empty, outgoing: $elm_community$intdict$IntDict$empty};
-var $elm_community$graph$Graph$computeEdgeDiff = F2(
-	function (old, _new) {
-		var collectUpdates = F3(
-			function (edgeUpdate, updatedId, label) {
-				var replaceUpdate = function (old_) {
-					var _v5 = _Utils_Tuple2(
-						old_,
-						edgeUpdate(label));
-					if (_v5.a.$ === 'Just') {
-						if (_v5.a.a.$ === 'Remove') {
-							if (_v5.b.$ === 'Insert') {
-								var oldLbl = _v5.a.a.a;
-								var newLbl = _v5.b.a;
-								return _Utils_eq(oldLbl, newLbl) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-									$elm_community$graph$Graph$Insert(newLbl));
-							} else {
-								return $elm_community$graph$Graph$crashHack('Graph.computeEdgeDiff: Collected two removals for the same edge. This is an error in the implementation of Graph and you should file a bug report!');
-							}
-						} else {
-							return $elm_community$graph$Graph$crashHack('Graph.computeEdgeDiff: Collected inserts before removals. This is an error in the implementation of Graph and you should file a bug report!');
-						}
-					} else {
-						var _v6 = _v5.a;
-						var eu = _v5.b;
-						return $elm$core$Maybe$Just(eu);
-					}
-				};
-				return A2($elm_community$intdict$IntDict$update, updatedId, replaceUpdate);
-			});
-		var collect = F3(
-			function (edgeUpdate, adj, updates) {
-				return A3(
-					$elm_community$intdict$IntDict$foldl,
-					collectUpdates(edgeUpdate),
-					updates,
-					adj);
-			});
-		var _v0 = _Utils_Tuple2(old, _new);
-		if (_v0.a.$ === 'Nothing') {
-			if (_v0.b.$ === 'Nothing') {
-				var _v1 = _v0.a;
-				var _v2 = _v0.b;
-				return $elm_community$graph$Graph$emptyDiff;
-			} else {
-				var _v4 = _v0.a;
-				var ins = _v0.b.a;
-				return {
-					incoming: A3(collect, $elm_community$graph$Graph$Insert, ins.outgoing, $elm_community$intdict$IntDict$empty),
-					outgoing: A3(collect, $elm_community$graph$Graph$Insert, ins.incoming, $elm_community$intdict$IntDict$empty)
-				};
-			}
-		} else {
-			if (_v0.b.$ === 'Nothing') {
-				var rem = _v0.a.a;
-				var _v3 = _v0.b;
-				return {
-					incoming: A3(collect, $elm_community$graph$Graph$Remove, rem.outgoing, $elm_community$intdict$IntDict$empty),
-					outgoing: A3(collect, $elm_community$graph$Graph$Remove, rem.incoming, $elm_community$intdict$IntDict$empty)
-				};
-			} else {
-				var rem = _v0.a.a;
-				var ins = _v0.b.a;
-				return _Utils_eq(rem, ins) ? $elm_community$graph$Graph$emptyDiff : {
-					incoming: A3(
-						collect,
-						$elm_community$graph$Graph$Insert,
-						ins.outgoing,
-						A3(collect, $elm_community$graph$Graph$Remove, rem.outgoing, $elm_community$intdict$IntDict$empty)),
-					outgoing: A3(
-						collect,
-						$elm_community$graph$Graph$Insert,
-						ins.incoming,
-						A3(collect, $elm_community$graph$Graph$Remove, rem.incoming, $elm_community$intdict$IntDict$empty))
-				};
-			}
-		}
-	});
-var $elm_community$intdict$IntDict$filter = F2(
-	function (predicate, dict) {
-		var add = F3(
-			function (k, v, d) {
-				return A2(predicate, k, v) ? A3($elm_community$intdict$IntDict$insert, k, v, d) : d;
-			});
-		return A3($elm_community$intdict$IntDict$foldl, add, $elm_community$intdict$IntDict$empty, dict);
-	});
-var $elm_community$graph$Graph$update = F2(
-	function (nodeId, updater) {
-		var wrappedUpdater = function (rep) {
-			var old = A2($elm_community$intdict$IntDict$get, nodeId, rep);
-			var filterInvalidEdges = function (ctx) {
-				return $elm_community$intdict$IntDict$filter(
-					F2(
-						function (id, _v0) {
-							return _Utils_eq(id, ctx.node.id) || A2($elm_community$intdict$IntDict$member, id, rep);
-						}));
-			};
-			var cleanUpEdges = function (ctx) {
-				return _Utils_update(
-					ctx,
-					{
-						incoming: A2(filterInvalidEdges, ctx, ctx.incoming),
-						outgoing: A2(filterInvalidEdges, ctx, ctx.outgoing)
-					});
-			};
-			var _new = A2(
-				$elm$core$Maybe$map,
-				cleanUpEdges,
-				updater(old));
-			var diff = A2($elm_community$graph$Graph$computeEdgeDiff, old, _new);
-			return A3(
-				$elm_community$intdict$IntDict$update,
-				nodeId,
-				$elm$core$Basics$always(_new),
-				A3($elm_community$graph$Graph$applyEdgeDiff, nodeId, diff, rep));
-		};
-		return A2(
-			$elm$core$Basics$composeR,
-			$elm_community$graph$Graph$unGraph,
-			A2($elm$core$Basics$composeR, wrappedUpdater, $elm_community$graph$Graph$Graph));
-	});
-var $elm_community$graph$Graph$remove = F2(
-	function (nodeId, graph) {
-		return A3(
-			$elm_community$graph$Graph$update,
-			nodeId,
-			$elm$core$Basics$always($elm$core$Maybe$Nothing),
-			graph);
-	});
-var $elm_community$graph$Graph$fold = F3(
-	function (f, acc, graph) {
-		var go = F2(
-			function (acc1, graph1) {
-				go:
-				while (true) {
-					var maybeContext = A2(
-						$elm$core$Maybe$andThen,
-						function (id) {
-							return A2($elm_community$graph$Graph$get, id, graph);
-						},
-						A2(
-							$elm$core$Maybe$map,
-							$elm$core$Tuple$first,
-							$elm_community$graph$Graph$nodeIdRange(graph1)));
-					if (maybeContext.$ === 'Just') {
-						var ctx = maybeContext.a;
-						var $temp$acc1 = A2(f, ctx, acc1),
-							$temp$graph1 = A2($elm_community$graph$Graph$remove, ctx.node.id, graph1);
-						acc1 = $temp$acc1;
-						graph1 = $temp$graph1;
-						continue go;
-					} else {
-						return acc1;
-					}
-				}
-			});
-		return A2(go, acc, graph);
-	});
-var $elm_community$graph$Graph$insert = F2(
-	function (nodeContext, graph) {
-		return A3(
-			$elm_community$graph$Graph$update,
-			nodeContext.node.id,
-			$elm$core$Basics$always(
-				$elm$core$Maybe$Just(nodeContext)),
-			graph);
-	});
-var $elm_community$intdict$IntDict$map = F2(
-	function (f, dict) {
-		switch (dict.$) {
-			case 'Empty':
-				return $elm_community$intdict$IntDict$empty;
-			case 'Leaf':
-				var l = dict.a;
-				return A2(
-					$elm_community$intdict$IntDict$leaf,
-					l.key,
-					A2(f, l.key, l.value));
-			default:
-				var i = dict.a;
-				return A3(
-					$elm_community$intdict$IntDict$inner,
-					i.prefix,
-					A2($elm_community$intdict$IntDict$map, f, i.left),
-					A2($elm_community$intdict$IntDict$map, f, i.right));
-		}
-	});
-var $elm_community$graph$Graph$mapEdges = function (f) {
-	return A2(
-		$elm_community$graph$Graph$fold,
-		function (_v0) {
-			var node = _v0.node;
-			var incoming = _v0.incoming;
-			var outgoing = _v0.outgoing;
-			return $elm_community$graph$Graph$insert(
-				{
-					incoming: A2(
-						$elm_community$intdict$IntDict$map,
-						F2(
-							function (n, e) {
-								return f(e);
-							}),
-						incoming),
-					node: node,
-					outgoing: A2(
-						$elm_community$intdict$IntDict$map,
-						F2(
-							function (n, e) {
-								return f(e);
-							}),
-						outgoing)
-				});
-		},
-		$elm_community$graph$Graph$empty);
-};
-var $elm_community$graph$Graph$mapNodes = function (f) {
-	return A2(
-		$elm_community$graph$Graph$fold,
-		function (_v0) {
-			var node = _v0.node;
-			var incoming = _v0.incoming;
-			var outgoing = _v0.outgoing;
-			return $elm_community$graph$Graph$insert(
-				{
-					incoming: incoming,
-					node: {
-						id: node.id,
-						label: f(node.label)
-					},
-					outgoing: outgoing
-				});
-		},
-		$elm_community$graph$Graph$empty);
-};
-var $author$project$GraphDisplay$convertMoleculeGraph = function (g) {
-	return A2(
-		$elm_community$graph$Graph$mapEdges,
-		function (e) {
-			return _Utils_Tuple0;
-		},
-		A2(
-			$elm_community$graph$Graph$mapNodes,
-			function (n) {
-				return A2(
-					$elm$core$Maybe$withDefault,
-					'unknown',
-					$author$project$RdfDict$rdfNodeToMaybeString(n.a));
-			},
-			g));
-};
-var $gampleman$elm_visualization$Force$Links = F2(
-	function (a, b) {
-		return {$: 'Links', a: a, b: b};
-	});
-var $gampleman$elm_visualization$Force$customLinks = F2(
-	function (iters, list) {
-		var counts = A3(
-			$elm$core$List$foldr,
-			F2(
-				function (_v1, d) {
-					var source = _v1.source;
-					var target = _v1.target;
-					return A3(
-						$elm$core$Dict$update,
-						target,
-						A2(
-							$elm$core$Basics$composeL,
-							A2(
-								$elm$core$Basics$composeL,
-								$elm$core$Maybe$Just,
-								$elm$core$Maybe$withDefault(1)),
-							$elm$core$Maybe$map(
-								$elm$core$Basics$add(1))),
-						A3(
-							$elm$core$Dict$update,
-							source,
-							A2(
-								$elm$core$Basics$composeL,
-								A2(
-									$elm$core$Basics$composeL,
-									$elm$core$Maybe$Just,
-									$elm$core$Maybe$withDefault(1)),
-								$elm$core$Maybe$map(
-									$elm$core$Basics$add(1))),
-							d));
-				}),
-			$elm$core$Dict$empty,
-			list);
-		var count = function (key) {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				0,
-				A2($elm$core$Dict$get, key, counts));
-		};
-		return A2(
-			$gampleman$elm_visualization$Force$Links,
-			iters,
-			A2(
-				$elm$core$List$map,
-				function (_v0) {
-					var source = _v0.source;
-					var target = _v0.target;
-					var distance = _v0.distance;
-					var strength = _v0.strength;
-					return {
-						bias: count(source) / (count(source) + count(target)),
-						distance: distance,
-						source: source,
-						strength: A2(
-							$elm$core$Maybe$withDefault,
-							1 / A2(
-								$elm$core$Basics$min,
-								count(source),
-								count(target)),
-							strength),
-						target: target
-					};
-				},
-				list));
-	});
-var $elm_community$graph$Graph$edges = function (graph) {
-	var flippedFoldl = F3(
-		function (f, dict, list) {
-			return A3($elm_community$intdict$IntDict$foldl, f, list, dict);
-		});
-	var prependEdges = F2(
-		function (node1, ctx) {
-			return A2(
-				flippedFoldl,
-				F2(
-					function (node2, e) {
-						return $elm$core$List$cons(
-							{from: node1, label: e, to: node2});
-					}),
-				ctx.outgoing);
-		});
-	return A3(
-		flippedFoldl,
-		prependEdges,
-		$elm_community$graph$Graph$unGraph(graph),
-		_List_Nil);
-};
-var $elm$core$Basics$cos = _Basics_cos;
-var $gampleman$elm_visualization$Force$initialAngle = $elm$core$Basics$pi * (3 - $elm$core$Basics$sqrt(5));
-var $gampleman$elm_visualization$Force$initialRadius = 10;
-var $elm$core$Basics$sin = _Basics_sin;
-var $gampleman$elm_visualization$Force$entity = F2(
-	function (index, a) {
-		var radius = $elm$core$Basics$sqrt(index) * $gampleman$elm_visualization$Force$initialRadius;
-		var angle = index * $gampleman$elm_visualization$Force$initialAngle;
-		return {
-			id: index,
-			value: a,
-			vx: 0.0,
-			vy: 0.0,
-			x: radius * $elm$core$Basics$cos(angle),
-			y: radius * $elm$core$Basics$sin(angle)
-		};
-	});
-var $author$project$GraphDisplay$h = 504;
-var $gampleman$elm_visualization$Force$iterations = F2(
-	function (iters, _v0) {
-		var config = _v0.a;
-		return $gampleman$elm_visualization$Force$State(
-			_Utils_update(
-				config,
-				{
-					alphaDecay: 1 - A2($elm$core$Basics$pow, config.minAlpha, 1 / iters)
-				}));
-	});
-var $gampleman$elm_visualization$Force$ManyBody = F2(
-	function (a, b) {
-		return {$: 'ManyBody', a: a, b: b};
-	});
-var $gampleman$elm_visualization$Force$customManyBody = function (theta) {
-	return A2(
-		$elm$core$Basics$composeR,
-		$elm$core$Dict$fromList,
-		$gampleman$elm_visualization$Force$ManyBody(theta));
-};
-var $gampleman$elm_visualization$Force$manyBodyStrength = function (strength) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$gampleman$elm_visualization$Force$customManyBody(0.9),
-		$elm$core$List$map(
-			function (key) {
-				return _Utils_Tuple2(key, strength);
-			}));
-};
-var $elm_community$graph$Graph$mapContexts = function (f) {
-	return A2(
-		$elm_community$graph$Graph$fold,
-		function (ctx) {
-			return $elm_community$graph$Graph$insert(
-				f(ctx));
-		},
-		$elm_community$graph$Graph$empty);
-};
-var $elm_community$intdict$IntDict$foldr = F3(
-	function (f, acc, dict) {
-		foldr:
-		while (true) {
-			switch (dict.$) {
-				case 'Empty':
-					return acc;
-				case 'Leaf':
-					var l = dict.a;
-					return A3(f, l.key, l.value, acc);
-				default:
-					var i = dict.a;
-					var $temp$f = f,
-						$temp$acc = A3($elm_community$intdict$IntDict$foldr, f, acc, i.right),
-						$temp$dict = i.left;
-					f = $temp$f;
-					acc = $temp$acc;
-					dict = $temp$dict;
-					continue foldr;
-			}
-		}
-	});
-var $elm_community$intdict$IntDict$values = function (dict) {
-	return A3(
-		$elm_community$intdict$IntDict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $elm_community$graph$Graph$nodes = A2(
-	$elm$core$Basics$composeR,
-	$elm_community$graph$Graph$unGraph,
-	A2(
-		$elm$core$Basics$composeR,
-		$elm_community$intdict$IntDict$values,
-		$elm$core$List$map(
-			function ($) {
-				return $.node;
-			})));
-var $gampleman$elm_visualization$Force$simulation = function (forces) {
-	return $gampleman$elm_visualization$Force$State(
-		{
-			alpha: 1.0,
-			alphaDecay: 1 - A2($elm$core$Basics$pow, 0.001, 1 / 300),
-			alphaTarget: 0.0,
-			forces: forces,
-			minAlpha: 0.001,
-			velocityDecay: 0.6
-		});
-};
-var $author$project$GraphDisplay$updateContextWithValue = F2(
-	function (nodeCtx, value) {
-		var node = nodeCtx.node;
-		return _Utils_update(
-			nodeCtx,
-			{
-				node: _Utils_update(
-					node,
-					{label: value})
-			});
-	});
-var $author$project$GraphDisplay$updateGraphWithList = function () {
-	var graphUpdater = function (value) {
-		return $elm$core$Maybe$map(
-			function (ctx) {
-				return A2($author$project$GraphDisplay$updateContextWithValue, ctx, value);
-			});
-	};
-	return $elm$core$List$foldr(
-		F2(
-			function (node, graph) {
-				return A3(
-					$elm_community$graph$Graph$update,
-					node.id,
-					graphUpdater(node),
-					graph);
-			}));
-}();
-var $author$project$GraphDisplay$w = 990;
-var $author$project$GraphDisplay$init = F2(
-	function (maxIterations, inGraph) {
-		var graph = A2(
-			$elm_community$graph$Graph$mapContexts,
-			function (ctx) {
-				var node = ctx.node;
-				var incoming = ctx.incoming;
-				var outgoing = ctx.outgoing;
-				return {
-					incoming: incoming,
-					node: {
-						id: node.id,
-						label: A2(
-							$gampleman$elm_visualization$Force$entity,
-							node.id,
-							A2(
-								$author$project$GraphDisplay$CustomNode,
-								$elm_community$intdict$IntDict$size(incoming) + $elm_community$intdict$IntDict$size(outgoing),
-								node.label))
-					},
-					outgoing: outgoing
-				};
-			},
-			$author$project$GraphDisplay$convertMoleculeGraph(inGraph));
-		var links = A2(
-			$elm$core$List$map,
-			function (_v0) {
-				var from = _v0.from;
-				var to = _v0.to;
-				return {distance: 30, source: from, strength: $elm$core$Maybe$Nothing, target: to};
-			},
-			$elm_community$graph$Graph$edges(graph));
-		var forces = _List_fromArray(
-			[
-				A2($gampleman$elm_visualization$Force$customLinks, 1, links),
-				A2(
-				$gampleman$elm_visualization$Force$manyBodyStrength,
-				-30,
-				A2(
-					$elm$core$List$map,
-					function ($) {
-						return $.id;
-					},
-					$elm_community$graph$Graph$nodes(graph))),
-				A2($gampleman$elm_visualization$Force$center, $author$project$GraphDisplay$w / 2, $author$project$GraphDisplay$h / 2)
-			]);
-		return A2(
-			$author$project$GraphDisplay$updateGraphWithList,
-			graph,
-			A2(
-				$gampleman$elm_visualization$Force$computeSimulation,
-				A2(
-					$gampleman$elm_visualization$Force$iterations,
-					maxIterations,
-					$gampleman$elm_visualization$Force$simulation(forces)),
-				A2(
-					$elm$core$List$map,
-					function ($) {
-						return $.label;
-					},
-					$elm_community$graph$Graph$nodes(graph))));
-	});
 var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
 		return {$: 'OnlyDynamic', a: a, b: b};
@@ -27078,771 +25600,6 @@ var $author$project$Main$predicateStyleToggle = function (selected) {
 			selected: $elm$core$Maybe$Just(selected)
 		});
 };
-var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
-var $elm_community$typed_svg$TypedSvg$Attributes$class = function (names) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'class',
-		A2($elm$core$String$join, ' ', names));
-};
-var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
-	return _VirtualDom_nodeNS(
-		_VirtualDom_noScript(tag));
-};
-var $elm_community$typed_svg$TypedSvg$Core$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
-var $elm_community$typed_svg$TypedSvg$g = $elm_community$typed_svg$TypedSvg$Core$node('g');
-var $elm_community$typed_svg$TypedSvg$Types$Paint = function (a) {
-	return {$: 'Paint', a: a};
-};
-var $gampleman$elm_visualization$Scale$Scale = function (a) {
-	return {$: 'Scale', a: a};
-};
-var $gampleman$elm_visualization$Scale$Sequential$convert = F3(
-	function (_v0, interpolator, x) {
-		var x0 = _v0.a;
-		var x1 = _v0.b;
-		return interpolator((x - x0) / (x1 - x0));
-	});
-var $gampleman$elm_visualization$Scale$sequential = F2(
-	function (interpolator, domain_) {
-		return $gampleman$elm_visualization$Scale$Scale(
-			{convert: $gampleman$elm_visualization$Scale$Sequential$convert, domain: domain_, range: interpolator});
-	});
-var $elm$core$Array$fromListHelp = F3(
-	function (list, nodeList, nodeListSize) {
-		fromListHelp:
-		while (true) {
-			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, list);
-			var jsArray = _v0.a;
-			var remainingItems = _v0.b;
-			if (_Utils_cmp(
-				$elm$core$Elm$JsArray$length(jsArray),
-				$elm$core$Array$branchFactor) < 0) {
-				return A2(
-					$elm$core$Array$builderToArray,
-					true,
-					{nodeList: nodeList, nodeListSize: nodeListSize, tail: jsArray});
-			} else {
-				var $temp$list = remainingItems,
-					$temp$nodeList = A2(
-					$elm$core$List$cons,
-					$elm$core$Array$Leaf(jsArray),
-					nodeList),
-					$temp$nodeListSize = nodeListSize + 1;
-				list = $temp$list;
-				nodeList = $temp$nodeList;
-				nodeListSize = $temp$nodeListSize;
-				continue fromListHelp;
-			}
-		}
-	});
-var $elm$core$Array$fromList = function (list) {
-	if (!list.b) {
-		return $elm$core$Array$empty;
-	} else {
-		return A3($elm$core$Array$fromListHelp, list, _List_Nil, 0);
-	}
-};
-var $avh4$elm_color$Color$RgbaSpace = F4(
-	function (a, b, c, d) {
-		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
-	});
-var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
-var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
-var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var $elm$core$Array$getHelp = F3(
-	function (shift, index, tree) {
-		getHelp:
-		while (true) {
-			var pos = $elm$core$Array$bitMask & (index >>> shift);
-			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (_v0.$ === 'SubTree') {
-				var subTree = _v0.a;
-				var $temp$shift = shift - $elm$core$Array$shiftStep,
-					$temp$index = index,
-					$temp$tree = subTree;
-				shift = $temp$shift;
-				index = $temp$index;
-				tree = $temp$tree;
-				continue getHelp;
-			} else {
-				var values = _v0.a;
-				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
-			}
-		}
-	});
-var $elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
-var $elm$core$Array$get = F2(
-	function (index, _v0) {
-		var len = _v0.a;
-		var startShift = _v0.b;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
-			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
-			A3($elm$core$Array$getHelp, startShift, index, tree)));
-	});
-var $elm$core$Array$length = function (_v0) {
-	var len = _v0.a;
-	return len;
-};
-var $gampleman$elm_visualization$Scale$Color$mkInterpolator = function (range) {
-	var n = $elm$core$Array$length(range);
-	return function (t) {
-		return A2(
-			$elm$core$Maybe$withDefault,
-			$avh4$elm_color$Color$black,
-			A2(
-				$elm$core$Array$get,
-				A2(
-					$elm$core$Basics$max,
-					0,
-					A2(
-						$elm$core$Basics$min,
-						n - 1,
-						$elm$core$Basics$floor(t * n))),
-				range));
-	};
-};
-var $avh4$elm_color$Color$scaleFrom255 = function (c) {
-	return c / 255;
-};
-var $avh4$elm_color$Color$rgb255 = F3(
-	function (r, g, b) {
-		return A4(
-			$avh4$elm_color$Color$RgbaSpace,
-			$avh4$elm_color$Color$scaleFrom255(r),
-			$avh4$elm_color$Color$scaleFrom255(g),
-			$avh4$elm_color$Color$scaleFrom255(b),
-			1.0);
-	});
-var $gampleman$elm_visualization$Scale$Color$viridisInterpolator = $gampleman$elm_visualization$Scale$Color$mkInterpolator(
-	$elm$core$Array$fromList(
-		_List_fromArray(
-			[
-				A3($avh4$elm_color$Color$rgb255, 68, 1, 84),
-				A3($avh4$elm_color$Color$rgb255, 68, 2, 86),
-				A3($avh4$elm_color$Color$rgb255, 69, 4, 87),
-				A3($avh4$elm_color$Color$rgb255, 69, 5, 89),
-				A3($avh4$elm_color$Color$rgb255, 70, 7, 90),
-				A3($avh4$elm_color$Color$rgb255, 70, 8, 92),
-				A3($avh4$elm_color$Color$rgb255, 70, 10, 93),
-				A3($avh4$elm_color$Color$rgb255, 70, 11, 94),
-				A3($avh4$elm_color$Color$rgb255, 71, 13, 96),
-				A3($avh4$elm_color$Color$rgb255, 71, 14, 97),
-				A3($avh4$elm_color$Color$rgb255, 71, 16, 99),
-				A3($avh4$elm_color$Color$rgb255, 71, 17, 100),
-				A3($avh4$elm_color$Color$rgb255, 71, 19, 101),
-				A3($avh4$elm_color$Color$rgb255, 72, 20, 103),
-				A3($avh4$elm_color$Color$rgb255, 72, 22, 104),
-				A3($avh4$elm_color$Color$rgb255, 72, 23, 105),
-				A3($avh4$elm_color$Color$rgb255, 72, 24, 106),
-				A3($avh4$elm_color$Color$rgb255, 72, 26, 108),
-				A3($avh4$elm_color$Color$rgb255, 72, 27, 109),
-				A3($avh4$elm_color$Color$rgb255, 72, 28, 110),
-				A3($avh4$elm_color$Color$rgb255, 72, 29, 111),
-				A3($avh4$elm_color$Color$rgb255, 72, 31, 112),
-				A3($avh4$elm_color$Color$rgb255, 72, 32, 113),
-				A3($avh4$elm_color$Color$rgb255, 72, 33, 115),
-				A3($avh4$elm_color$Color$rgb255, 72, 35, 116),
-				A3($avh4$elm_color$Color$rgb255, 72, 36, 117),
-				A3($avh4$elm_color$Color$rgb255, 72, 37, 118),
-				A3($avh4$elm_color$Color$rgb255, 72, 38, 119),
-				A3($avh4$elm_color$Color$rgb255, 72, 40, 120),
-				A3($avh4$elm_color$Color$rgb255, 72, 41, 121),
-				A3($avh4$elm_color$Color$rgb255, 71, 42, 122),
-				A3($avh4$elm_color$Color$rgb255, 71, 44, 122),
-				A3($avh4$elm_color$Color$rgb255, 71, 45, 123),
-				A3($avh4$elm_color$Color$rgb255, 71, 46, 124),
-				A3($avh4$elm_color$Color$rgb255, 71, 47, 125),
-				A3($avh4$elm_color$Color$rgb255, 70, 48, 126),
-				A3($avh4$elm_color$Color$rgb255, 70, 50, 126),
-				A3($avh4$elm_color$Color$rgb255, 70, 51, 127),
-				A3($avh4$elm_color$Color$rgb255, 70, 52, 128),
-				A3($avh4$elm_color$Color$rgb255, 69, 53, 129),
-				A3($avh4$elm_color$Color$rgb255, 69, 55, 129),
-				A3($avh4$elm_color$Color$rgb255, 69, 56, 130),
-				A3($avh4$elm_color$Color$rgb255, 68, 57, 131),
-				A3($avh4$elm_color$Color$rgb255, 68, 58, 131),
-				A3($avh4$elm_color$Color$rgb255, 68, 59, 132),
-				A3($avh4$elm_color$Color$rgb255, 67, 61, 132),
-				A3($avh4$elm_color$Color$rgb255, 67, 62, 133),
-				A3($avh4$elm_color$Color$rgb255, 66, 63, 133),
-				A3($avh4$elm_color$Color$rgb255, 66, 64, 134),
-				A3($avh4$elm_color$Color$rgb255, 66, 65, 134),
-				A3($avh4$elm_color$Color$rgb255, 65, 66, 135),
-				A3($avh4$elm_color$Color$rgb255, 65, 68, 135),
-				A3($avh4$elm_color$Color$rgb255, 64, 69, 136),
-				A3($avh4$elm_color$Color$rgb255, 64, 70, 136),
-				A3($avh4$elm_color$Color$rgb255, 63, 71, 136),
-				A3($avh4$elm_color$Color$rgb255, 63, 72, 137),
-				A3($avh4$elm_color$Color$rgb255, 62, 73, 137),
-				A3($avh4$elm_color$Color$rgb255, 62, 74, 137),
-				A3($avh4$elm_color$Color$rgb255, 62, 76, 138),
-				A3($avh4$elm_color$Color$rgb255, 61, 77, 138),
-				A3($avh4$elm_color$Color$rgb255, 61, 78, 138),
-				A3($avh4$elm_color$Color$rgb255, 60, 79, 138),
-				A3($avh4$elm_color$Color$rgb255, 60, 80, 139),
-				A3($avh4$elm_color$Color$rgb255, 59, 81, 139),
-				A3($avh4$elm_color$Color$rgb255, 59, 82, 139),
-				A3($avh4$elm_color$Color$rgb255, 58, 83, 139),
-				A3($avh4$elm_color$Color$rgb255, 58, 84, 140),
-				A3($avh4$elm_color$Color$rgb255, 57, 85, 140),
-				A3($avh4$elm_color$Color$rgb255, 57, 86, 140),
-				A3($avh4$elm_color$Color$rgb255, 56, 88, 140),
-				A3($avh4$elm_color$Color$rgb255, 56, 89, 140),
-				A3($avh4$elm_color$Color$rgb255, 55, 90, 140),
-				A3($avh4$elm_color$Color$rgb255, 55, 91, 141),
-				A3($avh4$elm_color$Color$rgb255, 54, 92, 141),
-				A3($avh4$elm_color$Color$rgb255, 54, 93, 141),
-				A3($avh4$elm_color$Color$rgb255, 53, 94, 141),
-				A3($avh4$elm_color$Color$rgb255, 53, 95, 141),
-				A3($avh4$elm_color$Color$rgb255, 52, 96, 141),
-				A3($avh4$elm_color$Color$rgb255, 52, 97, 141),
-				A3($avh4$elm_color$Color$rgb255, 51, 98, 141),
-				A3($avh4$elm_color$Color$rgb255, 51, 99, 141),
-				A3($avh4$elm_color$Color$rgb255, 50, 100, 142),
-				A3($avh4$elm_color$Color$rgb255, 50, 101, 142),
-				A3($avh4$elm_color$Color$rgb255, 49, 102, 142),
-				A3($avh4$elm_color$Color$rgb255, 49, 103, 142),
-				A3($avh4$elm_color$Color$rgb255, 49, 104, 142),
-				A3($avh4$elm_color$Color$rgb255, 48, 105, 142),
-				A3($avh4$elm_color$Color$rgb255, 48, 106, 142),
-				A3($avh4$elm_color$Color$rgb255, 47, 107, 142),
-				A3($avh4$elm_color$Color$rgb255, 47, 108, 142),
-				A3($avh4$elm_color$Color$rgb255, 46, 109, 142),
-				A3($avh4$elm_color$Color$rgb255, 46, 110, 142),
-				A3($avh4$elm_color$Color$rgb255, 46, 111, 142),
-				A3($avh4$elm_color$Color$rgb255, 45, 112, 142),
-				A3($avh4$elm_color$Color$rgb255, 45, 113, 142),
-				A3($avh4$elm_color$Color$rgb255, 44, 113, 142),
-				A3($avh4$elm_color$Color$rgb255, 44, 114, 142),
-				A3($avh4$elm_color$Color$rgb255, 44, 115, 142),
-				A3($avh4$elm_color$Color$rgb255, 43, 116, 142),
-				A3($avh4$elm_color$Color$rgb255, 43, 117, 142),
-				A3($avh4$elm_color$Color$rgb255, 42, 118, 142),
-				A3($avh4$elm_color$Color$rgb255, 42, 119, 142),
-				A3($avh4$elm_color$Color$rgb255, 42, 120, 142),
-				A3($avh4$elm_color$Color$rgb255, 41, 121, 142),
-				A3($avh4$elm_color$Color$rgb255, 41, 122, 142),
-				A3($avh4$elm_color$Color$rgb255, 41, 123, 142),
-				A3($avh4$elm_color$Color$rgb255, 40, 124, 142),
-				A3($avh4$elm_color$Color$rgb255, 40, 125, 142),
-				A3($avh4$elm_color$Color$rgb255, 39, 126, 142),
-				A3($avh4$elm_color$Color$rgb255, 39, 127, 142),
-				A3($avh4$elm_color$Color$rgb255, 39, 128, 142),
-				A3($avh4$elm_color$Color$rgb255, 38, 129, 142),
-				A3($avh4$elm_color$Color$rgb255, 38, 130, 142),
-				A3($avh4$elm_color$Color$rgb255, 38, 130, 142),
-				A3($avh4$elm_color$Color$rgb255, 37, 131, 142),
-				A3($avh4$elm_color$Color$rgb255, 37, 132, 142),
-				A3($avh4$elm_color$Color$rgb255, 37, 133, 142),
-				A3($avh4$elm_color$Color$rgb255, 36, 134, 142),
-				A3($avh4$elm_color$Color$rgb255, 36, 135, 142),
-				A3($avh4$elm_color$Color$rgb255, 35, 136, 142),
-				A3($avh4$elm_color$Color$rgb255, 35, 137, 142),
-				A3($avh4$elm_color$Color$rgb255, 35, 138, 141),
-				A3($avh4$elm_color$Color$rgb255, 34, 139, 141),
-				A3($avh4$elm_color$Color$rgb255, 34, 140, 141),
-				A3($avh4$elm_color$Color$rgb255, 34, 141, 141),
-				A3($avh4$elm_color$Color$rgb255, 33, 142, 141),
-				A3($avh4$elm_color$Color$rgb255, 33, 143, 141),
-				A3($avh4$elm_color$Color$rgb255, 33, 144, 141),
-				A3($avh4$elm_color$Color$rgb255, 33, 145, 140),
-				A3($avh4$elm_color$Color$rgb255, 32, 146, 140),
-				A3($avh4$elm_color$Color$rgb255, 32, 146, 140),
-				A3($avh4$elm_color$Color$rgb255, 32, 147, 140),
-				A3($avh4$elm_color$Color$rgb255, 31, 148, 140),
-				A3($avh4$elm_color$Color$rgb255, 31, 149, 139),
-				A3($avh4$elm_color$Color$rgb255, 31, 150, 139),
-				A3($avh4$elm_color$Color$rgb255, 31, 151, 139),
-				A3($avh4$elm_color$Color$rgb255, 31, 152, 139),
-				A3($avh4$elm_color$Color$rgb255, 31, 153, 138),
-				A3($avh4$elm_color$Color$rgb255, 31, 154, 138),
-				A3($avh4$elm_color$Color$rgb255, 30, 155, 138),
-				A3($avh4$elm_color$Color$rgb255, 30, 156, 137),
-				A3($avh4$elm_color$Color$rgb255, 30, 157, 137),
-				A3($avh4$elm_color$Color$rgb255, 31, 158, 137),
-				A3($avh4$elm_color$Color$rgb255, 31, 159, 136),
-				A3($avh4$elm_color$Color$rgb255, 31, 160, 136),
-				A3($avh4$elm_color$Color$rgb255, 31, 161, 136),
-				A3($avh4$elm_color$Color$rgb255, 31, 161, 135),
-				A3($avh4$elm_color$Color$rgb255, 31, 162, 135),
-				A3($avh4$elm_color$Color$rgb255, 32, 163, 134),
-				A3($avh4$elm_color$Color$rgb255, 32, 164, 134),
-				A3($avh4$elm_color$Color$rgb255, 33, 165, 133),
-				A3($avh4$elm_color$Color$rgb255, 33, 166, 133),
-				A3($avh4$elm_color$Color$rgb255, 34, 167, 133),
-				A3($avh4$elm_color$Color$rgb255, 34, 168, 132),
-				A3($avh4$elm_color$Color$rgb255, 35, 169, 131),
-				A3($avh4$elm_color$Color$rgb255, 36, 170, 131),
-				A3($avh4$elm_color$Color$rgb255, 37, 171, 130),
-				A3($avh4$elm_color$Color$rgb255, 37, 172, 130),
-				A3($avh4$elm_color$Color$rgb255, 38, 173, 129),
-				A3($avh4$elm_color$Color$rgb255, 39, 173, 129),
-				A3($avh4$elm_color$Color$rgb255, 40, 174, 128),
-				A3($avh4$elm_color$Color$rgb255, 41, 175, 127),
-				A3($avh4$elm_color$Color$rgb255, 42, 176, 127),
-				A3($avh4$elm_color$Color$rgb255, 44, 177, 126),
-				A3($avh4$elm_color$Color$rgb255, 45, 178, 125),
-				A3($avh4$elm_color$Color$rgb255, 46, 179, 124),
-				A3($avh4$elm_color$Color$rgb255, 47, 180, 124),
-				A3($avh4$elm_color$Color$rgb255, 49, 181, 123),
-				A3($avh4$elm_color$Color$rgb255, 50, 182, 122),
-				A3($avh4$elm_color$Color$rgb255, 52, 182, 121),
-				A3($avh4$elm_color$Color$rgb255, 53, 183, 121),
-				A3($avh4$elm_color$Color$rgb255, 55, 184, 120),
-				A3($avh4$elm_color$Color$rgb255, 56, 185, 119),
-				A3($avh4$elm_color$Color$rgb255, 58, 186, 118),
-				A3($avh4$elm_color$Color$rgb255, 59, 187, 117),
-				A3($avh4$elm_color$Color$rgb255, 61, 188, 116),
-				A3($avh4$elm_color$Color$rgb255, 63, 188, 115),
-				A3($avh4$elm_color$Color$rgb255, 64, 189, 114),
-				A3($avh4$elm_color$Color$rgb255, 66, 190, 113),
-				A3($avh4$elm_color$Color$rgb255, 68, 191, 112),
-				A3($avh4$elm_color$Color$rgb255, 70, 192, 111),
-				A3($avh4$elm_color$Color$rgb255, 72, 193, 110),
-				A3($avh4$elm_color$Color$rgb255, 74, 193, 109),
-				A3($avh4$elm_color$Color$rgb255, 76, 194, 108),
-				A3($avh4$elm_color$Color$rgb255, 78, 195, 107),
-				A3($avh4$elm_color$Color$rgb255, 80, 196, 106),
-				A3($avh4$elm_color$Color$rgb255, 82, 197, 105),
-				A3($avh4$elm_color$Color$rgb255, 84, 197, 104),
-				A3($avh4$elm_color$Color$rgb255, 86, 198, 103),
-				A3($avh4$elm_color$Color$rgb255, 88, 199, 101),
-				A3($avh4$elm_color$Color$rgb255, 90, 200, 100),
-				A3($avh4$elm_color$Color$rgb255, 92, 200, 99),
-				A3($avh4$elm_color$Color$rgb255, 94, 201, 98),
-				A3($avh4$elm_color$Color$rgb255, 96, 202, 96),
-				A3($avh4$elm_color$Color$rgb255, 99, 203, 95),
-				A3($avh4$elm_color$Color$rgb255, 101, 203, 94),
-				A3($avh4$elm_color$Color$rgb255, 103, 204, 92),
-				A3($avh4$elm_color$Color$rgb255, 105, 205, 91),
-				A3($avh4$elm_color$Color$rgb255, 108, 205, 90),
-				A3($avh4$elm_color$Color$rgb255, 110, 206, 88),
-				A3($avh4$elm_color$Color$rgb255, 112, 207, 87),
-				A3($avh4$elm_color$Color$rgb255, 115, 208, 86),
-				A3($avh4$elm_color$Color$rgb255, 117, 208, 84),
-				A3($avh4$elm_color$Color$rgb255, 119, 209, 83),
-				A3($avh4$elm_color$Color$rgb255, 122, 209, 81),
-				A3($avh4$elm_color$Color$rgb255, 124, 210, 80),
-				A3($avh4$elm_color$Color$rgb255, 127, 211, 78),
-				A3($avh4$elm_color$Color$rgb255, 129, 211, 77),
-				A3($avh4$elm_color$Color$rgb255, 132, 212, 75),
-				A3($avh4$elm_color$Color$rgb255, 134, 213, 73),
-				A3($avh4$elm_color$Color$rgb255, 137, 213, 72),
-				A3($avh4$elm_color$Color$rgb255, 139, 214, 70),
-				A3($avh4$elm_color$Color$rgb255, 142, 214, 69),
-				A3($avh4$elm_color$Color$rgb255, 144, 215, 67),
-				A3($avh4$elm_color$Color$rgb255, 147, 215, 65),
-				A3($avh4$elm_color$Color$rgb255, 149, 216, 64),
-				A3($avh4$elm_color$Color$rgb255, 152, 216, 62),
-				A3($avh4$elm_color$Color$rgb255, 155, 217, 60),
-				A3($avh4$elm_color$Color$rgb255, 157, 217, 59),
-				A3($avh4$elm_color$Color$rgb255, 160, 218, 57),
-				A3($avh4$elm_color$Color$rgb255, 162, 218, 55),
-				A3($avh4$elm_color$Color$rgb255, 165, 219, 54),
-				A3($avh4$elm_color$Color$rgb255, 168, 219, 52),
-				A3($avh4$elm_color$Color$rgb255, 170, 220, 50),
-				A3($avh4$elm_color$Color$rgb255, 173, 220, 48),
-				A3($avh4$elm_color$Color$rgb255, 176, 221, 47),
-				A3($avh4$elm_color$Color$rgb255, 178, 221, 45),
-				A3($avh4$elm_color$Color$rgb255, 181, 222, 43),
-				A3($avh4$elm_color$Color$rgb255, 184, 222, 41),
-				A3($avh4$elm_color$Color$rgb255, 186, 222, 40),
-				A3($avh4$elm_color$Color$rgb255, 189, 223, 38),
-				A3($avh4$elm_color$Color$rgb255, 192, 223, 37),
-				A3($avh4$elm_color$Color$rgb255, 194, 223, 35),
-				A3($avh4$elm_color$Color$rgb255, 197, 224, 33),
-				A3($avh4$elm_color$Color$rgb255, 200, 224, 32),
-				A3($avh4$elm_color$Color$rgb255, 202, 225, 31),
-				A3($avh4$elm_color$Color$rgb255, 205, 225, 29),
-				A3($avh4$elm_color$Color$rgb255, 208, 225, 28),
-				A3($avh4$elm_color$Color$rgb255, 210, 226, 27),
-				A3($avh4$elm_color$Color$rgb255, 213, 226, 26),
-				A3($avh4$elm_color$Color$rgb255, 216, 226, 25),
-				A3($avh4$elm_color$Color$rgb255, 218, 227, 25),
-				A3($avh4$elm_color$Color$rgb255, 221, 227, 24),
-				A3($avh4$elm_color$Color$rgb255, 223, 227, 24),
-				A3($avh4$elm_color$Color$rgb255, 226, 228, 24),
-				A3($avh4$elm_color$Color$rgb255, 229, 228, 25),
-				A3($avh4$elm_color$Color$rgb255, 231, 228, 25),
-				A3($avh4$elm_color$Color$rgb255, 234, 229, 26),
-				A3($avh4$elm_color$Color$rgb255, 236, 229, 27),
-				A3($avh4$elm_color$Color$rgb255, 239, 229, 28),
-				A3($avh4$elm_color$Color$rgb255, 241, 229, 29),
-				A3($avh4$elm_color$Color$rgb255, 244, 230, 30),
-				A3($avh4$elm_color$Color$rgb255, 246, 230, 32),
-				A3($avh4$elm_color$Color$rgb255, 248, 230, 33),
-				A3($avh4$elm_color$Color$rgb255, 251, 231, 35),
-				A3($avh4$elm_color$Color$rgb255, 253, 231, 37)
-			])));
-var $author$project$GraphDisplay$colorScale = A2(
-	$gampleman$elm_visualization$Scale$sequential,
-	$gampleman$elm_visualization$Scale$Color$viridisInterpolator,
-	_Utils_Tuple2(200, 700));
-var $gampleman$elm_visualization$Scale$convert = F2(
-	function (_v0, value) {
-		var scale = _v0.a;
-		return A3(scale.convert, scale.domain, scale.range, value);
-	});
-var $elm_community$typed_svg$TypedSvg$line = $elm_community$typed_svg$TypedSvg$Core$node('line');
-var $avh4$elm_color$Color$toCssString = function (_v0) {
-	var r = _v0.a;
-	var g = _v0.b;
-	var b = _v0.c;
-	var a = _v0.d;
-	var roundTo = function (x) {
-		return $elm$core$Basics$round(x * 1000) / 1000;
-	};
-	var pct = function (x) {
-		return $elm$core$Basics$round(x * 10000) / 100;
-	};
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				'rgba(',
-				$elm$core$String$fromFloat(
-				pct(r)),
-				'%,',
-				$elm$core$String$fromFloat(
-				pct(g)),
-				'%,',
-				$elm$core$String$fromFloat(
-				pct(b)),
-				'%,',
-				$elm$core$String$fromFloat(
-				roundTo(a)),
-				')'
-			]));
-};
-var $elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString = function (paint) {
-	switch (paint.$) {
-		case 'Paint':
-			var color = paint.a;
-			return $avh4$elm_color$Color$toCssString(color);
-		case 'CSSVariable':
-			var string = paint.a;
-			return $elm$core$String$concat(
-				_List_fromArray(
-					['var(' + (string + ')')]));
-		case 'Reference':
-			var string = paint.a;
-			return $elm$core$String$concat(
-				_List_fromArray(
-					['url(#', string, ')']));
-		case 'ContextFill':
-			return 'context-fill';
-		case 'ContextStroke':
-			return 'context-stroke';
-		default:
-			return 'none';
-	}
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$stroke = A2(
-	$elm$core$Basics$composeL,
-	$elm_community$typed_svg$TypedSvg$Core$attribute('stroke'),
-	$elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString);
-var $elm_community$typed_svg$TypedSvg$Types$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
-var $elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString = function (length) {
-	switch (length.$) {
-		case 'Cm':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'cm';
-		case 'Em':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'em';
-		case 'Ex':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'ex';
-		case 'In':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'in';
-		case 'Mm':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'mm';
-		case 'Num':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x);
-		case 'Pc':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'pc';
-		case 'Percent':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + '%';
-		case 'Pt':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'pt';
-		case 'Px':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'px';
-		default:
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'rem';
-	}
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$strokeWidth = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'stroke-width',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$strokeWidth = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$x1 = function (position) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'x1',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(position));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$x1 = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$x1(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$x2 = function (position) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'x2',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(position));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$x2 = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$x2(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$y1 = function (position) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'y1',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(position));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$y1 = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$y1(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$y2 = function (position) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'y2',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(position));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$y2 = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$y2(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $author$project$GraphDisplay$linkElement = F2(
-	function (graph, edge) {
-		var retrieveEntity = A2(
-			$elm$core$Basics$composeL,
-			$elm$core$Maybe$withDefault(
-				A2(
-					$gampleman$elm_visualization$Force$entity,
-					0,
-					A2($author$project$GraphDisplay$CustomNode, 0, ''))),
-			$elm$core$Maybe$map(
-				A2(
-					$elm$core$Basics$composeR,
-					function ($) {
-						return $.node;
-					},
-					function ($) {
-						return $.label;
-					})));
-		var source = retrieveEntity(
-			A2($elm_community$graph$Graph$get, edge.from, graph));
-		var target = retrieveEntity(
-			A2($elm_community$graph$Graph$get, edge.to, graph));
-		return A2(
-			$elm_community$typed_svg$TypedSvg$line,
-			_List_fromArray(
-				[
-					$elm_community$typed_svg$TypedSvg$Attributes$InPx$strokeWidth(1),
-					$elm_community$typed_svg$TypedSvg$Attributes$stroke(
-					$elm_community$typed_svg$TypedSvg$Types$Paint(
-						A2($gampleman$elm_visualization$Scale$convert, $author$project$GraphDisplay$colorScale, source.x))),
-					$elm_community$typed_svg$TypedSvg$Attributes$InPx$x1(source.x),
-					$elm_community$typed_svg$TypedSvg$Attributes$InPx$y1(source.y),
-					$elm_community$typed_svg$TypedSvg$Attributes$InPx$x2(target.x),
-					$elm_community$typed_svg$TypedSvg$Attributes$InPx$y2(target.y)
-				]),
-			_List_Nil);
-	});
-var $elm_community$typed_svg$TypedSvg$Types$PaintNone = {$: 'PaintNone'};
-var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
-var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cx',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$cx = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$cx(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cy',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$cy = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$cy(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$fill = A2(
-	$elm$core$Basics$composeL,
-	$elm_community$typed_svg$TypedSvg$Core$attribute('fill'),
-	$elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString);
-var $elm_community$typed_svg$TypedSvg$Attributes$points = function (pts) {
-	var pointToString = function (_v0) {
-		var xx = _v0.a;
-		var yy = _v0.b;
-		return $elm$core$String$fromFloat(xx) + (', ' + $elm$core$String$fromFloat(yy));
-	};
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'points',
-		A2(
-			$elm$core$String$join,
-			' ',
-			A2($elm$core$List$map, pointToString, pts)));
-};
-var $elm_community$typed_svg$TypedSvg$polygon = $elm_community$typed_svg$TypedSvg$Core$node('polygon');
-var $author$project$GraphDisplay$hexagon = F3(
-	function (_v0, size, attrs) {
-		var x = _v0.a;
-		var y = _v0.b;
-		var angle = (2 * $elm$core$Basics$pi) / 6;
-		var p = $elm_community$typed_svg$TypedSvg$Attributes$points(
-			A2(
-				$elm$core$List$map,
-				function (a) {
-					return _Utils_Tuple2(
-						x + ($elm$core$Basics$cos(a * angle) * size),
-						y + ($elm$core$Basics$sin(a * angle) * size));
-				},
-				A2(
-					$elm$core$List$map,
-					$elm$core$Basics$toFloat,
-					A2($elm$core$List$range, 0, 6))));
-		return $elm_community$typed_svg$TypedSvg$polygon(
-			A2($elm$core$List$cons, p, attrs));
-	});
-var $elm_community$typed_svg$TypedSvg$Core$text = $elm$virtual_dom$VirtualDom$text;
-var $elm_community$typed_svg$TypedSvg$title = $elm_community$typed_svg$TypedSvg$Core$node('title');
-var $author$project$GraphDisplay$nodeSize = F2(
-	function (size, node) {
-		return A4(
-			$author$project$GraphDisplay$hexagon,
-			_Utils_Tuple2(node.x, node.y),
-			size,
-			_List_fromArray(
-				[
-					$elm_community$typed_svg$TypedSvg$Attributes$fill(
-					$elm_community$typed_svg$TypedSvg$Types$Paint(
-						A2($gampleman$elm_visualization$Scale$convert, $author$project$GraphDisplay$colorScale, node.x)))
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm_community$typed_svg$TypedSvg$title,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm_community$typed_svg$TypedSvg$Core$text(node.value.name)
-						]))
-				]));
-	});
-var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'r',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$InPx$r = function (value) {
-	return $elm_community$typed_svg$TypedSvg$Attributes$r(
-		$elm_community$typed_svg$TypedSvg$Types$px(value));
-};
-var $author$project$GraphDisplay$nodeElement = function (node) {
-	return (node.label.value.rank < 5) ? A2($author$project$GraphDisplay$nodeSize, 4, node.label) : ((node.label.value.rank < 9) ? A2($author$project$GraphDisplay$nodeSize, 7, node.label) : ((!A2($elm$core$Basics$modBy, 2, node.label.value.rank)) ? A2(
-		$elm_community$typed_svg$TypedSvg$g,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2($author$project$GraphDisplay$nodeSize, 9, node.label),
-				A2(
-				$elm_community$typed_svg$TypedSvg$circle,
-				_List_fromArray(
-					[
-						$elm_community$typed_svg$TypedSvg$Attributes$InPx$r(12),
-						$elm_community$typed_svg$TypedSvg$Attributes$InPx$cx(node.label.x),
-						$elm_community$typed_svg$TypedSvg$Attributes$InPx$cy(node.label.y),
-						$elm_community$typed_svg$TypedSvg$Attributes$fill($elm_community$typed_svg$TypedSvg$Types$PaintNone),
-						$elm_community$typed_svg$TypedSvg$Attributes$stroke(
-						$elm_community$typed_svg$TypedSvg$Types$Paint(
-							A2($gampleman$elm_visualization$Scale$convert, $author$project$GraphDisplay$colorScale, node.label.x)))
-					]),
-				_List_Nil)
-			])) : A2($author$project$GraphDisplay$nodeSize, 10, node.label)));
-};
-var $elm_community$typed_svg$TypedSvg$svg = $elm_community$typed_svg$TypedSvg$Core$node('svg');
-var $elm_community$typed_svg$TypedSvg$Attributes$viewBox = F4(
-	function (minX, minY, vWidth, vHeight) {
-		return A2(
-			$elm_community$typed_svg$TypedSvg$Core$attribute,
-			'viewBox',
-			A2(
-				$elm$core$String$join,
-				' ',
-				A2(
-					$elm$core$List$map,
-					$elm$core$String$fromFloat,
-					_List_fromArray(
-						[minX, minY, vWidth, vHeight]))));
-	});
-var $author$project$GraphDisplay$view = function (model) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$svg,
-		_List_fromArray(
-			[
-				A4($elm_community$typed_svg$TypedSvg$Attributes$viewBox, 0, 0, $author$project$GraphDisplay$w, $author$project$GraphDisplay$h)
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm_community$typed_svg$TypedSvg$g,
-				_List_fromArray(
-					[
-						$elm_community$typed_svg$TypedSvg$Attributes$class(
-						_List_fromArray(
-							['links']))
-					]),
-				A2(
-					$elm$core$List$map,
-					$author$project$GraphDisplay$linkElement(model),
-					$elm_community$graph$Graph$edges(model))),
-				A2(
-				$elm_community$typed_svg$TypedSvg$g,
-				_List_fromArray(
-					[
-						$elm_community$typed_svg$TypedSvg$Attributes$class(
-						_List_fromArray(
-							['nodes']))
-					]),
-				A2(
-					$elm$core$List$map,
-					$author$project$GraphDisplay$nodeElement,
-					$elm_community$graph$Graph$nodes(model)))
-			]));
-};
 var $author$project$Main$view = function (model) {
 	return {
 		body: $elm$core$List$singleton(
@@ -28017,32 +25774,26 @@ var $author$project$Main$view = function (model) {
 												function () {
 												var _v4 = model.graphDisplay;
 												if (_v4.$ === 'On') {
-													return $mdgriffith$elm_ui$Element$html(
-														$author$project$GraphDisplay$view(
-															A2(
-																$author$project$GraphDisplay$init,
-																model.graphMaxIterations,
-																A3(
-																	$elm$core$Debug$log,
-																	A3(
-																		$elm_community$graph$Graph$DOT$output,
-																		function (n) {
-																			return $elm$core$Maybe$Just(
-																				A2(
-																					$author$project$Main$aka,
-																					model.predicateStyle,
-																					A2(
-																						$elm$core$Maybe$withDefault,
-																						'unknown',
-																						$author$project$RdfDict$rdfNodeToMaybeString(n.a))));
-																		},
-																		function (e) {
-																			return $elm$core$Maybe$Just(
-																				A2($author$project$Main$aka, model.predicateStyle, e));
-																		},
-																		$author$project$Main$convertRdfDict2CommunityGraph(a)),
-																	$author$project$Main$convertRdfDict2CommunityGraph,
-																	a))));
+													return A2(
+														$elm$core$Debug$log,
+														A3(
+															$elm_community$graph$Graph$DOT$output,
+															function (n) {
+																return $elm$core$Maybe$Just(
+																	A2(
+																		$author$project$Main$aka,
+																		model.predicateStyle,
+																		A2(
+																			$elm$core$Maybe$withDefault,
+																			'unknown',
+																			$author$project$RdfDict$rdfNodeToMaybeString(n.a))));
+															},
+															function (e) {
+																return $elm$core$Maybe$Just(
+																	A2($author$project$Main$aka, model.predicateStyle, e));
+															},
+															$author$project$Main$convertRdfDict2CommunityGraph(a)),
+														$mdgriffith$elm_ui$Element$none);
 												} else {
 													return $mdgriffith$elm_ui$Element$none;
 												}

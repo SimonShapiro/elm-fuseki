@@ -75,7 +75,10 @@
         var app = Elm.Main.init({flags:server});
         app.ports.setStorage.subscribe(function(state) {
             localStorage.setItem('myapp-server', state);
-            worker.postMessage("Hello worker")
+        });
+        app.ports.sendActionRequestToWorker.subscribe(function(actionObject) {
+            console.log("Elm Action", actionObject);
+            worker.postMessage(actionObject)
         });
         if (Worker) {
             console.log("Worker available!")
