@@ -57,6 +57,7 @@ import Element
 import RdfDict
 
 import Dagre 
+import List
 
 dagreOptions = 
     { rankDir = Dagre.TB
@@ -187,6 +188,7 @@ type Msg
     | ResetLineOfThought
     | ClearCaches
     | ToggleGraph GraphDisplay
+    | ReceivedMessageFromWorker Value
 
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
@@ -200,6 +202,7 @@ type alias KGResponse =  -- a copy of the query is available in the api
 
 port setStorage : Value -> Cmd msg
 port sendActionRequestToWorker : Value -> Cmd msg
+port receiveActionResultFromWorker : (Value -> msg) -> Sub msg
 
 renderer : Markdown.Renderer.Renderer (Element msg)
 renderer =
@@ -678,6 +681,50 @@ update msg model =
             ({ model | lineOfThought = []}, Cmd.none)
         ClearCaches -> 
             ({ model | lineOfThought = [], resultHistory = Dict.empty}, Cmd.none)
+        ReceivedMessageFromWorker message ->
+            let
+--                _ = Debug.log ("Received this message from the worker "++message)
+                graphDecorder = JD.map2 (\a b -> {width = a, height = b})
+                        (at ["graph", "width"] JD.float) 
+                        (at ["graph", "height"] JD.float)
+                nodeDecoder = JD.map6 Dagre.PlacedNode
+                                    (JD.field "id" JD.int)
+                                    (JD.field "label" JD.string)
+                                    (JD.field "width" JD.int)
+                                    (JD.field "height" JD.int)
+                                    (JD.field "x" JD.float)
+                                    (JD.field "y" JD.float)
+                                    |> JD.list
+
+                pointDecoder = JD.map2 Dagre.Point
+                                    (JD.field "x" JD.float)   
+                                    (JD.field "y" JD.float)
+                                    |> JD.list 
+
+                edgeDecoder = JD.map4 Dagre.PlacedEdge
+                                    (JD.field "from" JD.int)
+                                    (JD.field "to" JD.int)
+                                    (JD.field "label" JD.string)
+                                    (JD.field "points" pointDecoder)
+                                    |> JD.list
+
+                mNodeList = JD.field "nodes" nodeDecoder
+                mGraph = JD.decodeValue 
+                            (JD.map3 (\a b c -> {graph = a, nodes = b, edges = c})
+                                graphDecorder
+                                mNodeList
+                                (JD.field "edges" edgeDecoder))
+                                message
+
+            in
+                case mGraph of 
+                    Err _ -> 
+                        Debug.log "Decode Error"
+                        (model, Cmd.none)
+                    Ok a -> 
+                        Debug.log (List.length a.edges |> String.fromInt)
+                        (model, Cmd.none)
+
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
@@ -703,7 +750,7 @@ handleUrlChange url =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    receiveActionResultFromWorker ReceivedMessageFromWorker
 
 pingServer : Server -> (Cmd Msg)
 pingServer newServer = 

@@ -24,7 +24,7 @@ onmessage = function(message) {
                     id: n.id,
                     label: n.label,
                     width: n.width,
-                    heigth: n.height,
+                    height: n.height,
                     x: n.x,
                     y: n.y
                 });
@@ -35,8 +35,8 @@ onmessage = function(message) {
 //                console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(g.edge(e)));
                 let edge = g.edge(e)
                 placedEdges.push({
-                    from: e.v,
-                    to: e.w,
+                    from: parseInt(e.v),  // seems to be a bug in dagre as it always return string here and below
+                    to: parseInt(e.w),
                     label: edge.label,
                     points: edge.points
                 });
@@ -49,7 +49,7 @@ onmessage = function(message) {
                             height:g._label.height
                         },
                 nodes: placedNodes,
-                edges: placedNodes
+                edges: placedEdges
                 })
             break;
         default:

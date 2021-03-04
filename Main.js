@@ -6881,10 +6881,13 @@ var $author$project$Main$initialFn = F3(
 var $elm$json$Json$Decode$null = _Json_decodeNull;
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$Main$ReceivedMessageFromWorker = function (a) {
+	return {$: 'ReceivedMessageFromWorker', a: a};
+};
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$Main$receiveActionResultFromWorker = _Platform_incomingPort('receiveActionResultFromWorker', $elm$json$Json$Decode$value);
 var $author$project$Main$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$Main$receiveActionResultFromWorker($author$project$Main$ReceivedMessageFromWorker);
 };
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
@@ -6910,11 +6913,28 @@ var $author$project$Main$GotSparqlResponse = function (a) {
 };
 var $author$project$Main$On = {$: 'On'};
 var $author$project$Main$Pinging = {$: 'Pinging'};
+var $author$project$Dagre$PlacedEdge = F4(
+	function (from, to, label, points) {
+		return {from: from, label: label, points: points, to: to};
+	});
+var $author$project$Dagre$PlacedNode = F6(
+	function (id, label, width, height, x, y) {
+		return {height: height, id: id, label: label, width: width, x: x, y: y};
+	});
+var $author$project$Dagre$Point = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
 var $author$project$Main$Querying = {$: 'Querying'};
 var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
 var $author$project$Main$SubjectOrientation = {$: 'SubjectOrientation'};
 var $author$project$Main$Verbose = {$: 'Verbose'};
 var $author$project$Main$Waiting = {$: 'Waiting'};
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
 var $elm_community$list_extra$List$Extra$groupWhile = F2(
 	function (isSameGroup, items) {
 		return A3(
@@ -7158,6 +7178,7 @@ var $author$project$RdfDict$contractResult = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
+var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -7279,14 +7300,14 @@ var $elm$file$File$Select$file = F2(
 			toMsg,
 			_File_uploadOne(mimes));
 	});
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$browser$Browser$Navigation$load = _Browser_load;
 var $author$project$Main$KGResponse = F7(
 	function (server, status, message, queryType, query, vars, result) {
 		return {message: message, query: query, queryType: queryType, result: result, server: server, status: status, vars: vars};
 	});
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$map7 = _Json_map7;
 var $author$project$RdfDict$SelectAtom = F5(
 	function (key, value, aType, language, datatype) {
@@ -7403,6 +7424,9 @@ var $author$project$RdfDict$makeRdfDict = function (cf) {
 			},
 			cf));
 };
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $elm$json$Json$Decode$map6 = _Json_map6;
 var $author$project$Main$Pinged = function (a) {
 	return {$: 'Pinged', a: a};
 };
@@ -8749,12 +8773,80 @@ var $author$project$Main$update = F2(
 						model,
 						{lineOfThought: _List_Nil}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'ClearCaches':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{lineOfThought: _List_Nil, resultHistory: $elm$core$Dict$empty}),
 					$elm$core$Platform$Cmd$none);
+			default:
+				var message = msg.a;
+				var pointDecoder = $elm$json$Json$Decode$list(
+					A3(
+						$elm$json$Json$Decode$map2,
+						$author$project$Dagre$Point,
+						A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$float),
+						A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$float)));
+				var nodeDecoder = $elm$json$Json$Decode$list(
+					A7(
+						$elm$json$Json$Decode$map6,
+						$author$project$Dagre$PlacedNode,
+						A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
+						A2($elm$json$Json$Decode$field, 'label', $elm$json$Json$Decode$string),
+						A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$int),
+						A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$int),
+						A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$float),
+						A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$float)));
+				var mNodeList = A2($elm$json$Json$Decode$field, 'nodes', nodeDecoder);
+				var graphDecorder = A3(
+					$elm$json$Json$Decode$map2,
+					F2(
+						function (a, b) {
+							return {height: b, width: a};
+						}),
+					A2(
+						$elm$json$Json$Decode$at,
+						_List_fromArray(
+							['graph', 'width']),
+						$elm$json$Json$Decode$float),
+					A2(
+						$elm$json$Json$Decode$at,
+						_List_fromArray(
+							['graph', 'height']),
+						$elm$json$Json$Decode$float));
+				var edgeDecoder = $elm$json$Json$Decode$list(
+					A5(
+						$elm$json$Json$Decode$map4,
+						$author$project$Dagre$PlacedEdge,
+						A2($elm$json$Json$Decode$field, 'from', $elm$json$Json$Decode$int),
+						A2($elm$json$Json$Decode$field, 'to', $elm$json$Json$Decode$int),
+						A2($elm$json$Json$Decode$field, 'label', $elm$json$Json$Decode$string),
+						A2($elm$json$Json$Decode$field, 'points', pointDecoder)));
+				var mGraph = A2(
+					$elm$json$Json$Decode$decodeValue,
+					A4(
+						$elm$json$Json$Decode$map3,
+						F3(
+							function (a, b, c) {
+								return {edges: c, graph: a, nodes: b};
+							}),
+						graphDecorder,
+						mNodeList,
+						A2($elm$json$Json$Decode$field, 'edges', edgeDecoder)),
+					message);
+				if (mGraph.$ === 'Err') {
+					return A2(
+						$elm$core$Debug$log,
+						'Decode Error',
+						_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+				} else {
+					var a = mGraph.a;
+					return A2(
+						$elm$core$Debug$log,
+						$elm$core$String$fromInt(
+							$elm$core$List$length(a.edges)),
+						_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+				}
 		}
 	});
 var $author$project$Main$BackToQuery = {$: 'BackToQuery'};
@@ -14978,10 +15070,6 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			$elm$virtual_dom$VirtualDom$on,
 			event,
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
-	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
 	});
 var $elm$html$Html$Events$targetValue = A2(
 	$elm$json$Json$Decode$at,

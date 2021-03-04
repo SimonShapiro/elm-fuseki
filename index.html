@@ -84,7 +84,10 @@
             console.log("Worker available!")
             var worker = new Worker("./workers/Worker.js") 
             worker.onmessage = function(message) {
-                console.log("Received from worker", message)
+                console.log("index.html - Received from worker", message.data)
+//                app.ports.receiveActionResultFromWorker.send(JSON.stringify(message.data));
+                app.ports.receiveActionResultFromWorker.send(message.data);
+//                app.ports.receiveActionResultFromWorker.send({"nodes": [{"a": 1, "b":2}, {"a": 6, "b": 7}]});
             }
         }
     </script>

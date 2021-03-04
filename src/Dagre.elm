@@ -1,4 +1,5 @@
 module Dagre exposing (..)
+import TypedSvg.Types exposing (Length(..))
 
 type RankDir
     = TB
@@ -34,8 +35,8 @@ type alias PlacedNode =
     , label : String
     , width : Int
     , height : Int
-    , x : Int
-    , y : Int
+    , x : Float
+    , y : Float
     }
 
 type alias UnplacedEdge =
@@ -45,21 +46,27 @@ type alias UnplacedEdge =
     }
 
 type alias Point = 
-    { x : Int
-    , y: Int
+    { x : Float
+    , y: Float
     }
 
 type alias PlacedEdge = 
     { from : Int
     , to : Int
     , label : String
-    , x : Int
-    , y : Int
+    -- , x : Int
+    -- , y : Int
     , points : List Point
     }
 
 type alias UnplacedDagreGraph =
     { options : GraphOptions
     , nodes : List UnplacedNode
-    , edges : List PlacedEdge
+    , edges : List UnplacedEdge
+    }
+
+type alias PlacedGraph = 
+    { graph : {width : Int, height : Int}
+    , nodes : List PlacedNode
+    , edges : List UnplacedEdge
     }
