@@ -83,6 +83,9 @@
         if (Worker) {
             console.log("Worker available!")
             var worker = new Worker("./workers/Worker.js") 
+            worker.onmessage = function(message) {
+                console.log("Received from worker", message)
+            }
         }
     </script>
 </body>

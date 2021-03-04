@@ -54,7 +54,7 @@ type alias PlacedEdge =
     , to : Int
     , label : String
     , x : Int
-    , y: Int
+    , y : Int
     , points : List Point
     }
 
