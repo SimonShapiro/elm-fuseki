@@ -6842,6 +6842,7 @@ var $author$project$Main$Normal = {$: 'Normal'};
 var $author$project$Main$Off = {$: 'Off'};
 var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
+var $author$project$Main$Unavailable = {$: 'Unavailable'};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$server = 'http://localhost:port';
@@ -6859,7 +6860,7 @@ var $author$project$Main$initialFn = F3(
 		var initialModel = {
 			currentRdfDict: $elm$core$Maybe$Nothing,
 			graphDisplay: $author$project$Main$Off,
-			graphMaxIterations: 10000,
+			graphImage: $author$project$Main$Unavailable,
 			key: elmKey,
 			keyboard: $author$project$Main$Normal,
 			lineOfThought: _List_Nil,
@@ -6891,6 +6892,9 @@ var $author$project$Main$subscriptions = function (_v0) {
 };
 var $author$project$Main$ApiError = function (a) {
 	return {$: 'ApiError', a: a};
+};
+var $author$project$Main$Available = function (a) {
+	return {$: 'Available', a: a};
 };
 var $elm$http$Http$BadBody = function (a) {
 	return {$: 'BadBody', a: a};
@@ -6927,6 +6931,7 @@ var $author$project$Dagre$Point = F2(
 	});
 var $author$project$Main$Querying = {$: 'Querying'};
 var $author$project$Main$ReadyToAcceptControl = {$: 'ReadyToAcceptControl'};
+var $author$project$Main$Requested = {$: 'Requested'};
 var $author$project$Main$SubjectOrientation = {$: 'SubjectOrientation'};
 var $author$project$Main$Verbose = {$: 'Verbose'};
 var $author$project$Main$Waiting = {$: 'Waiting'};
@@ -7748,13 +7753,13 @@ var $author$project$Main$convertCommunityGraphToDagreWithoutLayout = function (g
 		$elm$core$List$map,
 		function (n) {
 			return {
-				height: 80,
+				height: 40,
 				id: n.id,
 				label: A2(
 					$elm$core$Maybe$withDefault,
 					'unknown',
 					$author$project$RdfDict$rdfNodeToMaybeString(n.label.a)),
-				width: 100
+				width: 120
 			};
 		},
 		$elm_community$graph$Graph$nodes(g));
@@ -8590,6 +8595,7 @@ var $author$project$Main$update = F2(
 								model,
 								{
 									currentRdfDict: contracted,
+									graphImage: $author$project$Main$Requested,
 									lineOfThought: lineOfThought,
 									resultHistory: resultHistory,
 									results: okData.result,
@@ -8838,31 +8844,28 @@ var $author$project$Main$update = F2(
 					return A2(
 						$elm$core$Debug$log,
 						'Decode Error',
-						_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+						_Utils_Tuple2(
+							_Utils_update(
+								model,
+								{graphImage: $author$project$Main$Unavailable}),
+							$elm$core$Platform$Cmd$none));
 				} else {
 					var a = mGraph.a;
 					return A2(
 						$elm$core$Debug$log,
 						$elm$core$String$fromInt(
 							$elm$core$List$length(a.edges)),
-						_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+						_Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									graphImage: $author$project$Main$Available(a)
+								}),
+							$elm$core$Platform$Cmd$none));
 				}
 		}
 	});
 var $author$project$Main$BackToQuery = {$: 'BackToQuery'};
-var $author$project$Main$aka = F2(
-	function (predicateStyle, pred) {
-		if (predicateStyle.$ === 'Verbose') {
-			return pred;
-		} else {
-			return A2(
-				$elm$core$Maybe$withDefault,
-				pred,
-				$elm$core$List$head(
-					$elm$core$List$reverse(
-						A2($elm$core$String$split, '/', pred))));
-		}
-	});
 var $mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
 	return {$: 'Attr', a: a};
 };
@@ -16782,6 +16785,19 @@ var $author$project$Main$RegisterSubjectPredicateOpen = function (a) {
 	return {$: 'RegisterSubjectPredicateOpen', a: a};
 };
 var $author$project$Main$Subject = {$: 'Subject'};
+var $author$project$Main$aka = F2(
+	function (predicateStyle, pred) {
+		if (predicateStyle.$ === 'Verbose') {
+			return pred;
+		} else {
+			return A2(
+				$elm$core$Maybe$withDefault,
+				pred,
+				$elm$core$List$head(
+					$elm$core$List$reverse(
+						A2($elm$core$String$split, '/', pred))));
+		}
+	});
 var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
 var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
 var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
@@ -25292,15 +25308,86 @@ var $author$project$Main$elOfTabularResults = F2(
 				]),
 			{columns: columns, data: data});
 	});
+var $elm_community$typed_svg$TypedSvg$Types$Scale = F2(
+	function (a, b) {
+		return {$: 'Scale', a: a, b: b};
+	});
+var $elm_community$typed_svg$TypedSvg$Types$Translate = F2(
+	function (a, b) {
+		return {$: 'Translate', a: a, b: b};
+	});
+var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
+	return _VirtualDom_nodeNS(
+		_VirtualDom_noScript(tag));
+};
+var $elm_community$typed_svg$TypedSvg$Core$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
+var $elm_community$typed_svg$TypedSvg$g = $elm_community$typed_svg$TypedSvg$Core$node('g');
+var $elm_community$typed_svg$TypedSvg$Types$AnchorMiddle = {$: 'AnchorMiddle'};
 var $elm_community$typed_svg$TypedSvg$Types$Paint = function (a) {
 	return {$: 'Paint', a: a};
+};
+var $author$project$DisplayGraph$aka = function (_long) {
+	return $elm$core$List$head(
+		$elm$core$List$reverse(
+			A2($elm$core$String$split, '/', _long)));
 };
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
+var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
 var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString = function (length) {
+	switch (length.$) {
+		case 'Cm':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'cm';
+		case 'Em':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'em';
+		case 'Ex':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'ex';
+		case 'In':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'in';
+		case 'Mm':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'mm';
+		case 'Num':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x);
+		case 'Pc':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'pc';
+		case 'Percent':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + '%';
+		case 'Pt':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'pt';
+		case 'Px':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'px';
+		default:
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'rem';
+	}
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'cx',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'cy',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
 var $avh4$elm_color$Color$toCssString = function (_v0) {
 	var r = _v0.a;
 	var g = _v0.b;
@@ -25357,42 +25444,11 @@ var $elm_community$typed_svg$TypedSvg$Attributes$fill = A2(
 	$elm$core$Basics$composeL,
 	$elm_community$typed_svg$TypedSvg$Core$attribute('fill'),
 	$elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString);
-var $elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString = function (length) {
-	switch (length.$) {
-		case 'Cm':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'cm';
-		case 'Em':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'em';
-		case 'Ex':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'ex';
-		case 'In':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'in';
-		case 'Mm':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'mm';
-		case 'Num':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x);
-		case 'Pc':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'pc';
-		case 'Percent':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + '%';
-		case 'Pt':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'pt';
-		case 'Px':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'px';
-		default:
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'rem';
-	}
+var $elm_community$typed_svg$TypedSvg$Attributes$fontSize = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'font-size',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
 var $elm_community$typed_svg$TypedSvg$Attributes$height = function (length) {
 	return A2(
@@ -25404,12 +25460,17 @@ var $elm_community$typed_svg$TypedSvg$Types$Px = function (a) {
 	return {$: 'Px', a: a};
 };
 var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
-var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
-	return _VirtualDom_nodeNS(
-		_VirtualDom_noScript(tag));
+var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'r',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
-var $elm_community$typed_svg$TypedSvg$Core$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
 var $elm_community$typed_svg$TypedSvg$rect = $elm_community$typed_svg$TypedSvg$Core$node('rect');
+var $avh4$elm_color$Color$rgba = F4(
+	function (r, g, b, a) {
+		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
+	});
 var $elm_community$typed_svg$TypedSvg$Attributes$stroke = A2(
 	$elm$core$Basics$composeL,
 	$elm_community$typed_svg$TypedSvg$Core$attribute('stroke'),
@@ -25420,6 +25481,27 @@ var $elm_community$typed_svg$TypedSvg$Attributes$strokeWidth = function (length)
 		'stroke-width',
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
+var $elm_community$typed_svg$TypedSvg$Core$text = $elm$virtual_dom$VirtualDom$text;
+var $elm_community$typed_svg$TypedSvg$TypesToStrings$anchorAlignmentToString = function (anchorAlignment) {
+	switch (anchorAlignment.$) {
+		case 'AnchorInherit':
+			return 'inherit';
+		case 'AnchorStart':
+			return 'start';
+		case 'AnchorMiddle':
+			return 'middle';
+		default:
+			return 'end';
+	}
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$textAnchor = function (anchorAlignment) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'text-anchor',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$anchorAlignmentToString(anchorAlignment));
+};
+var $elm_community$typed_svg$TypedSvg$text_ = $elm_community$typed_svg$TypedSvg$Core$node('text');
+var $elm_community$typed_svg$TypedSvg$Attributes$title = $elm_community$typed_svg$TypedSvg$Core$attribute('title');
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
 var $elm_community$typed_svg$TypedSvg$Attributes$width = function (length) {
 	return A2(
@@ -25438,6 +25520,92 @@ var $elm_community$typed_svg$TypedSvg$Attributes$y = function (length) {
 		$elm_community$typed_svg$TypedSvg$Core$attribute,
 		'y',
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $author$project$DisplayGraph$myIcon = F5(
+	function (x, y, label, wd, ht) {
+		return A2(
+			$elm_community$typed_svg$TypedSvg$g,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm_community$typed_svg$TypedSvg$rect,
+					_List_fromArray(
+						[
+							$elm_community$typed_svg$TypedSvg$Attributes$x(
+							$elm_community$typed_svg$TypedSvg$Types$px(x - (wd / 2))),
+							$elm_community$typed_svg$TypedSvg$Attributes$y(
+							$elm_community$typed_svg$TypedSvg$Types$px(y - (ht / 2))),
+							$elm_community$typed_svg$TypedSvg$Attributes$height(
+							$elm_community$typed_svg$TypedSvg$Types$px(ht)),
+							$elm_community$typed_svg$TypedSvg$Attributes$width(
+							$elm_community$typed_svg$TypedSvg$Types$px(wd)),
+							$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
+							$elm_community$typed_svg$TypedSvg$Types$px(1)),
+							$elm_community$typed_svg$TypedSvg$Attributes$stroke(
+							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$black)),
+							$elm_community$typed_svg$TypedSvg$Attributes$fill(
+							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$white))
+						]),
+					_List_Nil),
+					A2(
+					$elm_community$typed_svg$TypedSvg$circle,
+					_List_fromArray(
+						[
+							$elm_community$typed_svg$TypedSvg$Attributes$cx(
+							$elm_community$typed_svg$TypedSvg$Types$px(x)),
+							$elm_community$typed_svg$TypedSvg$Attributes$cy(
+							$elm_community$typed_svg$TypedSvg$Types$px(y)),
+							$elm_community$typed_svg$TypedSvg$Attributes$r(
+							$elm_community$typed_svg$TypedSvg$Types$px(2)),
+							$elm_community$typed_svg$TypedSvg$Attributes$fill(
+							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$blue)),
+							$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
+							$elm_community$typed_svg$TypedSvg$Types$px(2)),
+							$elm_community$typed_svg$TypedSvg$Attributes$stroke(
+							$elm_community$typed_svg$TypedSvg$Types$Paint(
+								A4($avh4$elm_color$Color$rgba, 0.8, 0, 0, 0.5))),
+							$elm_community$typed_svg$TypedSvg$Attributes$title(label)
+						]),
+					_List_Nil),
+					A2(
+					$elm_community$typed_svg$TypedSvg$text_,
+					_List_fromArray(
+						[
+							$elm_community$typed_svg$TypedSvg$Attributes$x(
+							$elm_community$typed_svg$TypedSvg$Types$px(x)),
+							$elm_community$typed_svg$TypedSvg$Attributes$y(
+							$elm_community$typed_svg$TypedSvg$Types$px(y)),
+							$elm_community$typed_svg$TypedSvg$Attributes$fill(
+							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$black)),
+							$elm_community$typed_svg$TypedSvg$Attributes$fontSize(
+							$elm_community$typed_svg$TypedSvg$Types$px(12)),
+							$elm_community$typed_svg$TypedSvg$Attributes$textAnchor($elm_community$typed_svg$TypedSvg$Types$AnchorMiddle)
+						]),
+					_List_fromArray(
+						[
+							function () {
+							var _v0 = $author$project$DisplayGraph$aka(label);
+							if (_v0.$ === 'Nothing') {
+								return $elm_community$typed_svg$TypedSvg$Core$text('');
+							} else {
+								var a = _v0.a;
+								return $elm_community$typed_svg$TypedSvg$Core$text(a);
+							}
+						}()
+						]))
+				]));
+	});
+var $author$project$DisplayGraph$displayNodes = function (nodes) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$g,
+		_List_Nil,
+		A2(
+			$elm$core$List$map,
+			function (n) {
+				return A5($author$project$DisplayGraph$myIcon, n.x, n.y, n.label, n.width, n.height);
+			},
+			nodes));
 };
 var $author$project$DisplayGraph$frame = F2(
 	function (width, height) {
@@ -25462,50 +25630,85 @@ var $author$project$DisplayGraph$frame = F2(
 				]),
 			_List_Nil);
 	});
-var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
-var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
-var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cx',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cy',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'r',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $avh4$elm_color$Color$rgba = F4(
-	function (r, g, b, a) {
-		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
-	});
-var $author$project$DisplayGraph$myCircle = A2(
-	$elm_community$typed_svg$TypedSvg$circle,
-	_List_fromArray(
-		[
-			$elm_community$typed_svg$TypedSvg$Attributes$cx(
-			$elm_community$typed_svg$TypedSvg$Types$px(100)),
-			$elm_community$typed_svg$TypedSvg$Attributes$cy(
-			$elm_community$typed_svg$TypedSvg$Types$px(100)),
-			$elm_community$typed_svg$TypedSvg$Attributes$r(
-			$elm_community$typed_svg$TypedSvg$Types$px(30)),
-			$elm_community$typed_svg$TypedSvg$Attributes$fill(
-			$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$blue)),
-			$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
-			$elm_community$typed_svg$TypedSvg$Types$px(2)),
-			$elm_community$typed_svg$TypedSvg$Attributes$stroke(
-			$elm_community$typed_svg$TypedSvg$Types$Paint(
-				A4($avh4$elm_color$Color$rgba, 0.8, 0, 0, 0.5)))
-		]),
-	_List_Nil);
 var $elm_community$typed_svg$TypedSvg$svg = $elm_community$typed_svg$TypedSvg$Core$node('svg');
+var $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString = function (xform) {
+	var tr = F2(
+		function (name, args) {
+			return $elm$core$String$concat(
+				_List_fromArray(
+					[
+						name,
+						'(',
+						A2(
+						$elm$core$String$join,
+						' ',
+						A2($elm$core$List$map, $elm$core$String$fromFloat, args)),
+						')'
+					]));
+		});
+	switch (xform.$) {
+		case 'Matrix':
+			var a = xform.a;
+			var b = xform.b;
+			var c = xform.c;
+			var d = xform.d;
+			var e = xform.e;
+			var f = xform.f;
+			return A2(
+				tr,
+				'matrix',
+				_List_fromArray(
+					[a, b, c, d, e, f]));
+		case 'Rotate':
+			var a = xform.a;
+			var x = xform.b;
+			var y = xform.c;
+			return A2(
+				tr,
+				'rotate',
+				_List_fromArray(
+					[a, x, y]));
+		case 'Scale':
+			var x = xform.a;
+			var y = xform.b;
+			return A2(
+				tr,
+				'scale',
+				_List_fromArray(
+					[x, y]));
+		case 'SkewX':
+			var x = xform.a;
+			return A2(
+				tr,
+				'skewX',
+				_List_fromArray(
+					[x]));
+		case 'SkewY':
+			var y = xform.a;
+			return A2(
+				tr,
+				'skewY',
+				_List_fromArray(
+					[y]));
+		default:
+			var x = xform.a;
+			var y = xform.b;
+			return A2(
+				tr,
+				'translate',
+				_List_fromArray(
+					[x, y]));
+	}
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$transform = function (transforms) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'transform',
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2($elm$core$List$map, $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString, transforms)));
+};
 var $elm_community$typed_svg$TypedSvg$Attributes$viewBox = F4(
 	function (minX, minY, vWidth, vHeight) {
 		return A2(
@@ -25530,7 +25733,21 @@ var $author$project$DisplayGraph$generateDagreGraph = function (graph) {
 		_List_fromArray(
 			[
 				A2($author$project$DisplayGraph$frame, graph.graph.width, graph.graph.height),
-				$author$project$DisplayGraph$myCircle
+				A2(
+				$elm_community$typed_svg$TypedSvg$g,
+				_List_fromArray(
+					[
+						$elm_community$typed_svg$TypedSvg$Attributes$transform(
+						_List_fromArray(
+							[
+								A2($elm_community$typed_svg$TypedSvg$Types$Scale, 0.9, 0.9),
+								A2($elm_community$typed_svg$TypedSvg$Types$Translate, 10, 10)
+							]))
+					]),
+				_List_fromArray(
+					[
+						$author$project$DisplayGraph$displayNodes(graph.nodes)
+					]))
 			]));
 };
 var $author$project$Main$ToggleGraph = function (a) {
@@ -25773,127 +25990,6 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
-var $elm_community$graph$Graph$DOT$Styles = F4(
-	function (rankdir, graph, node, edge) {
-		return {edge: edge, graph: graph, node: node, rankdir: rankdir};
-	});
-var $elm_community$graph$Graph$DOT$TB = {$: 'TB'};
-var $elm_community$graph$Graph$DOT$defaultStyles = A4($elm_community$graph$Graph$DOT$Styles, $elm_community$graph$Graph$DOT$TB, '', '', '');
-var $elm$core$Dict$isEmpty = function (dict) {
-	if (dict.$ === 'RBEmpty_elm_builtin') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$List$sortWith = _List_sortWith;
-var $elm_community$graph$Graph$DOT$outputWithStylesAndAttributes = F4(
-	function (styles, nodeAttrs, edgeAttrs, graph) {
-		var rankDirToString = function (r) {
-			switch (r.$) {
-				case 'TB':
-					return 'TB';
-				case 'LR':
-					return 'LR';
-				case 'BT':
-					return 'BT';
-				default:
-					return 'RL';
-			}
-		};
-		var nodes = $elm_community$graph$Graph$nodes(graph);
-		var encode = A2(
-			$elm$core$Basics$composeR,
-			$elm$json$Json$Encode$string,
-			$elm$json$Json$Encode$encode(0));
-		var edges = function () {
-			var compareEdge = F2(
-				function (a, b) {
-					var _v1 = A2($elm$core$Basics$compare, a.from, b.from);
-					switch (_v1.$) {
-						case 'LT':
-							return $elm$core$Basics$LT;
-						case 'GT':
-							return $elm$core$Basics$GT;
-						default:
-							return A2($elm$core$Basics$compare, a.to, b.to);
-					}
-				});
-			return A2(
-				$elm$core$List$sortWith,
-				compareEdge,
-				$elm_community$graph$Graph$edges(graph));
-		}();
-		var attrAssocs = A2(
-			$elm$core$Basics$composeR,
-			$elm$core$Dict$toList,
-			A2(
-				$elm$core$Basics$composeR,
-				$elm$core$List$map(
-					function (_v0) {
-						var k = _v0.a;
-						var v = _v0.b;
-						return k + ('=' + encode(v));
-					}),
-				$elm$core$String$join(', ')));
-		var makeAttrs = function (d) {
-			return $elm$core$Dict$isEmpty(d) ? '' : (' [' + (attrAssocs(d) + ']'));
-		};
-		var edge = function (e) {
-			return '  ' + ($elm$core$String$fromInt(e.from) + (' -> ' + ($elm$core$String$fromInt(e.to) + makeAttrs(
-				edgeAttrs(e.label)))));
-		};
-		var edgesString = A2(
-			$elm$core$String$join,
-			'\n',
-			A2($elm$core$List$map, edge, edges));
-		var node = function (n) {
-			return '  ' + ($elm$core$String$fromInt(n.id) + makeAttrs(
-				nodeAttrs(n.label)));
-		};
-		var nodesString = A2(
-			$elm$core$String$join,
-			'\n',
-			A2($elm$core$List$map, node, nodes));
-		return A2(
-			$elm$core$String$join,
-			'\n',
-			_List_fromArray(
-				[
-					'digraph G {',
-					'  rankdir=' + rankDirToString(styles.rankdir),
-					'  graph [' + (styles.graph + ']'),
-					'  node [' + (styles.node + ']'),
-					'  edge [' + (styles.edge + ']'),
-					'',
-					edgesString,
-					'',
-					nodesString,
-					'}'
-				]));
-	});
-var $elm$core$Dict$singleton = F2(
-	function (key, value) {
-		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-	});
-var $elm_community$graph$Graph$DOT$outputWithStyles = F4(
-	function (styles, mapNode, mapEdge, graph) {
-		var labelOnly = function (maybeLabel) {
-			if (maybeLabel.$ === 'Nothing') {
-				return $elm$core$Dict$empty;
-			} else {
-				var l = maybeLabel.a;
-				return A2($elm$core$Dict$singleton, 'label', l);
-			}
-		};
-		return A4(
-			$elm_community$graph$Graph$DOT$outputWithStylesAndAttributes,
-			styles,
-			A2($elm$core$Basics$composeL, labelOnly, mapNode),
-			A2($elm$core$Basics$composeL, labelOnly, mapEdge),
-			graph);
-	});
-var $elm_community$graph$Graph$DOT$output = $elm_community$graph$Graph$DOT$outputWithStyles($elm_community$graph$Graph$DOT$defaultStyles);
 var $author$project$Main$ChangePredicateStyle = function (a) {
 	return {$: 'ChangePredicateStyle', a: a};
 };
@@ -26112,32 +26208,17 @@ var $author$project$Main$view = function (model) {
 														function () {
 														var _v4 = model.graphDisplay;
 														if (_v4.$ === 'On') {
-															return $mdgriffith$elm_ui$Element$html(
-																A3(
-																	$elm$core$Debug$log,
-																	A3(
-																		$elm_community$graph$Graph$DOT$output,
-																		function (n) {
-																			return $elm$core$Maybe$Just(
-																				A2(
-																					$author$project$Main$aka,
-																					model.predicateStyle,
-																					A2(
-																						$elm$core$Maybe$withDefault,
-																						'unknown',
-																						$author$project$RdfDict$rdfNodeToMaybeString(n.a))));
-																		},
-																		function (e) {
-																			return $elm$core$Maybe$Just(
-																				A2($author$project$Main$aka, model.predicateStyle, e));
-																		},
-																		$author$project$Main$convertRdfDict2CommunityGraph(a)),
-																	$author$project$DisplayGraph$generateDagreGraph,
-																	{
-																		edges: _List_Nil,
-																		graph: {height: 1200, width: 1200},
-																		nodes: _List_Nil
-																	}));
+															var _v5 = model.graphImage;
+															switch (_v5.$) {
+																case 'Available':
+																	var g = _v5.a;
+																	return $mdgriffith$elm_ui$Element$html(
+																		$author$project$DisplayGraph$generateDagreGraph(g));
+																case 'Unavailable':
+																	return $mdgriffith$elm_ui$Element$text('No graph available');
+																default:
+																	return $mdgriffith$elm_ui$Element$text('Graph not yet ready');
+															}
 														} else {
 															return $mdgriffith$elm_ui$Element$none;
 														}

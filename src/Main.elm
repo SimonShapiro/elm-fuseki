@@ -72,8 +72,8 @@ convertCommunityGraphToDagreWithoutLayout g =
         edges = List.map (\e -> {from = e.from, to=e.to, label=e.label}) (Graph.edges g)
         nodes = List.map (\n ->     { id = n.id
                                     , label= RdfDict.rdfNodeToMaybeString (Tuple.first n.label) |> Maybe.withDefault "unknown"
-                                    , width = 100
-                                    , height = 80
+                                    , width = 120
+                                    , height = 40
                                      }) (Graph.nodes g)
     in
         (nodes, edges)
@@ -120,6 +120,11 @@ type UIState
     | ApiError Http.Error
     | Waiting
 
+type GraphDisplayState
+    = Unavailable
+    | Requested
+    | Available Dagre.PlacedGraph
+
 type alias Model = 
     { state: UIState
     , server: Server
@@ -135,7 +140,7 @@ type alias Model =
     , resultsDisplay: ResultsDisplay
     , predicateStyle: PredicateStyle
     , graphDisplay: GraphDisplay
-    , graphMaxIterations: Int
+    , graphImage: GraphDisplayState
     , openPredicatesInSubject: OpenPredicatesInSubject
     , key: Key
     }
@@ -453,7 +458,7 @@ initialFn maybeServer url elmKey =
                         , resultsDisplay = Table
                         , predicateStyle = Terse
                         , graphDisplay = Off
-                        , graphMaxIterations = 10000
+                        , graphImage = Unavailable
                         , openPredicatesInSubject = []
                         , key = elmKey
                         }
@@ -621,6 +626,7 @@ update msg model =
                                     , resultHistory = resultHistory
                                     , lineOfThought = lineOfThought
                                     , currentRdfDict = contracted
+                                    , graphImage = Requested
                                     }, cmd)
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
@@ -720,10 +726,10 @@ update msg model =
                 case mGraph of 
                     Err _ -> 
                         Debug.log "Decode Error"
-                        (model, Cmd.none)
+                        ({model | graphImage = Unavailable}, Cmd.none)
                     Ok a -> 
                         Debug.log (List.length a.edges |> String.fromInt)
-                        (model, Cmd.none)
+                        ({model | graphImage = Available a}, Cmd.none)
 
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
@@ -1363,11 +1369,15 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                             [ graphToggle model.graphDisplay
                                                             , case model.graphDisplay of
                                                                 On ->
-                                                                    Debug.log (convertRdfDict2CommunityGraph a |>  Graph.DOT.output (\n -> RdfDict.rdfNodeToMaybeString (Tuple.first n) |> Maybe.withDefault "unknown" |> aka model.predicateStyle |> Just) 
-                                                                                                                                    (\e -> Just( aka model.predicateStyle e) ))
+                                                                --    Debug.log (convertRdfDict2CommunityGraph a |>  Graph.DOT.output (\n -> RdfDict.rdfNodeToMaybeString (Tuple.first n) |> Maybe.withDefault "unknown" |> aka model.predicateStyle |> Just) 
+                                                                --                                                                    (\e -> Just( aka model.predicateStyle e) ))
  --                                                                   convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
 --                                                                    rdfDictToJsonValue a |> sendActionRequestToWorker
-                                                                    generateDagreGraph {graph = {width = 1200, height = 1200}, nodes= [],edges = []}|> Element.html
+
+                                                                    case model.graphImage of
+                                                                        Available g -> generateDagreGraph g |> Element.html
+                                                                        Unavailable -> Element.text "No graph available"
+                                                                        Requested -> Element.text "Graph not yet ready"
                                                                 Off -> Element.none
                                                             ]
                                                             , elOfSubjects model
