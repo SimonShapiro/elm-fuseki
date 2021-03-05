@@ -66,7 +66,7 @@ type alias UnplacedDagreGraph =
     }
 
 type alias PlacedGraph = 
-    { graph : {width : Int, height : Int}
+    { graph : {width : Float, height : Float}
     , nodes : List PlacedNode
     , edges : List UnplacedEdge
     }

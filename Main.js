@@ -25292,6 +25292,247 @@ var $author$project$Main$elOfTabularResults = F2(
 				]),
 			{columns: columns, data: data});
 	});
+var $elm_community$typed_svg$TypedSvg$Types$Paint = function (a) {
+	return {$: 'Paint', a: a};
+};
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $avh4$elm_color$Color$toCssString = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var roundTo = function (x) {
+		return $elm$core$Basics$round(x * 1000) / 1000;
+	};
+	var pct = function (x) {
+		return $elm$core$Basics$round(x * 10000) / 100;
+	};
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'rgba(',
+				$elm$core$String$fromFloat(
+				pct(r)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(g)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(b)),
+				'%,',
+				$elm$core$String$fromFloat(
+				roundTo(a)),
+				')'
+			]));
+};
+var $elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString = function (paint) {
+	switch (paint.$) {
+		case 'Paint':
+			var color = paint.a;
+			return $avh4$elm_color$Color$toCssString(color);
+		case 'CSSVariable':
+			var string = paint.a;
+			return $elm$core$String$concat(
+				_List_fromArray(
+					['var(' + (string + ')')]));
+		case 'Reference':
+			var string = paint.a;
+			return $elm$core$String$concat(
+				_List_fromArray(
+					['url(#', string, ')']));
+		case 'ContextFill':
+			return 'context-fill';
+		case 'ContextStroke':
+			return 'context-stroke';
+		default:
+			return 'none';
+	}
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$fill = A2(
+	$elm$core$Basics$composeL,
+	$elm_community$typed_svg$TypedSvg$Core$attribute('fill'),
+	$elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString);
+var $elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString = function (length) {
+	switch (length.$) {
+		case 'Cm':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'cm';
+		case 'Em':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'em';
+		case 'Ex':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'ex';
+		case 'In':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'in';
+		case 'Mm':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'mm';
+		case 'Num':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x);
+		case 'Pc':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'pc';
+		case 'Percent':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + '%';
+		case 'Pt':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'pt';
+		case 'Px':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'px';
+		default:
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'rem';
+	}
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$height = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'height',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Types$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
+var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
+	return _VirtualDom_nodeNS(
+		_VirtualDom_noScript(tag));
+};
+var $elm_community$typed_svg$TypedSvg$Core$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
+var $elm_community$typed_svg$TypedSvg$rect = $elm_community$typed_svg$TypedSvg$Core$node('rect');
+var $elm_community$typed_svg$TypedSvg$Attributes$stroke = A2(
+	$elm$core$Basics$composeL,
+	$elm_community$typed_svg$TypedSvg$Core$attribute('stroke'),
+	$elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString);
+var $elm_community$typed_svg$TypedSvg$Attributes$strokeWidth = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'stroke-width',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
+var $elm_community$typed_svg$TypedSvg$Attributes$width = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'width',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$x = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'x',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$y = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'y',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $author$project$DisplayGraph$frame = F2(
+	function (width, height) {
+		return A2(
+			$elm_community$typed_svg$TypedSvg$rect,
+			_List_fromArray(
+				[
+					$elm_community$typed_svg$TypedSvg$Attributes$x(
+					$elm_community$typed_svg$TypedSvg$Types$px(0)),
+					$elm_community$typed_svg$TypedSvg$Attributes$y(
+					$elm_community$typed_svg$TypedSvg$Types$px(0)),
+					$elm_community$typed_svg$TypedSvg$Attributes$width(
+					$elm_community$typed_svg$TypedSvg$Types$px(width)),
+					$elm_community$typed_svg$TypedSvg$Attributes$height(
+					$elm_community$typed_svg$TypedSvg$Types$px(height)),
+					$elm_community$typed_svg$TypedSvg$Attributes$stroke(
+					$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$black)),
+					$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
+					$elm_community$typed_svg$TypedSvg$Types$px(1)),
+					$elm_community$typed_svg$TypedSvg$Attributes$fill(
+					$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$white))
+				]),
+			_List_Nil);
+	});
+var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
+var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
+var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'cx',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'cy',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'r',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
+};
+var $avh4$elm_color$Color$rgba = F4(
+	function (r, g, b, a) {
+		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
+	});
+var $author$project$DisplayGraph$myCircle = A2(
+	$elm_community$typed_svg$TypedSvg$circle,
+	_List_fromArray(
+		[
+			$elm_community$typed_svg$TypedSvg$Attributes$cx(
+			$elm_community$typed_svg$TypedSvg$Types$px(100)),
+			$elm_community$typed_svg$TypedSvg$Attributes$cy(
+			$elm_community$typed_svg$TypedSvg$Types$px(100)),
+			$elm_community$typed_svg$TypedSvg$Attributes$r(
+			$elm_community$typed_svg$TypedSvg$Types$px(30)),
+			$elm_community$typed_svg$TypedSvg$Attributes$fill(
+			$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$blue)),
+			$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
+			$elm_community$typed_svg$TypedSvg$Types$px(2)),
+			$elm_community$typed_svg$TypedSvg$Attributes$stroke(
+			$elm_community$typed_svg$TypedSvg$Types$Paint(
+				A4($avh4$elm_color$Color$rgba, 0.8, 0, 0, 0.5)))
+		]),
+	_List_Nil);
+var $elm_community$typed_svg$TypedSvg$svg = $elm_community$typed_svg$TypedSvg$Core$node('svg');
+var $elm_community$typed_svg$TypedSvg$Attributes$viewBox = F4(
+	function (minX, minY, vWidth, vHeight) {
+		return A2(
+			$elm_community$typed_svg$TypedSvg$Core$attribute,
+			'viewBox',
+			A2(
+				$elm$core$String$join,
+				' ',
+				A2(
+					$elm$core$List$map,
+					$elm$core$String$fromFloat,
+					_List_fromArray(
+						[minX, minY, vWidth, vHeight]))));
+	});
+var $author$project$DisplayGraph$generateDagreGraph = function (graph) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$svg,
+		_List_fromArray(
+			[
+				A4($elm_community$typed_svg$TypedSvg$Attributes$viewBox, 0, 0, graph.graph.width, graph.graph.height)
+			]),
+		_List_fromArray(
+			[
+				A2($author$project$DisplayGraph$frame, graph.graph.width, graph.graph.height),
+				$author$project$DisplayGraph$myCircle
+			]));
+};
 var $author$project$Main$ToggleGraph = function (a) {
 	return {$: 'ToggleGraph', a: a};
 };
@@ -25858,34 +26099,50 @@ var $author$project$Main$view = function (model) {
 												$author$project$Main$elOfMainPage(model),
 												$author$project$Main$elOfLineOfThought(model),
 												$author$project$Main$predicateStyleToggle(model.predicateStyle),
-												$author$project$Main$graphToggle(model.graphDisplay),
-												function () {
-												var _v4 = model.graphDisplay;
-												if (_v4.$ === 'On') {
-													return A2(
-														$elm$core$Debug$log,
-														A3(
-															$elm_community$graph$Graph$DOT$output,
-															function (n) {
-																return $elm$core$Maybe$Just(
-																	A2(
-																		$author$project$Main$aka,
-																		model.predicateStyle,
-																		A2(
-																			$elm$core$Maybe$withDefault,
-																			'unknown',
-																			$author$project$RdfDict$rdfNodeToMaybeString(n.a))));
-															},
-															function (e) {
-																return $elm$core$Maybe$Just(
-																	A2($author$project$Main$aka, model.predicateStyle, e));
-															},
-															$author$project$Main$convertRdfDict2CommunityGraph(a)),
-														$mdgriffith$elm_ui$Element$none);
-												} else {
-													return $mdgriffith$elm_ui$Element$none;
-												}
-											}(),
+												A2(
+												$mdgriffith$elm_ui$Element$column,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+														A2($mdgriffith$elm_ui$Element$paddingXY, 10, 0)
+													]),
+												_List_fromArray(
+													[
+														$author$project$Main$graphToggle(model.graphDisplay),
+														function () {
+														var _v4 = model.graphDisplay;
+														if (_v4.$ === 'On') {
+															return $mdgriffith$elm_ui$Element$html(
+																A3(
+																	$elm$core$Debug$log,
+																	A3(
+																		$elm_community$graph$Graph$DOT$output,
+																		function (n) {
+																			return $elm$core$Maybe$Just(
+																				A2(
+																					$author$project$Main$aka,
+																					model.predicateStyle,
+																					A2(
+																						$elm$core$Maybe$withDefault,
+																						'unknown',
+																						$author$project$RdfDict$rdfNodeToMaybeString(n.a))));
+																		},
+																		function (e) {
+																			return $elm$core$Maybe$Just(
+																				A2($author$project$Main$aka, model.predicateStyle, e));
+																		},
+																		$author$project$Main$convertRdfDict2CommunityGraph(a)),
+																	$author$project$DisplayGraph$generateDagreGraph,
+																	{
+																		edges: _List_Nil,
+																		graph: {height: 1200, width: 1200},
+																		nodes: _List_Nil
+																	}));
+														} else {
+															return $mdgriffith$elm_ui$Element$none;
+														}
+													}()
+													])),
 												$author$project$Main$elOfSubjects(model)
 											])));
 							} else {

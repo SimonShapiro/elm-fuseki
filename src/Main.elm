@@ -35,7 +35,7 @@ import String
 import Sparql exposing (..)
 import PlaygroundQuery exposing (..)
 import RdfDict exposing (..)
-import GraphDisplay exposing (..)
+import DisplayGraph exposing (..)
 import List.Extra exposing (uncons, groupWhile)
 
 import Element exposing (..)
@@ -57,7 +57,7 @@ import Element
 import RdfDict
 
 import Dagre 
-import List
+import Element
 
 dagreOptions = 
     { rankDir = Dagre.TB
@@ -1359,15 +1359,17 @@ view model = { title = "Sparql Query Playground - 0.0"
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                             , elOfLineOfThought model -- maybe not model???
                                                             , predicateStyleToggle model.predicateStyle
-                                                            , graphToggle model.graphDisplay
+                                                            , Element.column [Element.width Element.fill, Element.paddingXY 10 0] 
+                                                            [ graphToggle model.graphDisplay
                                                             , case model.graphDisplay of
                                                                 On ->
                                                                     Debug.log (convertRdfDict2CommunityGraph a |>  Graph.DOT.output (\n -> RdfDict.rdfNodeToMaybeString (Tuple.first n) |> Maybe.withDefault "unknown" |> aka model.predicateStyle |> Just) 
                                                                                                                                     (\e -> Just( aka model.predicateStyle e) ))
  --                                                                   convertRdfDict2CommunityGraph a |> GraphDisplay.init model.graphMaxIterations |> GraphDisplay.view |> Element.html 
 --                                                                    rdfDictToJsonValue a |> sendActionRequestToWorker
-                                                                    Element.none 
+                                                                    generateDagreGraph {graph = {width = 1200, height = 1200}, nodes= [],edges = []}|> Element.html
                                                                 Off -> Element.none
+                                                            ]
                                                             , elOfSubjects model
                                                             ]
                                             |> Element.layout []

@@ -1,4 +1,4 @@
-module GraphDisplay exposing (..)
+module GraphDisplay_retired exposing (..)
 
 import Color exposing (Color)
 import Force exposing (State)
