@@ -49,6 +49,44 @@ aka long =
     |> List.reverse
     |> List.head
 
+shapeEdgePoints : List Point -> String
+shapeEdgePoints points = 
+    let
+        head = points |> List.head |> Maybe.withDefault {x=0, y=0}
+        rest = points |> List.tail |> Maybe.withDefault [{x=0, y=0}]
+    in
+        "M"::((String.fromFloat head.x)++","++(String.fromFloat head.y))
+        ::"Q":: List.map (\p -> (String.fromFloat p.x)++","++(String.fromFloat p.y)) rest
+        |> String.join " "
+
+myEdge : Dagre.PlacedEdge -> Svg msg
+myEdge edge =
+    let
+        points = edge.points
+        -- start = points 
+        --         |> List.head
+        --         |> Maybe.withDefault {x=0, y=0}
+        -- end = points
+        --         |> List.reverse
+        --         |> List.head
+        --         |> Maybe.withDefault {x=0, y=0}
+    in
+        g [] [ TypedSvg.path   [ Attr.d (shapeEdgePoints points)
+                        , Attr.stroke (Paint Color.black)
+                        , Attr.fill PaintNone
+                        ] []
+                , text_ [ Attr.x (px edge.x)
+                    , Attr.y (px edge.y)
+                    , fill <| Paint <| Color.black
+                    , Attr.fontSize (px 8)
+                    , Attr.textAnchor TypedSvg.Types.AnchorEnd 
+--                    , strokeWidth (px 1)
+                    ] 
+                        [ case aka edge.label of
+                            Nothing -> text ""
+                            Just a -> text a
+                        ]
+        ]
 
 frame : Float -> Float -> Svg msg
 frame width height =
@@ -68,8 +106,14 @@ displayNodes nodes =
     g [] (List.map (\n -> myIcon n.x n.y n.label n.width n.height)
         nodes)
 
+displayEdges : List Dagre.PlacedEdge -> Svg msg
+displayEdges edges = 
+    g [] (List.map (\e -> myEdge e) edges)
+
 generateDagreGraph : Dagre.PlacedGraph -> Html msg
 generateDagreGraph graph =   svg [ viewBox 0 0 graph.graph.width graph.graph.height ] 
     [ frame graph.graph.width graph.graph.height
-    , g [Attr.transform [TypedSvg.Types.Scale 0.9 0.9, TypedSvg.Types.Translate 10 10]] [displayNodes graph.nodes]
+    , g [Attr.transform [TypedSvg.Types.Scale 0.9 0.9, TypedSvg.Types.Translate 10 10]] [ displayEdges graph.edges
+                                                                                        , displayNodes graph.nodes 
+                                                                                        ]
     ]

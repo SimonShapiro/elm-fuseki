@@ -42,6 +42,8 @@ type alias UnplacedEdge =
     { from : Int
     , to : Int
     , label : String
+    , width : Int
+    , height : Int
     }
 
 type alias Point = 
@@ -53,8 +55,10 @@ type alias PlacedEdge =
     { from : Int
     , to : Int
     , label : String
-    -- , x : Int
-    -- , y : Int
+    , width : Int
+    , height : Int
+    , x : Float
+    , y : Float
     , points : List Point
     }
 

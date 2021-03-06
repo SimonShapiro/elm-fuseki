@@ -69,7 +69,7 @@ emptyDagre = Dagre.UnplacedDagreGraph dagreOptions [] []
 convertCommunityGraphToDagreWithoutLayout : Graph  (SubjectMolecule RdfNode) String -> (List Dagre.UnplacedNode, List Dagre.UnplacedEdge)
 convertCommunityGraphToDagreWithoutLayout g = 
     let
-        edges = List.map (\e -> {from = e.from, to=e.to, label=e.label}) (Graph.edges g)
+        edges = List.map (\e -> {from = e.from, to=e.to, label=e.label, width = 60, height = 15}) (Graph.edges g)
         nodes = List.map (\n ->     { id = n.id
                                     , label= RdfDict.rdfNodeToMaybeString (Tuple.first n.label) |> Maybe.withDefault "unknown"
                                     , width = 120
@@ -89,6 +89,8 @@ convertDagreWithoutLayoutToJson dagre =
         jsonEdges = JE.list (\e -> JE.object    [ ("from", JE.int e.from)
                                                 , ("to", JE.int e.to)
                                                 , ("label", JE.string e.label)
+                                                , ("width", JE.int e.width)
+                                                , ("height", JE.int e.height)
                                                 ]) (Tuple.second dagre)
     in
         JE.object   [ ("action", JE.string "LayoutGraph")
@@ -707,10 +709,14 @@ update msg model =
                                     (JD.field "y" JD.float)
                                     |> JD.list 
 
-                edgeDecoder = JD.map4 Dagre.PlacedEdge
+                edgeDecoder = JD.map8 Dagre.PlacedEdge
                                     (JD.field "from" JD.int)
                                     (JD.field "to" JD.int)
                                     (JD.field "label" JD.string)
+                                    (JD.field "width" JD.int)
+                                    (JD.field "height" JD.int)
+                                    (JD.field "x" JD.float)
+                                    (JD.field "y" JD.float)
                                     (JD.field "points" pointDecoder)
                                     |> JD.list
 

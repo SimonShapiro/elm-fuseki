@@ -38,6 +38,10 @@ onmessage = function(message) {
                     from: parseInt(e.v),  // seems to be a bug in dagre as it always return string here and below
                     to: parseInt(e.w),
                     label: edge.label,
+                    width: edge.width,
+                    height: edge.height,
+                    x: edge.x,
+                    y: edge.y,
                     points: edge.points
                 });
             });
