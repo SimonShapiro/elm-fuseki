@@ -2,8 +2,8 @@ module DisplayGraph exposing (..)
 
 import Color
 import Html exposing (Html)
-import TypedSvg exposing (circle, svg, rect, g, text_)
-import TypedSvg.Attributes as Attr exposing (x, y, cx, cy, fill, r, stroke, strokeWidth, viewBox, x, y, width, height, title)
+import TypedSvg exposing (circle, svg, rect, g, text_, polygon, marker, defs)
+import TypedSvg.Attributes as Attr exposing (x, y, cx, cy, fill, r, stroke, strokeWidth, viewBox, x, y, width, height, title, points, orient)
 import TypedSvg.Types exposing (Paint(..), px)
 import TypedSvg.Core exposing (Svg, text)
 import Dagre exposing (..)
@@ -49,6 +49,15 @@ aka long =
     |> List.reverse
     |> List.head
 
+arrowHead = marker [ Attr.markerWidth (px 10)
+                    , Attr.markerHeight (px 10)
+                    , Attr.orient "auto"
+                    , Attr.id "arrowHead"
+                    , Attr.refX "10"
+                    , Attr.refY "3.5"
+                    ]
+                    [ polygon [ points [(0,0), (10, 3.5), (0,7)]] [] ]
+
 shapeEdgePoints : List Point -> String
 shapeEdgePoints points = 
     let
@@ -56,7 +65,7 @@ shapeEdgePoints points =
         rest = points |> List.tail |> Maybe.withDefault [{x=0, y=0}]
     in
         "M"::((String.fromFloat head.x)++","++(String.fromFloat head.y))
-        ::"Q":: List.map (\p -> (String.fromFloat p.x)++","++(String.fromFloat p.y)) rest
+        ::"L":: List.map (\p -> (String.fromFloat p.x)++","++(String.fromFloat p.y)) rest
         |> String.join " "
 
 myEdge : Dagre.PlacedEdge -> Svg msg
@@ -74,6 +83,7 @@ myEdge edge =
         g [] [ TypedSvg.path   [ Attr.d (shapeEdgePoints points)
                         , Attr.stroke (Paint Color.black)
                         , Attr.fill PaintNone
+                        , Attr.markerEnd "url(#arrowHead)"
                         ] []
                 , text_ [ Attr.x (px edge.x)
                     , Attr.y (px edge.y)
@@ -111,8 +121,9 @@ displayEdges edges =
     g [] (List.map (\e -> myEdge e) edges)
 
 generateDagreGraph : Dagre.PlacedGraph -> Html msg
-generateDagreGraph graph =   svg [ viewBox 0 0 graph.graph.width graph.graph.height ] 
-    [ frame graph.graph.width graph.graph.height
+generateDagreGraph graph =   svg [ viewBox 0 0 graph.graph.width graph.graph.height] 
+    [ defs [][arrowHead]
+    , frame graph.graph.width graph.graph.height
     , g [Attr.transform [TypedSvg.Types.Scale 0.9 0.9, TypedSvg.Types.Translate 10 10]] [ displayEdges graph.edges
                                                                                         , displayNodes graph.nodes 
                                                                                         ]

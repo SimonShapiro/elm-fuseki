@@ -25350,11 +25350,115 @@ var $elm_community$typed_svg$TypedSvg$Types$Translate = F2(
 	function (a, b) {
 		return {$: 'Translate', a: a, b: b};
 	});
+var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $elm_community$typed_svg$TypedSvg$Attributes$id = $elm_community$typed_svg$TypedSvg$Core$attribute('id');
 var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
 	return _VirtualDom_nodeNS(
 		_VirtualDom_noScript(tag));
 };
 var $elm_community$typed_svg$TypedSvg$Core$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
+var $elm_community$typed_svg$TypedSvg$marker = $elm_community$typed_svg$TypedSvg$Core$node('marker');
+var $elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString = function (length) {
+	switch (length.$) {
+		case 'Cm':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'cm';
+		case 'Em':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'em';
+		case 'Ex':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'ex';
+		case 'In':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'in';
+		case 'Mm':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'mm';
+		case 'Num':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x);
+		case 'Pc':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'pc';
+		case 'Percent':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + '%';
+		case 'Pt':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'pt';
+		case 'Px':
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'px';
+		default:
+			var x = length.a;
+			return $elm$core$String$fromFloat(x) + 'rem';
+	}
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$markerHeight = function (mHeight) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'markerHeight',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(mHeight));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$markerWidth = function (mWidth) {
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'markerWidth',
+		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(mWidth));
+};
+var $elm_community$typed_svg$TypedSvg$Attributes$orient = $elm_community$typed_svg$TypedSvg$Core$attribute('orient');
+var $elm_community$typed_svg$TypedSvg$Attributes$points = function (pts) {
+	var pointToString = function (_v0) {
+		var xx = _v0.a;
+		var yy = _v0.b;
+		return $elm$core$String$fromFloat(xx) + (', ' + $elm$core$String$fromFloat(yy));
+	};
+	return A2(
+		$elm_community$typed_svg$TypedSvg$Core$attribute,
+		'points',
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2($elm$core$List$map, pointToString, pts)));
+};
+var $elm_community$typed_svg$TypedSvg$polygon = $elm_community$typed_svg$TypedSvg$Core$node('polygon');
+var $elm_community$typed_svg$TypedSvg$Types$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
+var $elm_community$typed_svg$TypedSvg$Attributes$refX = $elm_community$typed_svg$TypedSvg$Core$attribute('refX');
+var $elm_community$typed_svg$TypedSvg$Attributes$refY = $elm_community$typed_svg$TypedSvg$Core$attribute('refY');
+var $author$project$DisplayGraph$arrowHead = A2(
+	$elm_community$typed_svg$TypedSvg$marker,
+	_List_fromArray(
+		[
+			$elm_community$typed_svg$TypedSvg$Attributes$markerWidth(
+			$elm_community$typed_svg$TypedSvg$Types$px(10)),
+			$elm_community$typed_svg$TypedSvg$Attributes$markerHeight(
+			$elm_community$typed_svg$TypedSvg$Types$px(10)),
+			$elm_community$typed_svg$TypedSvg$Attributes$orient('auto'),
+			$elm_community$typed_svg$TypedSvg$Attributes$id('arrowHead'),
+			$elm_community$typed_svg$TypedSvg$Attributes$refX('10'),
+			$elm_community$typed_svg$TypedSvg$Attributes$refY('3.5')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm_community$typed_svg$TypedSvg$polygon,
+			_List_fromArray(
+				[
+					$elm_community$typed_svg$TypedSvg$Attributes$points(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(0, 0),
+							_Utils_Tuple2(10, 3.5),
+							_Utils_Tuple2(0, 7)
+						]))
+				]),
+			_List_Nil)
+		]));
+var $elm_community$typed_svg$TypedSvg$defs = $elm_community$typed_svg$TypedSvg$Core$node('defs');
 var $elm_community$typed_svg$TypedSvg$g = $elm_community$typed_svg$TypedSvg$Core$node('g');
 var $elm_community$typed_svg$TypedSvg$Types$AnchorEnd = {$: 'AnchorEnd'};
 var $elm_community$typed_svg$TypedSvg$Types$Paint = function (a) {
@@ -25371,7 +25475,6 @@ var $avh4$elm_color$Color$RgbaSpace = F4(
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
-var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm_community$typed_svg$TypedSvg$Attributes$d = $elm_community$typed_svg$TypedSvg$Core$attribute('d');
 var $avh4$elm_color$Color$toCssString = function (_v0) {
 	var r = _v0.a;
@@ -25429,54 +25532,14 @@ var $elm_community$typed_svg$TypedSvg$Attributes$fill = A2(
 	$elm$core$Basics$composeL,
 	$elm_community$typed_svg$TypedSvg$Core$attribute('fill'),
 	$elm_community$typed_svg$TypedSvg$TypesToStrings$paintToString);
-var $elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString = function (length) {
-	switch (length.$) {
-		case 'Cm':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'cm';
-		case 'Em':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'em';
-		case 'Ex':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'ex';
-		case 'In':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'in';
-		case 'Mm':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'mm';
-		case 'Num':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x);
-		case 'Pc':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'pc';
-		case 'Percent':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + '%';
-		case 'Pt':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'pt';
-		case 'Px':
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'px';
-		default:
-			var x = length.a;
-			return $elm$core$String$fromFloat(x) + 'rem';
-	}
-};
 var $elm_community$typed_svg$TypedSvg$Attributes$fontSize = function (length) {
 	return A2(
 		$elm_community$typed_svg$TypedSvg$Core$attribute,
 		'font-size',
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
+var $elm_community$typed_svg$TypedSvg$Attributes$markerEnd = $elm_community$typed_svg$TypedSvg$Core$attribute('marker-end');
 var $elm_community$typed_svg$TypedSvg$path = $elm_community$typed_svg$TypedSvg$Core$node('path');
-var $elm_community$typed_svg$TypedSvg$Types$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $elm_community$typed_svg$TypedSvg$Types$px = $elm_community$typed_svg$TypedSvg$Types$Px;
 var $author$project$DisplayGraph$shapeEdgePoints = function (points) {
 	var rest = A2(
 		$elm$core$Maybe$withDefault,
@@ -25500,7 +25563,7 @@ var $author$project$DisplayGraph$shapeEdgePoints = function (points) {
 				$elm$core$String$fromFloat(head.x) + (',' + $elm$core$String$fromFloat(head.y)),
 				A2(
 					$elm$core$List$cons,
-					'Q',
+					'L',
 					A2(
 						$elm$core$List$map,
 						function (p) {
@@ -25559,7 +25622,8 @@ var $author$project$DisplayGraph$myEdge = function (edge) {
 						$author$project$DisplayGraph$shapeEdgePoints(points)),
 						$elm_community$typed_svg$TypedSvg$Attributes$stroke(
 						$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$black)),
-						$elm_community$typed_svg$TypedSvg$Attributes$fill($elm_community$typed_svg$TypedSvg$Types$PaintNone)
+						$elm_community$typed_svg$TypedSvg$Attributes$fill($elm_community$typed_svg$TypedSvg$Types$PaintNone),
+						$elm_community$typed_svg$TypedSvg$Attributes$markerEnd('url(#arrowHead)')
 					]),
 				_List_Nil),
 				A2(
@@ -25858,6 +25922,11 @@ var $author$project$DisplayGraph$generateDagreGraph = function (graph) {
 			]),
 		_List_fromArray(
 			[
+				A2(
+				$elm_community$typed_svg$TypedSvg$defs,
+				_List_Nil,
+				_List_fromArray(
+					[$author$project$DisplayGraph$arrowHead])),
 				A2($author$project$DisplayGraph$frame, graph.graph.width, graph.graph.height),
 				A2(
 				$elm_community$typed_svg$TypedSvg$g,
