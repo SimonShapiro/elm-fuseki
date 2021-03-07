@@ -77,6 +77,63 @@ convertCommunityGraphToDagreWithoutLayout g =
                                      }) (Graph.nodes g)
     in
         (nodes, edges)
+convertyGraphToDagreWithoutLayout : Graph  (String, String) (String, String) -> (List Dagre.UnplacedNode, List Dagre.UnplacedEdge)
+convertyGraphToDagreWithoutLayout g = 
+    let
+        edges = List.map (\e -> {from = e.from, to=e.to, label=Tuple.first e.label, width = 60, height = 15}) (Graph.edges g)
+        nodes = List.map (\n ->     { id = n.id
+                                    , label= Tuple.first n.label
+                                    , width = 120
+                                    , height = 40
+                                     }) (Graph.nodes g)
+    in
+        (nodes, edges)
+
+unzip3 list =
+  let (a, b, c ) = unzip3Help list
+  in ( List.reverse a, List.reverse b, List.reverse c )
+unzip3Help list =
+  List.foldl
+    (\(a, b, c) (as_, bs, cs) -> ( a :: as_, b :: bs, c :: cs ))
+    ([],[],[])
+    list
+
+selectAtomAsTuple : SelectAtom -> (String, String)
+selectAtomAsTuple atom =
+    (atom.value, atom.aType)
+
+convertServerFormToCommunityGraph : ServerForm SelectAtom -> Graph (String, String) (String, String)
+convertServerFormToCommunityGraph spo =
+    let
+        triples = makeTripleForm spo
+--        List(a, b, c) -> (List a, List b, List c)
+        (subjects, predicates, objects) = case triples of
+                                            Just t -> t |> unzip3
+                                            Nothing -> ([], [], [])  
+        --extracted = List.map()
+        comparableSubjects = List.map (\s -> selectAtomAsTuple s) subjects
+--        comparablePredicates = List.map (\s -> selectAtomAsTuple s) predicates
+        comparableObjects = List.map (\s -> selectAtomAsTuple s) objects
+        combinedSubjectObjects = List.append comparableSubjects comparableObjects
+                                |> List.Extra.unique
+        reverseDict = List.indexedMap Tuple.pair combinedSubjectObjects
+                        |> List.map(\(x, y) -> (y, x))
+                        |> Dict.fromList
+        nodes = List.indexedMap Tuple.pair combinedSubjectObjects
+                |> List.map (\(x, y) -> Graph.Node x y)
+
+        edges = case triples of 
+            Just t -> List.map (\triple -> 
+                                    let
+                                        (s, p, o) = triple 
+                                        sindex = Dict.get (selectAtomAsTuple s) reverseDict |> Maybe.withDefault -1
+                                        oindex = Dict.get (selectAtomAsTuple o) reverseDict |> Maybe.withDefault -1
+                                    in
+                                        Graph.Edge sindex oindex (selectAtomAsTuple p)
+                                ) t
+            Nothing -> []
+    in
+        Graph.fromNodesAndEdges nodes edges
 
 convertDagreWithoutLayoutToJson : (List Dagre.UnplacedNode, List Dagre.UnplacedEdge) -> JE.Value
 convertDagreWithoutLayoutToJson dagre = 
@@ -99,6 +156,7 @@ convertDagreWithoutLayoutToJson dagre =
                     ]
 
 rdfDictToJsonValue = convertRdfDict2CommunityGraph >> convertCommunityGraphToDagreWithoutLayout >> convertDagreWithoutLayoutToJson
+resultsToJsonValue = convertServerFormToCommunityGraph >> convertyGraphToDagreWithoutLayout >> convertDagreWithoutLayoutToJson
 
 version : String
 version = "v0.1"
@@ -618,9 +676,10 @@ update msg model =
                                                     _ -> model.lineOfThought
                                 contracted = contractResult okData.vars okData.result  -- Maybe (ContractedForm SelectAtom)
                                                         |> Maybe.map makeRdfDict 
-                                cmd = case contracted of
-                                    Just a -> rdfDictToJsonValue a |> sendActionRequestToWorker
-                                    _ -> Cmd.none
+                                -- cmd = case contracted of
+                                --     Just a -> rdfDictToJsonValue a |> sendActionRequestToWorker
+                                --     _ -> Cmd.none
+                                cmd = resultsToJsonValue okData.result |> sendActionRequestToWorker
                             in
                                     ({ model | state = DisplayingSelectResult okData.vars okData.result
                                     , vars = okData.vars

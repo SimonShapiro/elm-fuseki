@@ -7637,140 +7637,41 @@ var $author$project$Main$pingServer = function (newServer) {
 		});
 };
 var $elm$browser$Browser$Navigation$pushUrl = _Browser_pushUrl;
-var $elm_community$intdict$IntDict$foldl = F3(
-	function (f, acc, dict) {
-		foldl:
-		while (true) {
-			switch (dict.$) {
-				case 'Empty':
-					return acc;
-				case 'Leaf':
-					var l = dict.a;
-					return A3(f, l.key, l.value, acc);
-				default:
-					var i = dict.a;
-					var $temp$f = f,
-						$temp$acc = A3($elm_community$intdict$IntDict$foldl, f, acc, i.left),
-						$temp$dict = i.right;
-					f = $temp$f;
-					acc = $temp$acc;
-					dict = $temp$dict;
-					continue foldl;
-			}
-		}
-	});
-var $elm_community$graph$Graph$unGraph = function (graph) {
-	var rep = graph.a;
-	return rep;
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
 };
-var $elm_community$graph$Graph$edges = function (graph) {
-	var flippedFoldl = F3(
-		function (f, dict, list) {
-			return A3($elm_community$intdict$IntDict$foldl, f, list, dict);
-		});
-	var prependEdges = F2(
-		function (node1, ctx) {
-			return A2(
-				flippedFoldl,
-				F2(
-					function (node2, e) {
-						return $elm$core$List$cons(
-							{from: node1, label: e, to: node2});
-					}),
-				ctx.outgoing);
-		});
-	return A3(
-		flippedFoldl,
-		prependEdges,
-		$elm_community$graph$Graph$unGraph(graph),
-		_List_Nil);
-};
-var $elm_community$intdict$IntDict$foldr = F3(
-	function (f, acc, dict) {
-		foldr:
-		while (true) {
-			switch (dict.$) {
-				case 'Empty':
-					return acc;
-				case 'Leaf':
-					var l = dict.a;
-					return A3(f, l.key, l.value, acc);
-				default:
-					var i = dict.a;
-					var $temp$f = f,
-						$temp$acc = A3($elm_community$intdict$IntDict$foldr, f, acc, i.right),
-						$temp$dict = i.left;
-					f = $temp$f;
-					acc = $temp$acc;
-					dict = $temp$dict;
-					continue foldr;
-			}
-		}
-	});
-var $elm_community$intdict$IntDict$values = function (dict) {
-	return A3(
-		$elm_community$intdict$IntDict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $elm_community$graph$Graph$nodes = A2(
-	$elm$core$Basics$composeR,
-	$elm_community$graph$Graph$unGraph,
-	A2(
-		$elm$core$Basics$composeR,
-		$elm_community$intdict$IntDict$values,
-		$elm$core$List$map(
-			function ($) {
-				return $.node;
-			})));
-var $author$project$RdfDict$rdfNodeToMaybeString = function (node) {
-	switch (node.$) {
-		case 'Uri':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'BlankNode':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'LiteralOnlyValue':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'LiteralValueAndDataType':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		case 'LiteralValueAndLanguageString':
-			var a = node.a;
-			return $elm$core$Maybe$Just(a.value);
-		default:
-			return $elm$core$Maybe$Nothing;
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
 	}
 };
-var $author$project$Main$convertCommunityGraphToDagreWithoutLayout = function (g) {
-	var nodes = A2(
-		$elm$core$List$map,
-		function (n) {
-			return {
-				height: 40,
-				id: n.id,
-				label: A2(
-					$elm$core$Maybe$withDefault,
-					'unknown',
-					$author$project$RdfDict$rdfNodeToMaybeString(n.label.a)),
-				width: 120
-			};
-		},
-		$elm_community$graph$Graph$nodes(g));
-	var edges = A2(
-		$elm$core$List$map,
-		function (e) {
-			return {from: e.from, height: 15, label: e.label, to: e.to, width: 60};
-		},
-		$elm_community$graph$Graph$edges(g));
-	return _Utils_Tuple2(nodes, edges);
-};
+var $elm$url$Url$Builder$relative = F2(
+	function (pathSegments, parameters) {
+		return _Utils_ap(
+			A2($elm$core$String$join, '/', pathSegments),
+			$elm$url$Url$Builder$toQuery(parameters));
+	});
+var $elm_community$list_extra$List$Extra$remove = F2(
+	function (x, xs) {
+		if (!xs.b) {
+			return _List_Nil;
+		} else {
+			var y = xs.a;
+			var ys = xs.b;
+			return _Utils_eq(x, y) ? ys : A2(
+				$elm$core$List$cons,
+				y,
+				A2($elm_community$list_extra$List$Extra$remove, x, ys));
+		}
+	});
+var $elm$browser$Browser$Navigation$replaceUrl = _Browser_replaceUrl;
 var $elm$json$Json$Encode$int = _Json_wrap;
 var $elm$json$Json$Encode$list = F2(
 	function (func, entries) {
@@ -8107,21 +8008,134 @@ var $elm$core$Tuple$pair = F2(
 	function (a, b) {
 		return _Utils_Tuple2(a, b);
 	});
-var $elm_community$maybe_extra$Maybe$Extra$cons = F2(
-	function (item, list) {
-		if (item.$ === 'Just') {
-			var v = item.a;
-			return A2($elm$core$List$cons, v, list);
+var $author$project$Main$selectAtomAsTuple = function (atom) {
+	return _Utils_Tuple2(atom.value, atom.aType);
+};
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $elm$core$Set$insert = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
 		} else {
-			return list;
+			return false;
 		}
 	});
-var $elm_community$maybe_extra$Maybe$Extra$values = A2($elm$core$List$foldr, $elm_community$maybe_extra$Maybe$Extra$cons, _List_Nil);
-var $author$project$Main$convertRdfDict2CommunityGraph = function (d) {
-	var _v0 = $elm$core$List$unzip(
-		$elm$core$Dict$toList(d));
-	var index = _v0.a;
-	var values = _v0.b;
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
+var $elm_community$list_extra$List$Extra$uniqueHelp = F4(
+	function (f, existing, remaining, accumulator) {
+		uniqueHelp:
+		while (true) {
+			if (!remaining.b) {
+				return $elm$core$List$reverse(accumulator);
+			} else {
+				var first = remaining.a;
+				var rest = remaining.b;
+				var computedFirst = f(first);
+				if (A2($elm$core$Set$member, computedFirst, existing)) {
+					var $temp$f = f,
+						$temp$existing = existing,
+						$temp$remaining = rest,
+						$temp$accumulator = accumulator;
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				} else {
+					var $temp$f = f,
+						$temp$existing = A2($elm$core$Set$insert, computedFirst, existing),
+						$temp$remaining = rest,
+						$temp$accumulator = A2($elm$core$List$cons, first, accumulator);
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$unique = function (list) {
+	return A4($elm_community$list_extra$List$Extra$uniqueHelp, $elm$core$Basics$identity, $elm$core$Set$empty, list, _List_Nil);
+};
+var $author$project$Main$unzip3Help = function (list) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, _v1) {
+				var a = _v0.a;
+				var b = _v0.b;
+				var c = _v0.c;
+				var as_ = _v1.a;
+				var bs = _v1.b;
+				var cs = _v1.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, a, as_),
+					A2($elm$core$List$cons, b, bs),
+					A2($elm$core$List$cons, c, cs));
+			}),
+		_Utils_Tuple3(_List_Nil, _List_Nil, _List_Nil),
+		list);
+};
+var $author$project$Main$unzip3 = function (list) {
+	var _v0 = $author$project$Main$unzip3Help(list);
+	var a = _v0.a;
+	var b = _v0.b;
+	var c = _v0.c;
+	return _Utils_Tuple3(
+		$elm$core$List$reverse(a),
+		$elm$core$List$reverse(b),
+		$elm$core$List$reverse(c));
+};
+var $author$project$Main$convertServerFormToCommunityGraph = function (spo) {
+	var triples = $author$project$RdfDict$makeTripleForm(spo);
+	var _v0 = function () {
+		if (triples.$ === 'Just') {
+			var t = triples.a;
+			return $author$project$Main$unzip3(t);
+		} else {
+			return _Utils_Tuple3(_List_Nil, _List_Nil, _List_Nil);
+		}
+	}();
+	var subjects = _v0.a;
+	var predicates = _v0.b;
+	var objects = _v0.c;
+	var comparableObjects = A2(
+		$elm$core$List$map,
+		function (s) {
+			return $author$project$Main$selectAtomAsTuple(s);
+		},
+		objects);
+	var comparableSubjects = A2(
+		$elm$core$List$map,
+		function (s) {
+			return $author$project$Main$selectAtomAsTuple(s);
+		},
+		subjects);
+	var combinedSubjectObjects = $elm_community$list_extra$List$Extra$unique(
+		A2($elm$core$List$append, comparableSubjects, comparableObjects));
+	var nodes = A2(
+		$elm$core$List$map,
+		function (_v5) {
+			var x = _v5.a;
+			var y = _v5.b;
+			return A2($elm_community$graph$Graph$Node, x, y);
+		},
+		A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, combinedSubjectObjects));
 	var reverseDict = $elm$core$Dict$fromList(
 		A2(
 			$elm$core$List$map,
@@ -8130,112 +8144,153 @@ var $author$project$Main$convertRdfDict2CommunityGraph = function (d) {
 				var y = _v4.b;
 				return _Utils_Tuple2(y, x);
 			},
-			A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, index)));
-	var edges = $elm$core$List$concat(
-		A2(
-			$elm$core$List$map,
-			function (_v2) {
-				var k = _v2.a;
-				var node = _v2.b;
-				var spo = node.b;
-				var id = A2(
-					$elm$core$Maybe$withDefault,
-					-1,
-					A2($elm$core$Dict$get, k, reverseDict));
-				return $elm$core$List$concat(
-					A2(
-						$elm$core$List$map,
-						function (_v3) {
-							var p = _v3.a;
-							var po = _v3.b;
-							return A2(
-								$elm$core$List$map,
-								function (e) {
-									return A3(
-										$elm_community$graph$Graph$Edge,
-										id,
-										e,
-										A2(
-											$elm$core$Maybe$withDefault,
-											'???',
-											$author$project$RdfDict$rdfNodeToMaybeString(p)));
-								},
-								$elm_community$maybe_extra$Maybe$Extra$values(
-									A2(
-										$elm$core$List$map,
-										function (o) {
-											return A2(
-												$elm$core$Dict$get,
-												A2(
-													$elm$core$Maybe$withDefault,
-													'???',
-													$author$project$RdfDict$rdfNodeToMaybeString(o)),
-												reverseDict);
-										},
-										po)));
-						},
-						spo));
-			},
-			$elm$core$Dict$toList(d)));
-	var nodes = A2(
-		$elm$core$List$map,
-		function (_v1) {
-			var x = _v1.a;
-			var y = _v1.b;
-			return A2($elm_community$graph$Graph$Node, x, y);
-		},
-		A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, values));
-	return A6(
-		$elm$core$Debug$log,
-		'Inside conversion' + $elm$core$String$fromInt(
-			$elm$core$List$length(values)),
-		$elm$core$Debug$log,
-		'Building graph of ' + ($elm$core$String$fromInt(
-			$elm$core$List$length(nodes)) + (':' + $elm$core$String$fromInt(
-			$elm$core$List$length(edges)))),
-		$elm_community$graph$Graph$fromNodesAndEdges,
-		nodes,
-		edges);
-};
-var $author$project$Main$rdfDictToJsonValue = A2(
-	$elm$core$Basics$composeR,
-	$author$project$Main$convertRdfDict2CommunityGraph,
-	A2($elm$core$Basics$composeR, $author$project$Main$convertCommunityGraphToDagreWithoutLayout, $author$project$Main$convertDagreWithoutLayoutToJson));
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$relative = F2(
-	function (pathSegments, parameters) {
-		return _Utils_ap(
-			A2($elm$core$String$join, '/', pathSegments),
-			$elm$url$Url$Builder$toQuery(parameters));
-	});
-var $elm_community$list_extra$List$Extra$remove = F2(
-	function (x, xs) {
-		if (!xs.b) {
-			return _List_Nil;
+			A2($elm$core$List$indexedMap, $elm$core$Tuple$pair, combinedSubjectObjects)));
+	var edges = function () {
+		if (triples.$ === 'Just') {
+			var t = triples.a;
+			return A2(
+				$elm$core$List$map,
+				function (triple) {
+					var _v3 = triple;
+					var s = _v3.a;
+					var p = _v3.b;
+					var o = _v3.c;
+					var oindex = A2(
+						$elm$core$Maybe$withDefault,
+						-1,
+						A2(
+							$elm$core$Dict$get,
+							$author$project$Main$selectAtomAsTuple(o),
+							reverseDict));
+					var sindex = A2(
+						$elm$core$Maybe$withDefault,
+						-1,
+						A2(
+							$elm$core$Dict$get,
+							$author$project$Main$selectAtomAsTuple(s),
+							reverseDict));
+					return A3(
+						$elm_community$graph$Graph$Edge,
+						sindex,
+						oindex,
+						$author$project$Main$selectAtomAsTuple(p));
+				},
+				t);
 		} else {
-			var y = xs.a;
-			var ys = xs.b;
-			return _Utils_eq(x, y) ? ys : A2(
-				$elm$core$List$cons,
-				y,
-				A2($elm_community$list_extra$List$Extra$remove, x, ys));
+			return _List_Nil;
+		}
+	}();
+	return A2($elm_community$graph$Graph$fromNodesAndEdges, nodes, edges);
+};
+var $elm_community$intdict$IntDict$foldl = F3(
+	function (f, acc, dict) {
+		foldl:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldl, f, acc, i.left),
+						$temp$dict = i.right;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldl;
+			}
 		}
 	});
-var $elm$browser$Browser$Navigation$replaceUrl = _Browser_replaceUrl;
+var $elm_community$graph$Graph$unGraph = function (graph) {
+	var rep = graph.a;
+	return rep;
+};
+var $elm_community$graph$Graph$edges = function (graph) {
+	var flippedFoldl = F3(
+		function (f, dict, list) {
+			return A3($elm_community$intdict$IntDict$foldl, f, list, dict);
+		});
+	var prependEdges = F2(
+		function (node1, ctx) {
+			return A2(
+				flippedFoldl,
+				F2(
+					function (node2, e) {
+						return $elm$core$List$cons(
+							{from: node1, label: e, to: node2});
+					}),
+				ctx.outgoing);
+		});
+	return A3(
+		flippedFoldl,
+		prependEdges,
+		$elm_community$graph$Graph$unGraph(graph),
+		_List_Nil);
+};
+var $elm_community$intdict$IntDict$foldr = F3(
+	function (f, acc, dict) {
+		foldr:
+		while (true) {
+			switch (dict.$) {
+				case 'Empty':
+					return acc;
+				case 'Leaf':
+					var l = dict.a;
+					return A3(f, l.key, l.value, acc);
+				default:
+					var i = dict.a;
+					var $temp$f = f,
+						$temp$acc = A3($elm_community$intdict$IntDict$foldr, f, acc, i.right),
+						$temp$dict = i.left;
+					f = $temp$f;
+					acc = $temp$acc;
+					dict = $temp$dict;
+					continue foldr;
+			}
+		}
+	});
+var $elm_community$intdict$IntDict$values = function (dict) {
+	return A3(
+		$elm_community$intdict$IntDict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm_community$graph$Graph$nodes = A2(
+	$elm$core$Basics$composeR,
+	$elm_community$graph$Graph$unGraph,
+	A2(
+		$elm$core$Basics$composeR,
+		$elm_community$intdict$IntDict$values,
+		$elm$core$List$map(
+			function ($) {
+				return $.node;
+			})));
+var $author$project$Main$convertyGraphToDagreWithoutLayout = function (g) {
+	var nodes = A2(
+		$elm$core$List$map,
+		function (n) {
+			return {height: 40, id: n.id, label: n.label.a, width: 120};
+		},
+		$elm_community$graph$Graph$nodes(g));
+	var edges = A2(
+		$elm$core$List$map,
+		function (e) {
+			return {from: e.from, height: 15, label: e.label.a, to: e.to, width: 60};
+		},
+		$elm_community$graph$Graph$edges(g));
+	return _Utils_Tuple2(nodes, edges);
+};
+var $author$project$Main$resultsToJsonValue = A2(
+	$elm$core$Basics$composeR,
+	$author$project$Main$convertServerFormToCommunityGraph,
+	A2($elm$core$Basics$composeR, $author$project$Main$convertyGraphToDagreWithoutLayout, $author$project$Main$convertDagreWithoutLayoutToJson));
 var $author$project$Main$sendActionRequestToWorker = _Platform_outgoingPort('sendActionRequestToWorker', $elm$core$Basics$identity);
 var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$core$Basics$identity);
 var $elm$url$Url$Builder$QueryParameter = F2(
@@ -8554,8 +8609,8 @@ var $author$project$Main$update = F2(
 					var _v11 = okData.status;
 					if (_v11 === 200) {
 						var resultHistory = function () {
-							var _v14 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
-							switch (_v14.$) {
+							var _v13 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
+							switch (_v13.$) {
 								case 'Load':
 									return $elm$core$Dict$empty;
 								case 'Insert':
@@ -8571,8 +8626,8 @@ var $author$project$Main$update = F2(
 							}
 						}();
 						var lineOfThought = function () {
-							var _v13 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
-							switch (_v13.$) {
+							var _v12 = $author$project$PlaygroundQuery$establishQueryType(okData.query);
+							switch (_v12.$) {
 								case 'Load':
 									return _List_Nil;
 								case 'Insert':
@@ -8587,15 +8642,8 @@ var $author$project$Main$update = F2(
 							$elm$core$Maybe$map,
 							$author$project$RdfDict$makeRdfDict,
 							A2($author$project$RdfDict$contractResult, okData.vars, okData.result));
-						var cmd = function () {
-							if (contracted.$ === 'Just') {
-								var a = contracted.a;
-								return $author$project$Main$sendActionRequestToWorker(
-									$author$project$Main$rdfDictToJsonValue(a));
-							} else {
-								return $elm$core$Platform$Cmd$none;
-							}
-						}();
+						var cmd = $author$project$Main$sendActionRequestToWorker(
+							$author$project$Main$resultsToJsonValue(okData.result));
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -8762,9 +8810,9 @@ var $author$project$Main$update = F2(
 						$elm$core$Dict$get,
 						$author$project$Sparql$toString(tQuery),
 						model.resultHistory));
-				var _v18 = thought;
-				var vars = _v18.a;
-				var table = _v18.b;
+				var _v17 = thought;
+				var vars = _v17.a;
+				var table = _v17.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -9022,10 +9070,6 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$core$Set$Set_elm_builtin = function (a) {
-	return {$: 'Set_elm_builtin', a: a};
-};
-var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
 var $mdgriffith$elm_ui$Internal$Model$lengthClassName = function (x) {
 	switch (x.$) {
 		case 'Px':
@@ -9171,26 +9215,6 @@ var $mdgriffith$elm_ui$Internal$Model$getStyleName = function (style) {
 				$mdgriffith$elm_ui$Internal$Model$transformClass(x));
 	}
 };
-var $elm$core$Set$insert = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return $elm$core$Set$Set_elm_builtin(
-			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
-	});
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
-	});
-var $elm$core$Set$member = F2(
-	function (key, _v0) {
-		var dict = _v0.a;
-		return A2($elm$core$Dict$member, key, dict);
-	});
 var $mdgriffith$elm_ui$Internal$Model$reduceStyles = F2(
 	function (style, nevermind) {
 		var cache = nevermind.a;
