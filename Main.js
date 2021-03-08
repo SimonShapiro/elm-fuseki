@@ -7695,8 +7695,28 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
+var $author$project$Dagre$rankDirToString = function (rank) {
+	switch (rank.$) {
+		case 'TB':
+			return 'TB';
+		case 'BT':
+			return 'BT';
+		case 'LR':
+			return 'LR';
+		default:
+			return 'RL';
+	}
+};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Main$convertDagreWithoutLayoutToJson = function (dagre) {
+	var jsonOptions = $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'orientation',
+				$elm$json$Json$Encode$string(
+					$author$project$Dagre$rankDirToString(dagre.options.rankDir)))
+			]));
 	var jsonNodes = A2(
 		$elm$json$Json$Encode$list,
 		function (n) {
@@ -7717,7 +7737,7 @@ var $author$project$Main$convertDagreWithoutLayoutToJson = function (dagre) {
 						$elm$json$Json$Encode$int(n.height))
 					]));
 		},
-		dagre.a);
+		dagre.nodes);
 	var jsonEdges = A2(
 		$elm$json$Json$Encode$list,
 		function (e) {
@@ -7741,13 +7761,14 @@ var $author$project$Main$convertDagreWithoutLayoutToJson = function (dagre) {
 						$elm$json$Json$Encode$int(e.height))
 					]));
 		},
-		dagre.b);
+		dagre.edges);
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
 				'action',
 				$elm$json$Json$Encode$string('LayoutGraph')),
+				_Utils_Tuple2('options', jsonOptions),
 				_Utils_Tuple2('nodes', jsonNodes),
 				_Utils_Tuple2('edges', jsonEdges)
 			]));
@@ -8272,25 +8293,31 @@ var $elm_community$graph$Graph$nodes = A2(
 			function ($) {
 				return $.node;
 			})));
-var $author$project$Main$convertyGraphToDagreWithoutLayout = function (g) {
-	var nodes = A2(
-		$elm$core$List$map,
-		function (n) {
-			return {height: 40, id: n.id, label: n.label.a, width: 120};
-		},
-		$elm_community$graph$Graph$nodes(g));
-	var edges = A2(
-		$elm$core$List$map,
-		function (e) {
-			return {from: e.from, height: 15, label: e.label.a, to: e.to, width: 60};
-		},
-		$elm_community$graph$Graph$edges(g));
-	return _Utils_Tuple2(nodes, edges);
-};
+var $author$project$Main$convertyGraphToDagreWithoutLayout = F2(
+	function (options, g) {
+		var nodes = A2(
+			$elm$core$List$map,
+			function (n) {
+				return {height: 40, id: n.id, label: n.label.a, width: 120};
+			},
+			$elm_community$graph$Graph$nodes(g));
+		var edges = A2(
+			$elm$core$List$map,
+			function (e) {
+				return {from: e.from, height: 15, label: e.label.a, to: e.to, width: 60};
+			},
+			$elm_community$graph$Graph$edges(g));
+		return {edges: edges, nodes: nodes, options: options};
+	});
+var $author$project$Dagre$LR = {$: 'LR'};
+var $author$project$Dagre$defaultG = {align: $elm$core$Maybe$Nothing, rankDir: $author$project$Dagre$LR};
 var $author$project$Main$resultsToJsonValue = A2(
 	$elm$core$Basics$composeR,
 	$author$project$Main$convertServerFormToCommunityGraph,
-	A2($elm$core$Basics$composeR, $author$project$Main$convertyGraphToDagreWithoutLayout, $author$project$Main$convertDagreWithoutLayoutToJson));
+	A2(
+		$elm$core$Basics$composeR,
+		$author$project$Main$convertyGraphToDagreWithoutLayout($author$project$Dagre$defaultG),
+		$author$project$Main$convertDagreWithoutLayoutToJson));
 var $author$project$Main$sendActionRequestToWorker = _Platform_outgoingPort('sendActionRequestToWorker', $elm$core$Basics$identity);
 var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$core$Basics$identity);
 var $elm$url$Url$Builder$QueryParameter = F2(

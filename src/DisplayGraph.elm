@@ -121,7 +121,7 @@ displayEdges edges =
     g [] (List.map (\e -> myEdge e) edges)
 
 generateDagreGraph : Dagre.PlacedGraph -> Html msg
-generateDagreGraph graph =   svg [ viewBox 0 0 graph.graph.width graph.graph.height] 
+generateDagreGraph graph =   svg [ viewBox 0 0 graph.graph.width graph.graph.height] -- first 2 control position (pan), last 2 control size (zoom)
     [ defs [][arrowHead]
     , frame graph.graph.width graph.graph.height
     , g [Attr.transform [TypedSvg.Types.Scale 0.9 0.9, TypedSvg.Types.Translate 10 10]] [ displayEdges graph.edges

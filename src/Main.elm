@@ -77,8 +77,8 @@ convertCommunityGraphToDagreWithoutLayout g =
                                      }) (Graph.nodes g)
     in
         (nodes, edges)
-convertyGraphToDagreWithoutLayout : Graph  (String, String) (String, String) -> (List Dagre.UnplacedNode, List Dagre.UnplacedEdge)
-convertyGraphToDagreWithoutLayout g = 
+convertyGraphToDagreWithoutLayout : Dagre.GraphOptions -> Graph  (String, String) (String, String) -> Dagre.UnplacedDagreGraph
+convertyGraphToDagreWithoutLayout options g = 
     let
         edges = List.map (\e -> {from = e.from, to=e.to, label=Tuple.first e.label, width = 60, height = 15}) (Graph.edges g)
         nodes = List.map (\n ->     { id = n.id
@@ -87,7 +87,9 @@ convertyGraphToDagreWithoutLayout g =
                                     , height = 40
                                      }) (Graph.nodes g)
     in
-        (nodes, edges)
+        { options=options
+        , nodes=nodes
+        , edges=edges}
 
 unzip3 list =
   let (a, b, c ) = unzip3Help list
@@ -135,28 +137,35 @@ convertServerFormToCommunityGraph spo =
     in
         Graph.fromNodesAndEdges nodes edges
 
-convertDagreWithoutLayoutToJson : (List Dagre.UnplacedNode, List Dagre.UnplacedEdge) -> JE.Value
+
+convertDagreWithoutLayoutToJson : Dagre.UnplacedDagreGraph -> JE.Value
 convertDagreWithoutLayoutToJson dagre = 
     let
+        jsonOptions = JE.object [ ("orientation", JE.string (Dagre.rankDirToString dagre.options.rankDir)
+
+                                )]
         jsonNodes = JE.list (\n -> JE.object    [ ("id", JE.int n.id)
                                                 , ("label", JE.string n.label) 
                                                 , ("width", JE.int n.width)
                                                 , ("height", JE.int n.height)
-                                                ]) (Tuple.first dagre)
+                                                ]) dagre.nodes
         jsonEdges = JE.list (\e -> JE.object    [ ("from", JE.int e.from)
                                                 , ("to", JE.int e.to)
                                                 , ("label", JE.string e.label)
                                                 , ("width", JE.int e.width)
                                                 , ("height", JE.int e.height)
-                                                ]) (Tuple.second dagre)
+                                                ]) dagre.edges
     in
         JE.object   [ ("action", JE.string "LayoutGraph")
+                    , ("options", jsonOptions)
                     , ("nodes", jsonNodes)
                     , ("edges", jsonEdges)
                     ]
 
-rdfDictToJsonValue = convertRdfDict2CommunityGraph >> convertCommunityGraphToDagreWithoutLayout >> convertDagreWithoutLayoutToJson
-resultsToJsonValue = convertServerFormToCommunityGraph >> convertyGraphToDagreWithoutLayout >> convertDagreWithoutLayoutToJson
+--rdfDictToJsonValue = convertRdfDict2CommunityGraph >> convertCommunityGraphToDagreWithoutLayout >> convertDagreWithoutLayoutToJson
+resultsToJsonValue = convertServerFormToCommunityGraph 
+                        >> convertyGraphToDagreWithoutLayout Dagre.defaultG
+                        >> convertDagreWithoutLayoutToJson
 
 version : String
 version = "v0.1"

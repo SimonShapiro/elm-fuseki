@@ -6,6 +6,14 @@ type RankDir
     | LR
     | RL
 
+rankDirToString : RankDir -> String
+rankDirToString rank = 
+    case rank of 
+        TB -> "TB"
+        BT -> "BT"
+        LR -> "LR"
+        RL -> "RL"
+
 type Align
     = UL
     | UR
@@ -18,7 +26,7 @@ type alias GraphOptions =
     }
 
 defaultG : GraphOptions 
-defaultG =  { rankDir = TB
+defaultG =  { rankDir = LR
             , align = Nothing
             }
 

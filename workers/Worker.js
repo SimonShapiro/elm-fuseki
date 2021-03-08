@@ -8,7 +8,7 @@ onmessage = function(message) {
             var g = new dagre.graphlib.Graph();
 
             // Set an object for the graph label
-            g.setGraph({});
+            g.setGraph({rankDir: message.data.options.orientation});
             message.data.nodes.forEach(node => {
                 g.setNode(node.id, node) 
             });
