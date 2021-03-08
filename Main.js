@@ -25369,14 +25369,6 @@ var $author$project$Main$elOfTabularResults = F2(
 				]),
 			{columns: columns, data: data});
 	});
-var $elm_community$typed_svg$TypedSvg$Types$Scale = F2(
-	function (a, b) {
-		return {$: 'Scale', a: a, b: b};
-	});
-var $elm_community$typed_svg$TypedSvg$Types$Translate = F2(
-	function (a, b) {
-		return {$: 'Translate', a: a, b: b};
-	});
 var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm_community$typed_svg$TypedSvg$Attributes$id = $elm_community$typed_svg$TypedSvg$Core$attribute('id');
 var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
@@ -25848,84 +25840,6 @@ var $author$project$DisplayGraph$frame = F2(
 			_List_Nil);
 	});
 var $elm_community$typed_svg$TypedSvg$svg = $elm_community$typed_svg$TypedSvg$Core$node('svg');
-var $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString = function (xform) {
-	var tr = F2(
-		function (name, args) {
-			return $elm$core$String$concat(
-				_List_fromArray(
-					[
-						name,
-						'(',
-						A2(
-						$elm$core$String$join,
-						' ',
-						A2($elm$core$List$map, $elm$core$String$fromFloat, args)),
-						')'
-					]));
-		});
-	switch (xform.$) {
-		case 'Matrix':
-			var a = xform.a;
-			var b = xform.b;
-			var c = xform.c;
-			var d = xform.d;
-			var e = xform.e;
-			var f = xform.f;
-			return A2(
-				tr,
-				'matrix',
-				_List_fromArray(
-					[a, b, c, d, e, f]));
-		case 'Rotate':
-			var a = xform.a;
-			var x = xform.b;
-			var y = xform.c;
-			return A2(
-				tr,
-				'rotate',
-				_List_fromArray(
-					[a, x, y]));
-		case 'Scale':
-			var x = xform.a;
-			var y = xform.b;
-			return A2(
-				tr,
-				'scale',
-				_List_fromArray(
-					[x, y]));
-		case 'SkewX':
-			var x = xform.a;
-			return A2(
-				tr,
-				'skewX',
-				_List_fromArray(
-					[x]));
-		case 'SkewY':
-			var y = xform.a;
-			return A2(
-				tr,
-				'skewY',
-				_List_fromArray(
-					[y]));
-		default:
-			var x = xform.a;
-			var y = xform.b;
-			return A2(
-				tr,
-				'translate',
-				_List_fromArray(
-					[x, y]));
-	}
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$transform = function (transforms) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'transform',
-		A2(
-			$elm$core$String$join,
-			' ',
-			A2($elm$core$List$map, $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString, transforms)));
-};
 var $elm_community$typed_svg$TypedSvg$Attributes$viewBox = F4(
 	function (minX, minY, vWidth, vHeight) {
 		return A2(
@@ -25957,15 +25871,7 @@ var $author$project$DisplayGraph$generateDagreGraph = function (graph) {
 				A2($author$project$DisplayGraph$frame, graph.graph.width, graph.graph.height),
 				A2(
 				$elm_community$typed_svg$TypedSvg$g,
-				_List_fromArray(
-					[
-						$elm_community$typed_svg$TypedSvg$Attributes$transform(
-						_List_fromArray(
-							[
-								A2($elm_community$typed_svg$TypedSvg$Types$Scale, 0.9, 0.9),
-								A2($elm_community$typed_svg$TypedSvg$Types$Translate, 10, 10)
-							]))
-					]),
+				_List_Nil,
 				_List_fromArray(
 					[
 						$author$project$DisplayGraph$displayEdges(graph.edges),
