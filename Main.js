@@ -25484,11 +25484,22 @@ var $elm_community$typed_svg$TypedSvg$Types$Paint = function (a) {
 	return {$: 'Paint', a: a};
 };
 var $elm_community$typed_svg$TypedSvg$Types$PaintNone = {$: 'PaintNone'};
-var $author$project$DisplayGraph$aka = function (_long) {
-	return $elm$core$List$head(
-		$elm$core$List$reverse(
-			A2($elm$core$String$split, '/', _long)));
-};
+var $author$project$DisplayGraph$aka = F2(
+	function (maxLength, _long) {
+		var _short = A2(
+			$elm$core$Maybe$withDefault,
+			_long,
+			$elm$core$List$head(
+				$elm$core$List$reverse(
+					A2($elm$core$String$split, '/', _long))));
+		return A2(
+			$elm$core$String$left,
+			A2(
+				$elm$core$Basics$min,
+				maxLength,
+				$elm$core$String$length(_short)),
+			_short);
+	});
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
@@ -25661,15 +25672,8 @@ var $author$project$DisplayGraph$myEdge = function (edge) {
 					]),
 				_List_fromArray(
 					[
-						function () {
-						var _v0 = $author$project$DisplayGraph$aka(edge.label);
-						if (_v0.$ === 'Nothing') {
-							return $elm_community$typed_svg$TypedSvg$Core$text('');
-						} else {
-							var a = _v0.a;
-							return $elm_community$typed_svg$TypedSvg$Core$text(a);
-						}
-					}()
+						$elm_community$typed_svg$TypedSvg$Core$text(
+						A2($author$project$DisplayGraph$aka, 100, edge.label))
 					]))
 			]));
 };
@@ -25685,44 +25689,19 @@ var $author$project$DisplayGraph$displayEdges = function (edges) {
 			edges));
 };
 var $elm_community$typed_svg$TypedSvg$Types$AnchorMiddle = {$: 'AnchorMiddle'};
-var $avh4$elm_color$Color$blue = A4($avh4$elm_color$Color$RgbaSpace, 52 / 255, 101 / 255, 164 / 255, 1.0);
-var $elm_community$typed_svg$TypedSvg$circle = $elm_community$typed_svg$TypedSvg$Core$node('circle');
-var $elm_community$typed_svg$TypedSvg$Attributes$cx = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cx',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$cy = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'cy',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
 var $elm_community$typed_svg$TypedSvg$Attributes$height = function (length) {
 	return A2(
 		$elm_community$typed_svg$TypedSvg$Core$attribute,
 		'height',
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
-var $elm_community$typed_svg$TypedSvg$Attributes$r = function (length) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'r',
-		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
-};
 var $elm_community$typed_svg$TypedSvg$rect = $elm_community$typed_svg$TypedSvg$Core$node('rect');
-var $avh4$elm_color$Color$rgba = F4(
-	function (r, g, b, a) {
-		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, a);
-	});
 var $elm_community$typed_svg$TypedSvg$Attributes$strokeWidth = function (length) {
 	return A2(
 		$elm_community$typed_svg$TypedSvg$Core$attribute,
 		'stroke-width',
 		$elm_community$typed_svg$TypedSvg$TypesToStrings$lengthToString(length));
 };
-var $elm_community$typed_svg$TypedSvg$Attributes$title = $elm_community$typed_svg$TypedSvg$Core$attribute('title');
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
 var $elm_community$typed_svg$TypedSvg$Attributes$width = function (length) {
 	return A2(
@@ -25758,26 +25737,6 @@ var $author$project$DisplayGraph$myIcon = F5(
 						]),
 					_List_Nil),
 					A2(
-					$elm_community$typed_svg$TypedSvg$circle,
-					_List_fromArray(
-						[
-							$elm_community$typed_svg$TypedSvg$Attributes$cx(
-							$elm_community$typed_svg$TypedSvg$Types$px(x)),
-							$elm_community$typed_svg$TypedSvg$Attributes$cy(
-							$elm_community$typed_svg$TypedSvg$Types$px(y)),
-							$elm_community$typed_svg$TypedSvg$Attributes$r(
-							$elm_community$typed_svg$TypedSvg$Types$px(2)),
-							$elm_community$typed_svg$TypedSvg$Attributes$fill(
-							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$blue)),
-							$elm_community$typed_svg$TypedSvg$Attributes$strokeWidth(
-							$elm_community$typed_svg$TypedSvg$Types$px(2)),
-							$elm_community$typed_svg$TypedSvg$Attributes$stroke(
-							$elm_community$typed_svg$TypedSvg$Types$Paint(
-								A4($avh4$elm_color$Color$rgba, 0.8, 0, 0, 0.5))),
-							$elm_community$typed_svg$TypedSvg$Attributes$title(label)
-						]),
-					_List_Nil),
-					A2(
 					$elm_community$typed_svg$TypedSvg$text_,
 					_List_fromArray(
 						[
@@ -25788,20 +25747,13 @@ var $author$project$DisplayGraph$myIcon = F5(
 							$elm_community$typed_svg$TypedSvg$Attributes$fill(
 							$elm_community$typed_svg$TypedSvg$Types$Paint($avh4$elm_color$Color$black)),
 							$elm_community$typed_svg$TypedSvg$Attributes$fontSize(
-							$elm_community$typed_svg$TypedSvg$Types$px(12)),
+							$elm_community$typed_svg$TypedSvg$Types$px(10)),
 							$elm_community$typed_svg$TypedSvg$Attributes$textAnchor($elm_community$typed_svg$TypedSvg$Types$AnchorMiddle)
 						]),
 					_List_fromArray(
 						[
-							function () {
-							var _v0 = $author$project$DisplayGraph$aka(label);
-							if (_v0.$ === 'Nothing') {
-								return $elm_community$typed_svg$TypedSvg$Core$text('');
-							} else {
-								var a = _v0.a;
-								return $elm_community$typed_svg$TypedSvg$Core$text(a);
-							}
-						}()
+							$elm_community$typed_svg$TypedSvg$Core$text(
+							A2($author$project$DisplayGraph$aka, 40, label))
 						]))
 				]));
 	});

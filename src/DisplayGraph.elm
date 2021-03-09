@@ -19,35 +19,37 @@ myIcon x y label wd ht =
                     , fill <| Paint <| Color.white
                     ]
                     []
-            , circle
-                [ cx (px x)
-                , cy (px y)
-                , r (px 2)
-                , fill <| Paint Color.blue
-                , strokeWidth (px 2)
-                , stroke <| Paint <| Color.rgba 0.8 0 0 0.5
-                , title label
-                ]
-                []
+            -- , circle
+            --     [ cx (px x)
+            --     , cy (px y)
+            --     , r (px 2)
+            --     , fill <| Paint Color.blue
+            --     , strokeWidth (px 2)
+            --     , stroke <| Paint <| Color.rgba 0.8 0 0 0.5
+            --     , title label
+            --     ]
+            --     []
             , text_ [ Attr.x (px x)
                     , Attr.y (px y)
                     , fill <| Paint <| Color.black
-                    , Attr.fontSize (px 12)
+                    , Attr.fontSize (px 10)
                     , Attr.textAnchor TypedSvg.Types.AnchorMiddle 
 --                    , strokeWidth (px 1)
                     ] 
-                        [ case aka label of
-                            Nothing -> text ""
-                            Just a -> text a
+                        [ aka 40 label |> text
                         ]
     ]
 
-aka : String -> Maybe String
-aka long = 
-    long
-    |> String.split "/"
-    |> List.reverse
-    |> List.head
+aka : Int -> String -> String
+aka maxLength long =
+    let
+        short = long
+            |> String.split "/"
+            |> List.reverse
+            |> List.head
+            |> Maybe.withDefault long
+    in 
+        String.left (min maxLength (String.length short)) short
 
 arrowHead = marker [ Attr.markerWidth (px 10)
                     , Attr.markerHeight (px 10)
@@ -92,9 +94,7 @@ myEdge edge =
                     , Attr.textAnchor TypedSvg.Types.AnchorEnd 
 --                    , strokeWidth (px 1)
                     ] 
-                        [ case aka edge.label of
-                            Nothing -> text ""
-                            Just a -> text a
+                        [ aka 100 edge.label |> text
                         ]
         ]
 
