@@ -492,8 +492,8 @@ convertRdfDict2CommunityGraph d =
                         |> List.concat
                 
     in
-        Debug.log ("Inside conversion"++(List.length values |> String.fromInt))
-        Debug.log ("Building graph of "++(List.length nodes |> String.fromInt)++":"++(List.length edges |> String.fromInt))
+-- Debug.log ("Inside conversion"++(List.length values |> String.fromInt))
+-- Debug.log ("Building graph of "++(List.length nodes |> String.fromInt)++":"++(List.length edges |> String.fromInt))
         Graph.fromNodesAndEdges nodes edges
 
 
@@ -597,7 +597,7 @@ update msg model =
                 Internal url ->
                     case parseUrlForIndexQuery url of
                         Nothing ->
-                            Debug.log ("Internal update running on NOTHING")    --(Url.toString url)) 
+-- Debug.log ("Internal update running on NOTHING")    --(Url.toString url)) 
                             ( model
                             , replaceUrl model.key (Url.toString url) 
                             )
@@ -620,7 +620,7 @@ update msg model =
                 Ok _ -> 
                     case model.urlQuery of
                         Nothing ->
-                            Debug.log "Pinged OK - no initial query"
+-- Debug.log "Pinged OK - no initial query"
                             ({model | state = Querying, keyboard = ReadyToAcceptControl}, setStorage (JE.string model.server))
                         Just query -> 
                             let
@@ -630,10 +630,10 @@ update msg model =
                             in
                                 ({ model | state = Querying, keyboard = ReadyToAcceptControl, query = query}, setStorage (JE.string model.server))
                 Err e -> 
-                    Debug.log "Pinged ERROR"
+-- Debug.log "Pinged ERROR"
                     ({model | state = Initialising}, Cmd.none)
         ChangeQuery newQuery -> 
-                Debug.log ("Query "++newQuery)
+-- Debug.log ("Query "++newQuery)
                 ({model | query = (establishQueryType newQuery)}, Cmd.none)
         SubmitQuery query -> 
             case model.query of
@@ -645,7 +645,7 @@ update msg model =
                             --    Debug.log ("Submitting Query " model.query
                                 case cachedResult of
                                     Nothing ->
-                                        Debug.log "Not from cache :-("
+-- Debug.log "Not from cache :-("
                                         ({model | state = Waiting}, pushUrl model.key (relative [][Url.Builder.string "query" (Sparql.toString query)])) -- submitQuery model.server query)
                                     Just result -> 
                                         let
@@ -653,7 +653,7 @@ update msg model =
                                             table = Tuple.second result
                                         in
                                         
-                                        Debug.log "Cached :-)"
+-- Debug.log "Cached :-)"
                                         ({ model | state = DisplayingSelectResult vars table
                                         , vars = vars
                                         , results = table
@@ -701,7 +701,7 @@ update msg model =
                         _ ->
                             ({model | state = DisplayingSelectError okData.message}, Cmd.none)
                 Err e -> 
-                    Debug.log "Response ERROR"
+-- Debug.log "Response ERROR"
                     ({model | state = ApiError e}, Cmd.none)
         FileRequested  ->
                 ( model
@@ -745,6 +745,7 @@ update msg model =
             let 
                 thought = Dict.get (Sparql.toString tQuery) model.resultHistory |> Maybe.withDefault ([],[])
                 (vars, table) = thought
+                cmd = resultsToJsonValue table |> sendActionRequestToWorker
             in
                 ({ model | state = DisplayingSelectResult vars table
                 , query = tQuery
@@ -752,7 +753,7 @@ update msg model =
                 , results = table
                 , currentRdfDict = contractResult vars table 
                                     |> Maybe.map makeRdfDict 
-                }, Cmd.none)
+                }, cmd)
         ResetLineOfThought -> 
             ({ model | lineOfThought = []}, Cmd.none)
         ClearCaches -> 
@@ -799,20 +800,20 @@ update msg model =
             in
                 case mGraph of 
                     Err _ -> 
-                        Debug.log "Decode Error"
+-- Debug.log "Decode Error"
                         ({model | graphImage = Unavailable}, Cmd.none)
                     Ok a -> 
-                        Debug.log (List.length a.edges |> String.fromInt)
+-- Debug.log (List.length a.edges |> String.fromInt)
                         ({model | graphImage = Available a}, Cmd.none)
 
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
     case req of
         Internal url ->
-            Debug.log ("Handling internal request to "++(Url.toString url))
+-- Debug.log ("Handling internal request to "++(Url.toString url))
             ClickedLink req
         External url ->
-            Debug.log ("Handling external request to "++url)
+-- Debug.log ("Handling external request to "++url)
             ClickedLink req
 
 
@@ -820,7 +821,7 @@ handleUrlChange : Url -> Msg
 handleUrlChange url = 
     case (parseUrlForIndexQuery url) of -- have to reparse url
         Nothing ->
-            Debug.log ("fwd/bck update running on NOTHING")    --(Url.toString url)) 
+-- Debug.log ("fwd/bck update running on NOTHING")    --(Url.toString url)) 
             NoOp
         Just a -> 
             let
@@ -835,7 +836,7 @@ subscriptions _ =
 pingServer : Server -> (Cmd Msg)
 pingServer newServer = 
   --  let
-        Debug.log ("Pinging"++newServer)
+-- Debug.log ("Pinging"++newServer)
 
   --  in
         Http.request
@@ -1051,7 +1052,7 @@ elOfRdfNode model nodeType node =
                                 Predicate -> 
                                         elOfRdfNode model Predicate node
         LiteralOnlyValue a ->
-            Debug.log ("Hunting the string wrapping issue "++(String.left 20 a.value)++(a.value |> String.words |> List.length |> String.fromInt))
+-- Debug.log ("Hunting the string wrapping issue "++(String.left 20 a.value)++(a.value |> String.words |> List.length |> String.fromInt))
             Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [Element.text a.value]
         LiteralValueAndDataType a ->
             Element.paragraph [Element.paddingXY 5 0, Element.Font.size sizePalette.normal, Element.width fill] [ elOfRdfNodeValue node
@@ -1212,7 +1213,7 @@ elOfQueryHistory : List SparqlQuery -> Element Msg
 elOfQueryHistory history =
     Element.textColumn [ spacing 10, padding 10, Element.height (Element.px 120), scrollbarY ]
         ( List.map (\query ->
-                Debug.log (Sparql.toString query)
+-- Debug.log (Sparql.toString query)
                 Element.row [spacing 10][ Element.Input.button
                                                 [ Element.Background.color colorPalette.button 
                                                 , Element.mouseOver [ Element.Background.color colorPalette.highlight] 

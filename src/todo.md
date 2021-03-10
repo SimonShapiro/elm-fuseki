@@ -22,6 +22,10 @@
 - [x] Move pin to a general result area off the card - to indicate 'pin' the result.
 - [x] query in editor on use of line of thought
 - [x] Back isn't using the cache results
+- [ ] Empty graph causes errors
+- [x] Problem with graph drawing and history
+- [ ] Store history/query cache data in session storage - this will impact performance
+- [ ] Remove unnecessary `Debug.log` statements
 - [ ] extra long unwrappables in ui - [ ] like tbl cert in `select * from <http://person.org/tbl> {?s ?p ?o}`
 - [ ] `Ouput format` used in two places on sparql page
 - [ ] replace error elements with paragraph elements.
@@ -57,7 +61,7 @@
 - [x] Introduce refresh of cached query results - automatic on `drop`, `load`, and `insert`
 - [x] Improve shape of query history by using `Element.textColumn`
 - [x] Allow `Terse` on object position url's
-- [ ] graph view
+- [x] graph view
 - [ ] parameterize graph control attributes
 - [ ] output graph in graphviz .DOT format
 - [ ] Add settings - api url; allow implied external links to model

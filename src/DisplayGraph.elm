@@ -49,7 +49,12 @@ aka maxLength long =
             |> List.head
             |> Maybe.withDefault long
     in 
-        String.left (min maxLength (String.length short)) short
+        if short == ""
+        then
+            String.left (min maxLength (String.length long)) long
+        else
+            String.left (min maxLength (String.length short)) short
+
 
 arrowHead = marker [ Attr.markerWidth (px 10)
                     , Attr.markerHeight (px 10)

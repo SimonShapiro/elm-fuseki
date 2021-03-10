@@ -6770,7 +6770,7 @@ var $author$project$Main$parseUrlForIndexQuery = function (url) {
 var $author$project$Main$handleUrlChange = function (url) {
 	var _v0 = $author$project$Main$parseUrlForIndexQuery(url);
 	if (_v0.$ === 'Nothing') {
-		return A2($elm$core$Debug$log, 'fwd/bck update running on NOTHING', $author$project$Main$NoOp);
+		return $author$project$Main$NoOp;
 	} else {
 		var a = _v0.a;
 		var _v1 = A2($elm$core$Debug$log, 'fwd/bck update running ', a);
@@ -6780,61 +6780,13 @@ var $author$project$Main$handleUrlChange = function (url) {
 var $author$project$Main$ClickedLink = function (a) {
 	return {$: 'ClickedLink', a: a};
 };
-var $elm$url$Url$addPort = F2(
-	function (maybePort, starter) {
-		if (maybePort.$ === 'Nothing') {
-			return starter;
-		} else {
-			var port_ = maybePort.a;
-			return starter + (':' + $elm$core$String$fromInt(port_));
-		}
-	});
-var $elm$url$Url$addPrefixed = F3(
-	function (prefix, maybeSegment, starter) {
-		if (maybeSegment.$ === 'Nothing') {
-			return starter;
-		} else {
-			var segment = maybeSegment.a;
-			return _Utils_ap(
-				starter,
-				_Utils_ap(prefix, segment));
-		}
-	});
-var $elm$url$Url$toString = function (url) {
-	var http = function () {
-		var _v0 = url.protocol;
-		if (_v0.$ === 'Http') {
-			return 'http://';
-		} else {
-			return 'https://';
-		}
-	}();
-	return A3(
-		$elm$url$Url$addPrefixed,
-		'#',
-		url.fragment,
-		A3(
-			$elm$url$Url$addPrefixed,
-			'?',
-			url.query,
-			_Utils_ap(
-				A2(
-					$elm$url$Url$addPort,
-					url.port_,
-					_Utils_ap(http, url.host)),
-				url.path)));
-};
 var $author$project$Main$handleUrlRequest = function (req) {
 	if (req.$ === 'Internal') {
 		var url = req.a;
-		return A3(
-			$elm$core$Debug$log,
-			'Handling internal request to ' + $elm$url$Url$toString(url),
-			$author$project$Main$ClickedLink,
-			req);
+		return $author$project$Main$ClickedLink(req);
 	} else {
 		var url = req.a;
-		return A3($elm$core$Debug$log, 'Handling external request to ' + url, $author$project$Main$ClickedLink, req);
+		return $author$project$Main$ClickedLink(req);
 	}
 };
 var $author$project$Main$Initialising = {$: 'Initialising'};
@@ -7622,10 +7574,7 @@ var $elm$http$Http$request = function (r) {
 };
 var $elm$http$Http$stringBody = _Http_pair;
 var $author$project$Main$pingServer = function (newServer) {
-	return A3(
-		$elm$core$Debug$log,
-		'Pinging' + newServer,
-		$elm$http$Http$request,
+	return $elm$http$Http$request(
 		{
 			body: A2($elm$http$Http$stringBody, 'text', ''),
 			expect: $elm$http$Http$expectWhatever($author$project$Main$Pinged),
@@ -8432,6 +8381,50 @@ var $author$project$Sparql$toString = function (sparql) {
 			return s;
 	}
 };
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -8443,15 +8436,12 @@ var $author$project$Main$update = F2(
 					var url = urlRequest.a;
 					var _v2 = $author$project$Main$parseUrlForIndexQuery(url);
 					if (_v2.$ === 'Nothing') {
-						return A2(
-							$elm$core$Debug$log,
-							'Internal update running on NOTHING',
-							_Utils_Tuple2(
-								model,
-								A2(
-									$elm$browser$Browser$Navigation$replaceUrl,
-									model.key,
-									$elm$url$Url$toString(url))));
+						return _Utils_Tuple2(
+							model,
+							A2(
+								$elm$browser$Browser$Navigation$replaceUrl,
+								model.key,
+								$elm$url$Url$toString(url)));
 					} else {
 						var a = _v2.a;
 						var _v3 = A2($elm$core$Debug$log, 'Internal update running ', a);
@@ -8503,15 +8493,12 @@ var $author$project$Main$update = F2(
 				if (result.$ === 'Ok') {
 					var _v5 = model.urlQuery;
 					if (_v5.$ === 'Nothing') {
-						return A2(
-							$elm$core$Debug$log,
-							'Pinged OK - no initial query',
-							_Utils_Tuple2(
-								_Utils_update(
-									model,
-									{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
-								$author$project$Main$setStorage(
-									$elm$json$Json$Encode$string(model.server))));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{keyboard: $author$project$Main$ReadyToAcceptControl, state: $author$project$Main$Querying}),
+							$author$project$Main$setStorage(
+								$elm$json$Json$Encode$string(model.server)));
 					} else {
 						var query = _v5.a;
 						var command = A3(
@@ -8529,27 +8516,21 @@ var $author$project$Main$update = F2(
 					}
 				} else {
 					var e = result.a;
-					return A2(
-						$elm$core$Debug$log,
-						'Pinged ERROR',
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{state: $author$project$Main$Initialising}),
-							$elm$core$Platform$Cmd$none));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{state: $author$project$Main$Initialising}),
+						$elm$core$Platform$Cmd$none);
 				}
 			case 'ChangeQuery':
 				var newQuery = msg.a;
-				return A2(
-					$elm$core$Debug$log,
-					'Query ' + newQuery,
-					_Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								query: $author$project$PlaygroundQuery$establishQueryType(newQuery)
-							}),
-						$elm$core$Platform$Cmd$none));
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							query: $author$project$PlaygroundQuery$establishQueryType(newQuery)
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'SubmitQuery':
 				var query = msg.a;
 				var _v7 = model.query;
@@ -8570,46 +8551,40 @@ var $author$project$Main$update = F2(
 						$author$project$Sparql$toString(query),
 						model.resultHistory);
 					if (cachedResult.$ === 'Nothing') {
-						return A2(
-							$elm$core$Debug$log,
-							'Not from cache :-(',
-							_Utils_Tuple2(
-								_Utils_update(
-									model,
-									{state: $author$project$Main$Waiting}),
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{state: $author$project$Main$Waiting}),
+							A2(
+								$elm$browser$Browser$Navigation$pushUrl,
+								model.key,
 								A2(
-									$elm$browser$Browser$Navigation$pushUrl,
-									model.key,
-									A2(
-										$elm$url$Url$Builder$relative,
-										_List_Nil,
-										_List_fromArray(
-											[
-												A2(
-												$elm$url$Url$Builder$string,
-												'query',
-												$author$project$Sparql$toString(query))
-											])))));
+									$elm$url$Url$Builder$relative,
+									_List_Nil,
+									_List_fromArray(
+										[
+											A2(
+											$elm$url$Url$Builder$string,
+											'query',
+											$author$project$Sparql$toString(query))
+										]))));
 					} else {
 						var result = cachedResult.a;
 						var vars = result.a;
 						var table = result.b;
-						return A2(
-							$elm$core$Debug$log,
-							'Cached :-)',
-							_Utils_Tuple2(
-								_Utils_update(
-									model,
-									{
-										currentRdfDict: A2(
-											$elm$core$Maybe$map,
-											$author$project$RdfDict$makeRdfDict,
-											A2($author$project$RdfDict$contractResult, vars, table)),
-										results: table,
-										state: A2($author$project$Main$DisplayingSelectResult, vars, table),
-										vars: vars
-									}),
-								$elm$core$Platform$Cmd$none));
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									currentRdfDict: A2(
+										$elm$core$Maybe$map,
+										$author$project$RdfDict$makeRdfDict,
+										A2($author$project$RdfDict$contractResult, vars, table)),
+									results: table,
+									state: A2($author$project$Main$DisplayingSelectResult, vars, table),
+									vars: vars
+								}),
+							$elm$core$Platform$Cmd$none);
 					}
 				}
 			case 'SubmitQueryWhileNavigating':
@@ -8695,16 +8670,13 @@ var $author$project$Main$update = F2(
 					}
 				} else {
 					var e = response.a;
-					return A2(
-						$elm$core$Debug$log,
-						'Response ERROR',
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									state: $author$project$Main$ApiError(e)
-								}),
-							$elm$core$Platform$Cmd$none));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								state: $author$project$Main$ApiError(e)
+							}),
+						$elm$core$Platform$Cmd$none);
 				}
 			case 'FileRequested':
 				return _Utils_Tuple2(
@@ -8840,6 +8812,8 @@ var $author$project$Main$update = F2(
 				var _v17 = thought;
 				var vars = _v17.a;
 				var table = _v17.b;
+				var cmd = $author$project$Main$sendActionRequestToWorker(
+					$author$project$Main$resultsToJsonValue(table));
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -8853,7 +8827,7 @@ var $author$project$Main$update = F2(
 							state: A2($author$project$Main$DisplayingSelectResult, vars, table),
 							vars: vars
 						}),
-					$elm$core$Platform$Cmd$none);
+					cmd);
 			case 'ResetLineOfThought':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -8926,27 +8900,20 @@ var $author$project$Main$update = F2(
 						A2($elm$json$Json$Decode$field, 'edges', edgeDecoder)),
 					message);
 				if (mGraph.$ === 'Err') {
-					return A2(
-						$elm$core$Debug$log,
-						'Decode Error',
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{graphImage: $author$project$Main$Unavailable}),
-							$elm$core$Platform$Cmd$none));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{graphImage: $author$project$Main$Unavailable}),
+						$elm$core$Platform$Cmd$none);
 				} else {
 					var a = mGraph.a;
-					return A2(
-						$elm$core$Debug$log,
-						$elm$core$String$fromInt(
-							$elm$core$List$length(a.edges)),
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									graphImage: $author$project$Main$Available(a)
-								}),
-							$elm$core$Platform$Cmd$none));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								graphImage: $author$project$Main$Available(a)
+							}),
+						$elm$core$Platform$Cmd$none);
 				}
 		}
 	});
@@ -16150,9 +16117,7 @@ var $author$project$Main$elOfQueryHistory = function (history) {
 		A2(
 			$elm$core$List$map,
 			function (query) {
-				return A4(
-					$elm$core$Debug$log,
-					$author$project$Sparql$toString(query),
+				return A2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_fromArray(
 						[
@@ -24870,11 +24835,7 @@ var $author$project$Main$elOfRdfNode = F3(
 					}
 				case 'LiteralOnlyValue':
 					var a = node.a;
-					return A4(
-						$elm$core$Debug$log,
-						'Hunting the string wrapping issue ' + (A2($elm$core$String$left, 20, a.value) + $elm$core$String$fromInt(
-							$elm$core$List$length(
-								$elm$core$String$words(a.value)))),
+					return A2(
 						$mdgriffith$elm_ui$Element$paragraph,
 						_List_fromArray(
 							[
@@ -25492,7 +25453,13 @@ var $author$project$DisplayGraph$aka = F2(
 			$elm$core$List$head(
 				$elm$core$List$reverse(
 					A2($elm$core$String$split, '/', _long))));
-		return A2(
+		return (_short === '') ? A2(
+			$elm$core$String$left,
+			A2(
+				$elm$core$Basics$min,
+				maxLength,
+				$elm$core$String$length(_long)),
+			_long) : A2(
 			$elm$core$String$left,
 			A2(
 				$elm$core$Basics$min,
