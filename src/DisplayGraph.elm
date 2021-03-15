@@ -7,6 +7,14 @@ import TypedSvg.Attributes as Attr exposing (x, y, cx, cy, fill, r, stroke, stro
 import TypedSvg.Types exposing (Paint(..), px)
 import TypedSvg.Core exposing (Svg, text)
 import Dagre exposing (..)
+import Draggable
+import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
+import Array exposing (length)
+
+type Msg = 
+    DragMsg (Draggable.Msg ())
+    | OnDragBy Vec2
+    | Zoom Float
 
 myIcon : Float -> Float -> String -> Int -> Int -> Svg msg
 myIcon x y label wd ht =
@@ -125,11 +133,28 @@ displayEdges : List Dagre.PlacedEdge -> Svg msg
 displayEdges edges = 
     g [] (List.map (\e -> myEdge e) edges)
 
-generateDagreGraph : Dagre.PlacedGraph -> Html msg
-generateDagreGraph graph =   svg [ viewBox 0 0 graph.graph.width graph.graph.height] -- first 2 control position (pan), last 2 control size (zoom)
-    [ defs [][arrowHead]
-    , frame graph.graph.width graph.graph.height
-    , g [] [ displayEdges graph.edges
+generateDagreGraph : Dagre.PlacedGraph -> Vector2.Vec2 -> Float -> Svg msg
+generateDagreGraph graph center zoom =  
+    let
+        ( cx, cy ) =
+            ( getX center, getY center )
+
+        ( halfWidth, halfHeight ) =
+            ( graph.graph.width / zoom / 2, graph.graph.height / zoom / 2 )
+
+        ( top, left ) =
+            ( cy - halfHeight, cx - halfWidth )
+
+        ( bottom, right ) =
+            ( cy + halfHeight, cx + halfWidth )
+    in
+        g []
+        [ defs [][arrowHead]
+        , frame graph.graph.width graph.graph.height
+        , g [ Attr.transform    [TypedSvg.Types.Translate -left -top
+                                , TypedSvg.Types.Scale zoom zoom
+                                ]] 
+            [ displayEdges graph.edges
             , displayNodes graph.nodes 
+            ]
         ]
-    ]

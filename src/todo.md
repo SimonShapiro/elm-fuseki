@@ -62,6 +62,8 @@
 - [x] Improve shape of query history by using `Element.textColumn`
 - [x] Allow `Terse` on object position url's
 - [x] graph view
+- [x] implement drag and zoom
+- [ ] Add limit and offset semantics in table and subject oriented list
 - [ ] parameterize graph control attributes
 - [ ] output graph in graphviz .DOT format
 - [ ] Add settings - api url; allow implied external links to model
@@ -82,14 +84,12 @@
 - [ ] Dockerise server.py
 - [ ] Investigate local fuseki making federated queries.
 - [ ] Investigate fuseki deployment/embedding and tdb sync
-- [ ] Add limit and offset semantics in table and subject oriented list
 - [ ] csv download - [ ] filename to be input
 - [ ] Improve table (a more fully featured table)
 
 ## Pending Re-factors
 
 - [x] Replace Sparql.toString with PlaygroundQuery.toString
-- [ ] Make DisplaySelectResults flow from RdfNode rather than SelectAtom
 - [ ] use a decoder strategy for establishQueryType
 - [ ] makeRdfDict redundant call and setting of table/subject
 

@@ -59,6 +59,14 @@ import RdfDict
 import Dagre 
 import Element
 
+import Draggable
+import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
+import TypedSvg exposing (svg)
+import TypedSvg.Attributes as Attr exposing (width, height) 
+-- (x, y, cx, cy, fill, r, stroke, strokeWidth, viewBox, x, y, width, height, title, points, orient)
+import TypedSvg.Types exposing (Paint(..), px)
+import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
+
 dagreOptions = 
     { rankDir = Dagre.TB
     , align = Nothing
@@ -179,6 +187,10 @@ type Cardinality
     | ZeroOrOne 
     | ZeroToMany 
     | OneToMany 
+type alias Size num =
+    { width : num
+    , height : num
+    }
 
 type UIState 
     = Initialising 
@@ -212,6 +224,10 @@ type alias Model =
     , graphImage: GraphDisplayState
     , openPredicatesInSubject: OpenPredicatesInSubject
     , key: Key
+    , zoom : Float
+    , center : Vec2
+--    , size : Size Float
+    , drag : Draggable.State ()
     }
 
 type alias OpenPredicatesInSubject = List (RdfNode, RdfNode)
@@ -263,6 +279,9 @@ type Msg
     | ClearCaches
     | ToggleGraph GraphDisplay
     | ReceivedMessageFromWorker Value
+    | DragMsg (Draggable.Msg ())
+    | OnDragBy Vec2
+    | Zoom Float
 
 type alias KGResponse =  -- a copy of the query is available in the api
     { server: Server
@@ -530,6 +549,10 @@ initialFn maybeServer url elmKey =
                         , graphImage = Unavailable
                         , openPredicatesInSubject = []
                         , key = elmKey
+                        , zoom = 1
+                        , center = Vector2.vec2 0 0
+   --                      , size = Size 300 300 -- ??? what is the purpose of size here
+                        , drag = Draggable.init
                         }
     in
         (initialModel, Cmd.none)
@@ -588,10 +611,34 @@ prefixHumnaReadablePartOfUrl prefix urlString =
     in
         reconstructedUrl
 
+dragConfig : Draggable.Config () Msg
+dragConfig =
+    Draggable.basicConfig (OnDragBy << (\( dx, dy ) -> Vector2.vec2 dx dy))
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
         NoOp -> (model, Cmd.none)
+        OnDragBy rawDelta ->
+            let
+                delta =
+                    rawDelta
+                        |> Vector2.scale (-1 / model.zoom)
+            in
+            ( { model | center = model.center |> Vector2.add delta }, Cmd.none )
+
+        Zoom factor ->
+            let
+                newZoom =
+                    model.zoom
+                        |> (+) (factor * 0.05)
+                        |> clamp 0.5 5
+            in
+            ( { model | zoom = newZoom }, Cmd.none )
+
+        DragMsg dragMsg ->
+            Draggable.update dragConfig dragMsg model
+
         ClickedLink urlRequest ->
             case urlRequest of
                 Internal url ->
@@ -804,7 +851,7 @@ update msg model =
                         ({model | graphImage = Unavailable}, Cmd.none)
                     Ok a -> 
 -- Debug.log (List.length a.edges |> String.fromInt)
-                        ({model | graphImage = Available a}, Cmd.none)
+                        ({model | graphImage = Available a, center = Vector2.vec2 (a.graph.width/2) (a.graph.height/2)}, Cmd.none)
 
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
@@ -830,8 +877,10 @@ handleUrlChange url =
                 SubmitQueryWhileNavigating  a
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    receiveActionResultFromWorker ReceivedMessageFromWorker
+subscriptions model =
+    Sub.batch   [ receiveActionResultFromWorker ReceivedMessageFromWorker
+                , Draggable.subscriptions DragMsg model.drag
+    ]
 
 pingServer : Server -> (Cmd Msg)
 pingServer newServer = 
@@ -1403,7 +1452,7 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                                 }
                                         ])
                                 _ ->
-                                    Element.layout [] (Element.column []
+                                    Element.layout [] ( Element.column []
                                         [ Element.text "ApiError: Oops - something went wrong! :-("
                                         , Element.Input.button  [ Element.Background.color colorPalette.button
                                                                 , Element.mouseOver [ Element.Background.color colorPalette.highlight]
@@ -1450,7 +1499,13 @@ view model = { title = "Sparql Query Playground - 0.0"
 --                                                                    rdfDictToJsonValue a |> sendActionRequestToWorker
 
                                                                     case model.graphImage of
-                                                                        Available g -> generateDagreGraph g |> Element.html
+                                                                        Available g -> svg  [ Attr.width (TypedSvg.Types.px g.graph.width)
+                                                                                            , Attr.height (TypedSvg.Types.px g.graph.height)
+                                                                                            , handleZoom Zoom
+                                                                                            , Draggable.mouseTrigger () DragMsg
+                                                                                            ] 
+                                                                                            [generateDagreGraph g model.center model.zoom]
+                                                                                         |> Element.html
                                                                         Unavailable -> Element.text "No graph available"
                                                                         Requested -> Element.text "Graph not yet ready"
                                                                 Off -> Element.none
@@ -1465,7 +1520,23 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                         , elOfTabularResults vars result
                                             ]
                                             |> Element.layout []
-            )}
+  )}
+
+handleZoom : (Float -> msg) -> Html.Attribute msg
+handleZoom onZoom =
+    let
+        alwaysPreventDefaultAndStopPropagation msg =
+            { message = msg, stopPropagation = True, preventDefault = True }
+
+        zoomDecoder : Decoder msg
+        zoomDecoder =
+            JD.float
+                |> JD.field "deltaY" 
+                |> JD.map onZoom
+    in
+    Html.Events.custom
+        "wheel"
+    <| JD.map alwaysPreventDefaultAndStopPropagation zoomDecoder
 
 -- Decoders
 selectAtomDecoder : Decoder SelectAtom
