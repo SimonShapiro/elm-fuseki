@@ -636,7 +636,11 @@ update msg model =
                 --         |> (+) (factor * 0.05)
                 --         |> clamp 0.05 5
 
-                newZoom = model.zoom * (1+ factor/40)
+                newZoom = if factor > 0
+                            then
+                                model.zoom * 1.1
+                            else
+                                model.zoom * 0.9
             in
             Debug.log ("New zoom"++(String.fromFloat newZoom)++":"++(String.fromFloat factor))
             ( { model | zoom = newZoom }, Cmd.none )
