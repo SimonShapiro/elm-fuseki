@@ -9939,7 +9939,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Zoom':
 				var factor = msg.a;
-				var newZoom = A3($elm$core$Basics$clamp, 0.5, 5, (factor * 0.05) + model.zoom);
+				var newZoom = A3($elm$core$Basics$clamp, 0.05, 50, (factor * 0.05) + model.zoom);
 				return A2(
 					$elm$core$Debug$log,
 					'New zoom' + $elm$core$String$fromFloat(newZoom),
