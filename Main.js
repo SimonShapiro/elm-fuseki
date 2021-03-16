@@ -27275,11 +27275,7 @@ var $author$project$DisplayGraph$generateDagreGraph = F4(
 		var _v3 = _Utils_Tuple2(cy + halfHeight, cx + halfWidth);
 		var bottom = _v3.a;
 		var right = _v3.b;
-		return A6(
-			$elm$core$Debug$log,
-			'Center=' + ($elm$core$String$fromFloat(cx) + (' half ' + $elm$core$String$fromFloat(halfWidth))),
-			$elm$core$Debug$log,
-			'Zoom=' + $elm$core$String$fromFloat(zoom),
+		return A2(
 			$elm_community$typed_svg$TypedSvg$g,
 			_List_Nil,
 			_List_fromArray(
@@ -27826,11 +27822,9 @@ var $author$project$Main$view = function (model) {
 												$mdgriffith$elm_ui$Element$column,
 												_List_fromArray(
 													[
+														A2($mdgriffith$elm_ui$Element$paddingXY, 20, 0),
 														$mdgriffith$elm_ui$Element$width(
-														$mdgriffith$elm_ui$Element$px(1400)),
-														$mdgriffith$elm_ui$Element$height(
-														$mdgriffith$elm_ui$Element$px(700)),
-														A2($mdgriffith$elm_ui$Element$paddingXY, 20, 0)
+														$mdgriffith$elm_ui$Element$px(1400))
 													]),
 												_List_fromArray(
 													[
@@ -27851,8 +27845,8 @@ var $author$project$Main$view = function (model) {
 																					$elm_community$typed_svg$TypedSvg$Attributes$viewBox,
 																					$elm_explorations$linear_algebra$Math$Vector2$getX(model.center),
 																					$elm_explorations$linear_algebra$Math$Vector2$getY(model.center),
-																					g.graph.width / model.zoom,
-																					g.graph.height / model.zoom),
+																					A2($elm$core$Basics$max, model.size.width, model.size.width * model.zoom),
+																					A2($elm$core$Basics$max, model.size.height, model.size.height * model.zoom)),
 																					$author$project$Main$handleZoom($author$project$Main$Zoom),
 																					A2($zaboco$elm_draggable$Draggable$mouseTrigger, _Utils_Tuple0, $author$project$Main$DragMsg)
 																				]),

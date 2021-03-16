@@ -154,8 +154,8 @@ generateDagreGraph size graph center zoom =
         ( bottom, right ) =
             ( cy + halfHeight, cx + halfWidth )
     in
-        Debug.log ("Center="++(String.fromFloat cx)++" half "++(String.fromFloat halfWidth))
-        Debug.log ("Zoom="++(String.fromFloat zoom))
+--        Debug.log ("Center="++(String.fromFloat cx)++" half "++(String.fromFloat halfWidth))
+--        Debug.log ("Zoom="++(String.fromFloat zoom))
         g []
         [ defs [][arrowHead]
         , frame graph.graph.width graph.graph.height
