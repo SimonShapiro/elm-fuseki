@@ -16,6 +16,12 @@ type Msg =
     | OnDragBy Vec2
     | Zoom Float
 
+type alias Size num =
+    { width : num
+    , height : num
+    }
+
+
 myIcon : Float -> Float -> String -> Int -> Int -> Svg msg
 myIcon x y label wd ht =
     g []    [ rect  [ x - (toFloat wd/2) |> px |> Attr.x
@@ -133,14 +139,14 @@ displayEdges : List Dagre.PlacedEdge -> Svg msg
 displayEdges edges = 
     g [] (List.map (\e -> myEdge e) edges)
 
-generateDagreGraph : Dagre.PlacedGraph -> Vector2.Vec2 -> Float -> Svg msg
-generateDagreGraph graph center zoom =  
+generateDagreGraph : Size Float -> Dagre.PlacedGraph -> Vector2.Vec2 -> Float -> Svg msg
+generateDagreGraph size graph center zoom =  
     let
         ( cx, cy ) =
             ( getX center, getY center )
 
         ( halfWidth, halfHeight ) =
-            ( graph.graph.width / zoom / 2, graph.graph.height / zoom / 2 )
+            ( size.width / 2, size.height / 2 )
 
         ( top, left ) =
             ( cy - halfHeight, cx - halfWidth )
@@ -148,12 +154,14 @@ generateDagreGraph graph center zoom =
         ( bottom, right ) =
             ( cy + halfHeight, cx + halfWidth )
     in
+        Debug.log ("Center="++(String.fromFloat cx)++" half "++(String.fromFloat halfWidth))
+        Debug.log ("Zoom="++(String.fromFloat zoom))
         g []
         [ defs [][arrowHead]
         , frame graph.graph.width graph.graph.height
-        , g [ Attr.transform    [TypedSvg.Types.Translate -left -top
-                                , TypedSvg.Types.Scale zoom zoom
-                                ]] 
+        , g [-- Attr.viewBox 1000 1000 graph.graph.width graph.graph.height
+            ]
+--            , Attr.transform [TypedSvg.Types.Scale zoom zoom]]--left right top bottom] 
             [ displayEdges graph.edges
             , displayNodes graph.nodes 
             ]

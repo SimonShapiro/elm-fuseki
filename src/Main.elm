@@ -66,6 +66,7 @@ import TypedSvg.Attributes as Attr exposing (width, height)
 -- (x, y, cx, cy, fill, r, stroke, strokeWidth, viewBox, x, y, width, height, title, points, orient)
 import TypedSvg.Types exposing (Paint(..), px)
 import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
+import String
 
 dagreOptions = 
     { rankDir = Dagre.TB
@@ -226,7 +227,7 @@ type alias Model =
     , key: Key
     , zoom : Float
     , center : Vec2
---    , size : Size Float
+    , size : Size Float
     , drag : Draggable.State ()
     }
 
@@ -551,7 +552,7 @@ initialFn maybeServer url elmKey =
                         , key = elmKey
                         , zoom = 1
                         , center = Vector2.vec2 0 0
-   --                      , size = Size 300 300 -- ??? what is the purpose of size here
+                        , size = Size 1400 700 -- ??? what is the purpose of size here
                         , drag = Draggable.init
                         }
     in
@@ -623,6 +624,7 @@ update msg model =
             let
                 delta =
                     rawDelta
+                    --    |> Vector2.scale (-1 / model.zoom)
                         |> Vector2.scale (-1 / model.zoom)
             in
             ( { model | center = model.center |> Vector2.add delta }, Cmd.none )
@@ -634,6 +636,7 @@ update msg model =
                         |> (+) (factor * 0.05)
                         |> clamp 0.5 5
             in
+            Debug.log ("New zoom"++(String.fromFloat newZoom))
             ( { model | zoom = newZoom }, Cmd.none )
 
         DragMsg dragMsg ->
@@ -850,8 +853,18 @@ update msg model =
 -- Debug.log "Decode Error"
                         ({model | graphImage = Unavailable}, Cmd.none)
                     Ok a -> 
--- Debug.log (List.length a.edges |> String.fromInt)
-                        ({model | graphImage = Available a, center = Vector2.vec2 (a.graph.width/2) (a.graph.height/2)}, Cmd.none)
+                        let
+                            zoom = (min (model.size.width/a.graph.width) (model.size.height/a.graph.height))
+                            --center = Vector2.vec2 (a.graph.width/2) (a.graph.height/2)
+ --                           center = Vector2.vec2 (a.graph.width/2) (a.graph.height/2)
+                        in
+                            Debug.log ("Setting zoom to "++(String.fromFloat <| min (model.size.width/a.graph.width) (model.size.height/a.graph.height)))
+                            Debug.log ("Setting width to"++(String.fromFloat <| a.graph.width))
+                            Debug.log ("Setting height to"++(String.fromFloat <| a.graph.height))
+                            ({model | graphImage = Available a
+   --                                 , center = center
+                                    , zoom = zoom
+                                    }, Cmd.none)
 
 handleUrlRequest : UrlRequest -> Msg
 handleUrlRequest req = 
@@ -1489,7 +1502,10 @@ view model = { title = "Sparql Query Playground - 0.0"
                                             Element.column  [ Element.width Element.fill] [ elOfMainPage model
                                                             , elOfLineOfThought model -- maybe not model???
                                                             , predicateStyleToggle model.predicateStyle
-                                                            , Element.column [Element.width Element.fill, Element.paddingXY 10 0] 
+                                                            , Element.column    [ Element.width (Element.px 1400)
+--                                                                                , Element.height (Element.px 700)
+                                                                                , Element.paddingXY 20 0
+                                                                                ] --Element.fill
                                                             [ graphToggle model.graphDisplay
                                                             , case model.graphDisplay of
                                                                 On ->
@@ -1499,12 +1515,15 @@ view model = { title = "Sparql Query Playground - 0.0"
 --                                                                    rdfDictToJsonValue a |> sendActionRequestToWorker
 
                                                                     case model.graphImage of
-                                                                        Available g -> svg  [ Attr.width (TypedSvg.Types.px g.graph.width)
-                                                                                            , Attr.height (TypedSvg.Types.px g.graph.height)
+                                                                        Available g -> 
+--                                                                            Debug.log ("Centres"++(getX model.center |> String.fromFloat)++":"++(getY model.center |> String.fromFloat))
+                                                                            svg  [ Attr.viewBox (getX model.center) (getY model.center) (g.graph.width/model.zoom) (g.graph.height/model.zoom)
+                                            --                                                , Attr.width (TypedSvg.Types.px model.size.width)
+                                            --                                                , Attr.height (TypedSvg.Types.px model.size.height)
                                                                                             , handleZoom Zoom
                                                                                             , Draggable.mouseTrigger () DragMsg
                                                                                             ] 
-                                                                                            [generateDagreGraph g model.center model.zoom]
+                                                                                            [generateDagreGraph model.size g model.center model.zoom]
                                                                                          |> Element.html
                                                                         Unavailable -> Element.text "No graph available"
                                                                         Requested -> Element.text "Graph not yet ready"
@@ -1533,6 +1552,7 @@ handleZoom onZoom =
             JD.float
                 |> JD.field "deltaY" 
                 |> JD.map onZoom
+
     in
     Html.Events.custom
         "wheel"

@@ -7806,6 +7806,10 @@ var $author$project$Main$handleUrlRequest = function (req) {
 var $author$project$Main$Initialising = {$: 'Initialising'};
 var $author$project$Main$Normal = {$: 'Normal'};
 var $author$project$Main$Off = {$: 'Off'};
+var $author$project$Main$Size = F2(
+	function (width, height) {
+		return {height: height, width: width};
+	});
 var $author$project$Main$Table = {$: 'Table'};
 var $author$project$Main$Terse = {$: 'Terse'};
 var $author$project$Main$Unavailable = {$: 'Unavailable'};
@@ -7846,6 +7850,7 @@ var $author$project$Main$initialFn = F3(
 			results: _List_Nil,
 			resultsDisplay: $author$project$Main$Table,
 			server: serverFlag,
+			size: A2($author$project$Main$Size, 1400, 700),
 			state: $author$project$Main$Initialising,
 			urlQuery: initialQuery,
 			vars: _List_Nil,
@@ -8661,6 +8666,7 @@ var $elm$file$File$Select$file = F2(
 			toMsg,
 			_File_uploadOne(mimes));
 	});
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$browser$Browser$Navigation$load = _Browser_load;
@@ -8787,6 +8793,10 @@ var $author$project$RdfDict$makeRdfDict = function (cf) {
 var $elm$json$Json$Decode$map3 = _Json_map3;
 var $elm$json$Json$Decode$map6 = _Json_map6;
 var $elm$json$Json$Decode$map8 = _Json_map8;
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
@@ -9930,11 +9940,14 @@ var $author$project$Main$update = F2(
 			case 'Zoom':
 				var factor = msg.a;
 				var newZoom = A3($elm$core$Basics$clamp, 0.5, 5, (factor * 0.05) + model.zoom);
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{zoom: newZoom}),
-					$elm$core$Platform$Cmd$none);
+				return A2(
+					$elm$core$Debug$log,
+					'New zoom' + $elm$core$String$fromFloat(newZoom),
+					_Utils_Tuple2(
+						_Utils_update(
+							model,
+							{zoom: newZoom}),
+						$elm$core$Platform$Cmd$none));
 			case 'DragMsg':
 				var dragMsg = msg.a;
 				return A3($zaboco$elm_draggable$Draggable$update, $author$project$Main$dragConfig, dragMsg, model);
@@ -10415,14 +10428,23 @@ var $author$project$Main$update = F2(
 						$elm$core$Platform$Cmd$none);
 				} else {
 					var a = mGraph.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								center: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, a.graph.width / 2, a.graph.height / 2),
-								graphImage: $author$project$Main$Available(a)
-							}),
-						$elm$core$Platform$Cmd$none);
+					var zoom = A2($elm$core$Basics$min, model.size.width / a.graph.width, model.size.height / a.graph.height);
+					return A6(
+						$elm$core$Debug$log,
+						'Setting zoom to ' + $elm$core$String$fromFloat(
+							A2($elm$core$Basics$min, model.size.width / a.graph.width, model.size.height / a.graph.height)),
+						$elm$core$Debug$log,
+						'Setting width to' + $elm$core$String$fromFloat(a.graph.width),
+						$elm$core$Debug$log,
+						'Setting height to' + $elm$core$String$fromFloat(a.graph.height),
+						_Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									graphImage: $author$project$Main$Available(a),
+									zoom: zoom
+								}),
+							$elm$core$Platform$Cmd$none));
 				}
 		}
 	});
@@ -10741,7 +10763,6 @@ var $mdgriffith$elm_ui$Internal$Model$Style = F2(
 var $mdgriffith$elm_ui$Internal$Style$dot = function (c) {
 	return '.' + c;
 };
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $mdgriffith$elm_ui$Internal$Model$formatColor = function (_v0) {
 	var red = _v0.a;
 	var green = _v0.b;
@@ -13019,10 +13040,6 @@ var $mdgriffith$elm_ui$Internal$Model$hasSmallCaps = function (typeface) {
 		return false;
 	}
 };
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
 var $mdgriffith$elm_ui$Internal$Model$renderProps = F3(
 	function (force, _v0, existing) {
 		var key = _v0.a;
@@ -26812,14 +26829,6 @@ var $author$project$Main$elOfTabularResults = F2(
 				]),
 			{columns: columns, data: data});
 	});
-var $elm_community$typed_svg$TypedSvg$Types$Scale = F2(
-	function (a, b) {
-		return {$: 'Scale', a: a, b: b};
-	});
-var $elm_community$typed_svg$TypedSvg$Types$Translate = F2(
-	function (a, b) {
-		return {$: 'Translate', a: a, b: b};
-	});
 var $elm_community$typed_svg$TypedSvg$Core$attribute = $elm$virtual_dom$VirtualDom$attribute;
 var $elm_community$typed_svg$TypedSvg$Attributes$id = $elm_community$typed_svg$TypedSvg$Core$attribute('id');
 var $elm$virtual_dom$VirtualDom$nodeNS = function (tag) {
@@ -27250,87 +27259,9 @@ var $author$project$DisplayGraph$frame = F2(
 	});
 var $elm_explorations$linear_algebra$Math$Vector2$getX = _MJS_v2getX;
 var $elm_explorations$linear_algebra$Math$Vector2$getY = _MJS_v2getY;
-var $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString = function (xform) {
-	var tr = F2(
-		function (name, args) {
-			return $elm$core$String$concat(
-				_List_fromArray(
-					[
-						name,
-						'(',
-						A2(
-						$elm$core$String$join,
-						' ',
-						A2($elm$core$List$map, $elm$core$String$fromFloat, args)),
-						')'
-					]));
-		});
-	switch (xform.$) {
-		case 'Matrix':
-			var a = xform.a;
-			var b = xform.b;
-			var c = xform.c;
-			var d = xform.d;
-			var e = xform.e;
-			var f = xform.f;
-			return A2(
-				tr,
-				'matrix',
-				_List_fromArray(
-					[a, b, c, d, e, f]));
-		case 'Rotate':
-			var a = xform.a;
-			var x = xform.b;
-			var y = xform.c;
-			return A2(
-				tr,
-				'rotate',
-				_List_fromArray(
-					[a, x, y]));
-		case 'Scale':
-			var x = xform.a;
-			var y = xform.b;
-			return A2(
-				tr,
-				'scale',
-				_List_fromArray(
-					[x, y]));
-		case 'SkewX':
-			var x = xform.a;
-			return A2(
-				tr,
-				'skewX',
-				_List_fromArray(
-					[x]));
-		case 'SkewY':
-			var y = xform.a;
-			return A2(
-				tr,
-				'skewY',
-				_List_fromArray(
-					[y]));
-		default:
-			var x = xform.a;
-			var y = xform.b;
-			return A2(
-				tr,
-				'translate',
-				_List_fromArray(
-					[x, y]));
-	}
-};
-var $elm_community$typed_svg$TypedSvg$Attributes$transform = function (transforms) {
-	return A2(
-		$elm_community$typed_svg$TypedSvg$Core$attribute,
-		'transform',
-		A2(
-			$elm$core$String$join,
-			' ',
-			A2($elm$core$List$map, $elm_community$typed_svg$TypedSvg$TypesToStrings$transformToString, transforms)));
-};
-var $author$project$DisplayGraph$generateDagreGraph = F3(
-	function (graph, center, zoom) {
-		var _v0 = _Utils_Tuple2((graph.graph.width / zoom) / 2, (graph.graph.height / zoom) / 2);
+var $author$project$DisplayGraph$generateDagreGraph = F4(
+	function (size, graph, center, zoom) {
+		var _v0 = _Utils_Tuple2(size.width / 2, size.height / 2);
 		var halfWidth = _v0.a;
 		var halfHeight = _v0.b;
 		var _v1 = _Utils_Tuple2(
@@ -27344,7 +27275,11 @@ var $author$project$DisplayGraph$generateDagreGraph = F3(
 		var _v3 = _Utils_Tuple2(cy + halfHeight, cx + halfWidth);
 		var bottom = _v3.a;
 		var right = _v3.b;
-		return A2(
+		return A6(
+			$elm$core$Debug$log,
+			'Center=' + ($elm$core$String$fromFloat(cx) + (' half ' + $elm$core$String$fromFloat(halfWidth))),
+			$elm$core$Debug$log,
+			'Zoom=' + $elm$core$String$fromFloat(zoom),
 			$elm_community$typed_svg$TypedSvg$g,
 			_List_Nil,
 			_List_fromArray(
@@ -27357,15 +27292,7 @@ var $author$project$DisplayGraph$generateDagreGraph = F3(
 					A2($author$project$DisplayGraph$frame, graph.graph.width, graph.graph.height),
 					A2(
 					$elm_community$typed_svg$TypedSvg$g,
-					_List_fromArray(
-						[
-							$elm_community$typed_svg$TypedSvg$Attributes$transform(
-							_List_fromArray(
-								[
-									A2($elm_community$typed_svg$TypedSvg$Types$Translate, -left, -top),
-									A2($elm_community$typed_svg$TypedSvg$Types$Scale, zoom, zoom)
-								]))
-						]),
+					_List_Nil,
 					_List_fromArray(
 						[
 							$author$project$DisplayGraph$displayEdges(graph.edges),
@@ -27711,6 +27638,20 @@ var $author$project$Main$predicateStyleToggle = function (selected) {
 		});
 };
 var $elm_community$typed_svg$TypedSvg$svg = $elm_community$typed_svg$TypedSvg$Core$node('svg');
+var $elm_community$typed_svg$TypedSvg$Attributes$viewBox = F4(
+	function (minX, minY, vWidth, vHeight) {
+		return A2(
+			$elm_community$typed_svg$TypedSvg$Core$attribute,
+			'viewBox',
+			A2(
+				$elm$core$String$join,
+				' ',
+				A2(
+					$elm$core$List$map,
+					$elm$core$String$fromFloat,
+					_List_fromArray(
+						[minX, minY, vWidth, vHeight]))));
+	});
 var $author$project$Main$view = function (model) {
 	return {
 		body: $elm$core$List$singleton(
@@ -27885,8 +27826,11 @@ var $author$project$Main$view = function (model) {
 												$mdgriffith$elm_ui$Element$column,
 												_List_fromArray(
 													[
-														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-														A2($mdgriffith$elm_ui$Element$paddingXY, 10, 0)
+														$mdgriffith$elm_ui$Element$width(
+														$mdgriffith$elm_ui$Element$px(1400)),
+														$mdgriffith$elm_ui$Element$height(
+														$mdgriffith$elm_ui$Element$px(700)),
+														A2($mdgriffith$elm_ui$Element$paddingXY, 20, 0)
 													]),
 												_List_fromArray(
 													[
@@ -27903,16 +27847,18 @@ var $author$project$Main$view = function (model) {
 																			$elm_community$typed_svg$TypedSvg$svg,
 																			_List_fromArray(
 																				[
-																					$elm_community$typed_svg$TypedSvg$Attributes$width(
-																					$elm_community$typed_svg$TypedSvg$Types$px(g.graph.width)),
-																					$elm_community$typed_svg$TypedSvg$Attributes$height(
-																					$elm_community$typed_svg$TypedSvg$Types$px(g.graph.height)),
+																					A4(
+																					$elm_community$typed_svg$TypedSvg$Attributes$viewBox,
+																					$elm_explorations$linear_algebra$Math$Vector2$getX(model.center),
+																					$elm_explorations$linear_algebra$Math$Vector2$getY(model.center),
+																					g.graph.width / model.zoom,
+																					g.graph.height / model.zoom),
 																					$author$project$Main$handleZoom($author$project$Main$Zoom),
 																					A2($zaboco$elm_draggable$Draggable$mouseTrigger, _Utils_Tuple0, $author$project$Main$DragMsg)
 																				]),
 																			_List_fromArray(
 																				[
-																					A3($author$project$DisplayGraph$generateDagreGraph, g, model.center, model.zoom)
+																					A4($author$project$DisplayGraph$generateDagreGraph, model.size, g, model.center, model.zoom)
 																				])));
 																case 'Unavailable':
 																	return $mdgriffith$elm_ui$Element$text('No graph available');
