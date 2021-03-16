@@ -8259,10 +8259,6 @@ var $elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
 	});
-var $elm$core$Basics$clamp = F3(
-	function (low, high, number) {
-		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
-	});
 var $elm_community$list_extra$List$Extra$groupWhile = F2(
 	function (isSameGroup, items) {
 		return A3(
@@ -9939,7 +9935,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Zoom':
 				var factor = msg.a;
-				var newZoom = A3($elm$core$Basics$clamp, 0.05, 50, (factor * 0.05) + model.zoom);
+				var newZoom = (factor * 0.05) + model.zoom;
 				return A2(
 					$elm$core$Debug$log,
 					'New zoom' + $elm$core$String$fromFloat(newZoom),
