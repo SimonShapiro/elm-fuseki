@@ -631,12 +631,14 @@ update msg model =
 
         Zoom factor ->
             let
-                newZoom =
-                    model.zoom
-                        |> (+) (factor * 0.05)
---                        |> clamp 0.05 50
+                -- newZoom =
+                --     model.zoom
+                --         |> (+) (factor * 0.05)
+                --         |> clamp 0.05 5
+
+                newZoom = model.zoom * (1+ factor/40)
             in
-            Debug.log ("New zoom"++(String.fromFloat newZoom))
+            Debug.log ("New zoom"++(String.fromFloat newZoom)++":"++(String.fromFloat factor))
             ( { model | zoom = newZoom }, Cmd.none )
 
         DragMsg dragMsg ->

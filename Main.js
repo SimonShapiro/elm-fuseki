@@ -9935,10 +9935,10 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'Zoom':
 				var factor = msg.a;
-				var newZoom = (factor * 0.05) + model.zoom;
+				var newZoom = model.zoom * (1 + (factor / 40));
 				return A2(
 					$elm$core$Debug$log,
-					'New zoom' + $elm$core$String$fromFloat(newZoom),
+					'New zoom' + ($elm$core$String$fromFloat(newZoom) + (':' + $elm$core$String$fromFloat(factor))),
 					_Utils_Tuple2(
 						_Utils_update(
 							model,
