@@ -9925,7 +9925,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'OnDragBy':
 				var rawDelta = msg.a;
-				var delta = A2($elm_explorations$linear_algebra$Math$Vector2$scale, (-1) / model.zoom, rawDelta);
+				var delta = A2($elm_explorations$linear_algebra$Math$Vector2$scale, (-1) * model.zoom, rawDelta);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,

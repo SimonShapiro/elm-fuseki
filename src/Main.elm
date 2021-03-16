@@ -625,7 +625,7 @@ update msg model =
                 delta =
                     rawDelta
                     --    |> Vector2.scale (-1 / model.zoom)
-                        |> Vector2.scale (-1 / model.zoom)
+                        |> Vector2.scale (-1 * model.zoom)
             in
             ( { model | center = model.center |> Vector2.add delta }, Cmd.none )
 
