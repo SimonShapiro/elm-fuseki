@@ -1519,9 +1519,9 @@ view model = { title = "Sparql Query Playground - 0.0"
                                                                         Available g -> 
 --                                                                            Debug.log ("Centres"++(getX model.center |> String.fromFloat)++":"++(getY model.center |> String.fromFloat))
                                                                             svg  [ 
-                                                                                    Attr.viewBox (getX model.center) (getY model.center) (model.size.width*model.zoom |> max (model.size.width)) (model.size.height*model.zoom |> max (model.size.height))
-                                            --                                                , Attr.width (TypedSvg.Types.px model.size.width)
-                                            --                                                , Attr.height (TypedSvg.Types.px model.size.height)
+                                        --                                            Attr.viewBox (getX model.center) (getY model.center) (g.graph.width/model.zoom) (g.graph.height/model.zoom)
+                                                                                            Attr.width (TypedSvg.Types.px model.size.width)
+                                                                                          , Attr.height (TypedSvg.Types.px model.size.height)
                                                                                             , handleZoom Zoom
                                                                                             , Draggable.mouseTrigger () DragMsg
                                                                                             ] 

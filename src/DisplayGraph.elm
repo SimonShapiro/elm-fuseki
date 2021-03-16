@@ -160,8 +160,9 @@ generateDagreGraph size graph center zoom =
         [ defs [][arrowHead]
         , frame graph.graph.width graph.graph.height
         , g [-- Attr.viewBox 1000 1000 graph.graph.width graph.graph.height
+             Attr.transform [TypedSvg.Types.Scale zoom zoom
+                            , TypedSvg.Types.Translate ((getX center)*(-1)/zoom) ((getY center)*(-1)/zoom)]--left right top bottom] 
             ]
---            , Attr.transform [TypedSvg.Types.Scale zoom zoom]]--left right top bottom] 
             [ displayEdges graph.edges
             , displayNodes graph.nodes 
             ]
