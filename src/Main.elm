@@ -642,7 +642,7 @@ update msg model =
                             else
                                 model.zoom * 0.9
             in
-            Debug.log ("New zoom"++(String.fromFloat newZoom)++":"++(String.fromFloat factor))
+            Debug.log ("New zoom"++(String.fromFloat newZoom)++":"++(String.fromFloat factor)) -- model.center should move to accomodate zoom 
             ( { model | zoom = newZoom }, Cmd.none )
 
         DragMsg dragMsg ->
@@ -864,9 +864,9 @@ update msg model =
                             --center = Vector2.vec2 (a.graph.width/2) (a.graph.height/2)
  --                           center = Vector2.vec2 (a.graph.width/2) (a.graph.height/2)
                         in
-                            Debug.log ("Setting zoom to "++(String.fromFloat <| min (model.size.width/a.graph.width) (model.size.height/a.graph.height)))
-                            Debug.log ("Setting width to"++(String.fromFloat <| a.graph.width))
-                            Debug.log ("Setting height to"++(String.fromFloat <| a.graph.height))
+                            -- Debug.log ("Setting zoom to "++(String.fromFloat <| min (model.size.width/a.graph.width) (model.size.height/a.graph.height)))
+                            -- Debug.log ("Setting width to"++(String.fromFloat <| a.graph.width))
+                            -- Debug.log ("Setting height to"++(String.fromFloat <| a.graph.height))
                             ({model | graphImage = Available a
    --                                 , center = center
                                     , zoom = zoom

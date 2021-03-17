@@ -158,7 +158,7 @@ generateDagreGraph size graph center zoom =
 --        Debug.log ("Zoom="++(String.fromFloat zoom))
         g []
         [ defs [][arrowHead]
-        , frame graph.graph.width graph.graph.height
+        , frame size.width size.height
         , g [-- Attr.viewBox 1000 1000 graph.graph.width graph.graph.height
              Attr.transform [TypedSvg.Types.Scale zoom zoom
                             , TypedSvg.Types.Translate ((getX center)*(-1)/zoom) ((getY center)*(-1)/zoom)]--left right top bottom] 

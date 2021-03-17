@@ -10425,22 +10425,14 @@ var $author$project$Main$update = F2(
 				} else {
 					var a = mGraph.a;
 					var zoom = A2($elm$core$Basics$min, model.size.width / a.graph.width, model.size.height / a.graph.height);
-					return A6(
-						$elm$core$Debug$log,
-						'Setting zoom to ' + $elm$core$String$fromFloat(
-							A2($elm$core$Basics$min, model.size.width / a.graph.width, model.size.height / a.graph.height)),
-						$elm$core$Debug$log,
-						'Setting width to' + $elm$core$String$fromFloat(a.graph.width),
-						$elm$core$Debug$log,
-						'Setting height to' + $elm$core$String$fromFloat(a.graph.height),
-						_Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									graphImage: $author$project$Main$Available(a),
-									zoom: zoom
-								}),
-							$elm$core$Platform$Cmd$none));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								graphImage: $author$project$Main$Available(a),
+								zoom: zoom
+							}),
+						$elm$core$Platform$Cmd$none);
 				}
 		}
 	});
@@ -27367,7 +27359,7 @@ var $author$project$DisplayGraph$generateDagreGraph = F4(
 					_List_Nil,
 					_List_fromArray(
 						[$author$project$DisplayGraph$arrowHead])),
-					A2($author$project$DisplayGraph$frame, graph.graph.width, graph.graph.height),
+					A2($author$project$DisplayGraph$frame, size.width, size.height),
 					A2(
 					$elm_community$typed_svg$TypedSvg$g,
 					_List_fromArray(
